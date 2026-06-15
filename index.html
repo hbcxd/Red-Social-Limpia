@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Celestial - Palabra de Dios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .contenedor {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        .btn {
+            display: block; width: 100%; padding: 10px; margin: 10px 0;
+            border: none; border-radius: 5px; font-size: 16px; cursor: pointer;
+        }
+        .btn-google { background-color: #4285F4; color: white; }
+        .btn-apple { background-color: #000000; color: white; }
+        .post {
+            border-bottom: 1px solid #eee; padding: 15px 0;
+        }
+        .btn-reporte {
+            color: red; background: none; border: none; font-size: 12px; cursor: pointer; float: right;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor">
+        <h1>Red Celestial</h1>
+        <p style="text-align: center;">Un espacio limpio enfocado en la palabra de Dios</p>
+
+        <div id="seccion-login">
+            <button class="btn btn-google" id="btn-google">Ingresar con Google</button>
+            <button class="btn btn-apple" id="btn-apple">Ingresar con Apple</button>
+        </div>
+
+        <div id="seccion-perfil" style="display: none; text-align: center; margin-bottom: 20px;">
+            <p>Bienvenido, <strong id="nombre-usuario">Hermano</strong></p>
+            <button id="btn-salir" style="padding: 5px; cursor:pointer;">Cerrar Sesión</button>
+        </div>
+
+        <hr>
+
+        <h3>Publicaciones de la comunidad</h3>
+        <div id="feed-publicaciones">
+            <p>Cargando mensajes de aliento...</p>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
