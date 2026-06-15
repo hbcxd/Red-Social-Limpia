@@ -1,8 +1,8 @@
-// Importamos las herramientas de Firebase directamente desde sus servidores
+// Importamos las herramientas de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-// NUEVO: Agregamos addDoc, updateDoc, doc, increment, arrayUnion y serverTimestamp para poder publicar y reportar
-import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, increment, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// Agregamos deleteDoc y arrayRemove para borrar posts y quitar likes
+import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, increment, arrayUnion, arrayRemove, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // Tus claves reales de Firebase
 const firebaseConfig = {
@@ -15,12 +15,11 @@ const firebaseConfig = {
   measurementId: "G-5X7TMJVN71"
 };
 
-// Inicializar la app
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Referencias a la interfaz web
+// Referencias del DOM
 const btnGoogle = document.getElementById('btn-google');
 const btnApple = document.getElementById('btn-apple');
 const btnSalir = document.getElementById('btn-salir');
@@ -28,20 +27,13 @@ const seccionLogin = document.getElementById('seccion-login');
 const seccionPerfil = document.getElementById('seccion-perfil');
 const nombreUsuario = document.getElementById('nombre-usuario');
 const feedPublicaciones = document.getElementById('feed-publicaciones');
-// Referencias a la nueva caja de publicación
 const btnPublicar = document.getElementById('btn-publicar');
 const inputPublicacion = document.getElementById('input-publicacion');
 
-// Función para iniciar sesión con Google
-btnGoogle.addEventListener('click', () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).catch(error => alert("Error al iniciar sesión: " + error.message));
-});
-
-// Función para cerrar sesión
+// Autenticación
+btnGoogle.addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.message)));
 btnSalir.addEventListener('click', () => signOut(auth));
 
-// Detectar si el usuario entró o salió
 onAuthStateChanged(auth, (user) => {
     if (user) {
         seccionLogin.style.display = 'none';
@@ -53,87 +45,136 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// NUEVO: Función para publicar un mensaje en la base de datos
+// Función para publicar
 btnPublicar.addEventListener('click', async () => {
     const contenido = inputPublicacion.value.trim();
-    if (!contenido) return alert("Por favor, escribe un mensaje antes de publicar.");
-    if (!auth.currentUser) return alert("Debes iniciar sesión para publicar.");
+    if (!contenido) return alert("Escribe un mensaje de bendición.");
+    if (!auth.currentUser) return alert("Inicia sesión para publicar.");
 
-    // Desactivar botón temporalmente para evitar doble publicación
     btnPublicar.disabled = true;
-    btnPublicar.textContent = "Publicando...";
-
     try {
         await addDoc(collection(db, "publicaciones"), {
             userId: auth.currentUser.uid,
             userName: auth.currentUser.displayName || "Hermano",
             content: contenido,
             timestamp: serverTimestamp(),
-            status: "approved", // Se aprueba por defecto hasta que integremos la IA de moderación
+            status: "approved",
             reportCount: 0,
-            reportedBy: []
+            reportedBy: [],
+            likes: [] // Nuevo arreglo para controlar los me gusta
         });
-        
-        // Limpiar la caja de texto tras publicar con éxito
         inputPublicacion.value = '';
     } catch (error) {
-        console.error("Error al publicar:", error);
-        alert("Hubo un error al publicar tu mensaje.");
+        console.error(error);
+        alert("Error al publicar.");
     } finally {
         btnPublicar.disabled = false;
-        btnPublicar.textContent = "Compartir Mensaje";
     }
 });
 
-// NUEVO: Función global para procesar reportes manuales
-window.reportarPost = async function(postId) {
-    const usuarioActual = auth.currentUser;
-    
-    if (!usuarioActual) {
-        alert("Debes iniciar sesión para poder reportar contenido.");
-        return;
-    }
+// FUNCIONES GLOBALES PARA INTERACCIÓN DE LOS USUARIOS
 
+// 1. Dar o quitar Me Gusta
+window.darLike = async function(postId, likesActualesStr) {
+    if (!auth.currentUser) return alert("Inicia sesión para interactuar.");
+    const uid = auth.currentUser.uid;
+    const likesActuales = JSON.parse(likesActualesStr || "[]");
     const postRef = doc(db, "publicaciones", postId);
 
     try {
-        await updateDoc(postRef, {
-            reportCount: increment(1),
-            reportedBy: arrayUnion(usuarioActual.uid)
-        });
-        alert("Gracias por tu reporte. Evaluaremos este contenido para mantener la comunidad limpia.");
+        if (likesActuales.includes(uid)) {
+            await updateDoc(postRef, { likes: arrayRemove(uid) }); // Quitar like
+        } else {
+            await updateDoc(postRef, { likes: arrayUnion(uid) }); // Dar like
+        }
     } catch (error) {
-        console.error("Error al reportar:", error);
-        alert("Hubo un problema procesando el reporte.");
+        console.error("Error al dar like:", error);
     }
 };
 
-// Cargar las publicaciones aprobadas
+// 2. Eliminar Post
+window.eliminarPost = async function(postId) {
+    if(confirm("¿Estás seguro de que deseas eliminar este mensaje?")) {
+        try {
+            await deleteDoc(doc(db, "publicaciones", postId));
+        } catch (error) {
+            console.error("Error al borrar:", error);
+            alert("No se pudo eliminar la publicación.");
+        }
+    }
+};
+
+// 3. Editar Post
+window.editarPost = async function(postId, contenidoActual) {
+    const nuevoContenido = prompt("Edita tu mensaje:", contenidoActual);
+    if (nuevoContenido !== null && nuevoContenido.trim() !== "") {
+        try {
+            await updateDoc(doc(db, "publicaciones", postId), {
+                content: nuevoContenido.trim()
+            });
+        } catch (error) {
+            console.error("Error al editar:", error);
+            alert("No se pudo editar la publicación.");
+        }
+    }
+};
+
+// 4. Reportar
+window.reportarPost = async function(postId) {
+    if (!auth.currentUser) return alert("Inicia sesión para reportar.");
+    try {
+        await updateDoc(doc(db, "publicaciones", postId), {
+            reportCount: increment(1),
+            reportedBy: arrayUnion(auth.currentUser.uid)
+        });
+        alert("Reporte enviado correctamente.");
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+// Renderizar el Feed en tiempo real
 const q = query(collection(db, "publicaciones"), where("status", "==", "approved"));
 onSnapshot(q, (snapshot) => {
     feedPublicaciones.innerHTML = ''; 
-    
     if (snapshot.empty) {
-        feedPublicaciones.innerHTML = '<p>No hay publicaciones aún. ¡Sé el primero en compartir la palabra!</p>';
+        feedPublicaciones.innerHTML = '<p>No hay publicaciones aún. ¡Sé el primero en compartir!</p>';
         return;
     }
 
-    // Convertimos los documentos a un array para ordenarlos de más nuevo a más viejo
     const postsArray = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Ordenar localmente (en el futuro se puede ordenar en la query de Firebase)
     postsArray.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
     postsArray.forEach((post) => {
-        // Ocultar si tiene 3 o más reportes
         if(post.reportCount >= 3) return;
+
+        const uid = auth.currentUser ? auth.currentUser.uid : null;
+        const esAutor = uid === post.userId;
+        const likes = post.likes || [];
+        const haDadoLike = uid ? likes.includes(uid) : false;
+        const totalLikes = likes.length;
+
+        // Botones dinámicos: Solo el autor ve Editar/Eliminar
+        const controlesAutor = esAutor ? `
+            <button onclick="window.editarPost('${post.id}', '${post.content.replace(/'/g, "\\'")}')" style="color: blue; border:none; background:none; cursor:pointer;">✏ Editar</button>
+            <button onclick="window.eliminarPost('${post.id}')" style="color: darkred; border:none; background:none; cursor:pointer;">🗑 Eliminar</button>
+        ` : '';
 
         const div = document.createElement('div');
         div.className = 'post';
         div.innerHTML = `
             <strong>${post.userName}</strong>
             <p>${post.content}</p>
-            <button class="btn-reporte" onclick="window.reportarPost('${post.id}')">⚠ Reportar</button>
-            <div style="clear: both;"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <div>
+                    <button onclick="window.darLike('${post.id}', '${JSON.stringify(likes)}')" style="color: ${haDadoLike ? 'blue' : 'gray'}; border:none; background:none; cursor:pointer;">
+                        👍 Me gusta (${totalLikes})
+                    </button>
+                    ${controlesAutor}
+                </div>
+                <button onclick="window.reportarPost('${post.id}')" style="color: red; border:none; background:none; cursor:pointer; font-size: 12px;">⚠ Reportar</button>
+            </div>
         `;
         feedPublicaciones.appendChild(div);
     });
