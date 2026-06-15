@@ -27,11 +27,15 @@
         }
         .btn-google { background-color: #4285F4; color: white; }
         .btn-apple { background-color: #000000; color: white; }
+        .btn-publicar { background-color: #2ecc71; color: white; }
         .post {
             border-bottom: 1px solid #eee; padding: 15px 0;
         }
         .btn-reporte {
-            color: red; background: none; border: none; font-size: 12px; cursor: pointer; float: right;
+            color: red; background: none; border: none; font-size: 12px; cursor: pointer; float: right; margin-top: 10px;
+        }
+        textarea {
+            width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; resize: vertical;
         }
     </style>
 </head>
@@ -49,6 +53,11 @@
         <div id="seccion-perfil" style="display: none; text-align: center; margin-bottom: 20px;">
             <p>Bienvenido, <strong id="nombre-usuario">Hermano</strong></p>
             <button id="btn-salir" style="padding: 5px; cursor:pointer;">Cerrar Sesión</button>
+            
+            <div style="margin-top: 20px; text-align: left;">
+                <textarea id="input-publicacion" rows="3" placeholder="Escribe un mensaje de bendición o versículo..."></textarea>
+                <button class="btn btn-publicar" id="btn-publicar">Compartir Mensaje</button>
+            </div>
         </div>
 
         <hr>
