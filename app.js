@@ -1,9 +1,10 @@
 // Importamos las herramientas de Firebase directamente desde sus servidores
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// NUEVO: Agregamos addDoc, updateDoc, doc, increment, arrayUnion y serverTimestamp para poder publicar y reportar
+import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, increment, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// AQUI IRÁN TUS CLAVES DE FIREBASE (Lo configuraremos en el siguiente paso)
+// Tus claves reales de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
   authDomain: "red-social-de-dios.firebaseapp.com",
@@ -27,6 +28,9 @@ const seccionLogin = document.getElementById('seccion-login');
 const seccionPerfil = document.getElementById('seccion-perfil');
 const nombreUsuario = document.getElementById('nombre-usuario');
 const feedPublicaciones = document.getElementById('feed-publicaciones');
+// Referencias a la nueva caja de publicación
+const btnPublicar = document.getElementById('btn-publicar');
+const inputPublicacion = document.getElementById('input-publicacion');
 
 // Función para iniciar sesión con Google
 btnGoogle.addEventListener('click', () => {
@@ -49,18 +53,77 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// Cargar las publicaciones aprobadas
-const q = query(collection(db, "publicaciones"), where("status", "==", "approved"));
-onSnapshot(q, (snapshot) => {
-    feedPublicaciones.innerHTML = ''; // Limpiar el mensaje de "Cargando"
+// NUEVO: Función para publicar un mensaje en la base de datos
+btnPublicar.addEventListener('click', async () => {
+    const contenido = inputPublicacion.value.trim();
+    if (!contenido) return alert("Por favor, escribe un mensaje antes de publicar.");
+    if (!auth.currentUser) return alert("Debes iniciar sesión para publicar.");
+
+    // Desactivar botón temporalmente para evitar doble publicación
+    btnPublicar.disabled = true;
+    btnPublicar.textContent = "Publicando...";
+
+    try {
+        await addDoc(collection(db, "publicaciones"), {
+            userId: auth.currentUser.uid,
+            userName: auth.currentUser.displayName || "Hermano",
+            content: contenido,
+            timestamp: serverTimestamp(),
+            status: "approved", // Se aprueba por defecto hasta que integremos la IA de moderación
+            reportCount: 0,
+            reportedBy: []
+        });
+        
+        // Limpiar la caja de texto tras publicar con éxito
+        inputPublicacion.value = '';
+    } catch (error) {
+        console.error("Error al publicar:", error);
+        alert("Hubo un error al publicar tu mensaje.");
+    } finally {
+        btnPublicar.disabled = false;
+        btnPublicar.textContent = "Compartir Mensaje";
+    }
+});
+
+// NUEVO: Función global para procesar reportes manuales
+window.reportarPost = async function(postId) {
+    const usuarioActual = auth.currentUser;
     
-    if (snapshot.empty) {
-        feedPublicaciones.innerHTML = '<p>No hay publicaciones aún.</p>';
+    if (!usuarioActual) {
+        alert("Debes iniciar sesión para poder reportar contenido.");
         return;
     }
 
-    snapshot.forEach((doc) => {
-        const post = doc.data();
+    const postRef = doc(db, "publicaciones", postId);
+
+    try {
+        await updateDoc(postRef, {
+            reportCount: increment(1),
+            reportedBy: arrayUnion(usuarioActual.uid)
+        });
+        alert("Gracias por tu reporte. Evaluaremos este contenido para mantener la comunidad limpia.");
+    } catch (error) {
+        console.error("Error al reportar:", error);
+        alert("Hubo un problema procesando el reporte.");
+    }
+};
+
+// Cargar las publicaciones aprobadas
+const q = query(collection(db, "publicaciones"), where("status", "==", "approved"));
+onSnapshot(q, (snapshot) => {
+    feedPublicaciones.innerHTML = ''; 
+    
+    if (snapshot.empty) {
+        feedPublicaciones.innerHTML = '<p>No hay publicaciones aún. ¡Sé el primero en compartir la palabra!</p>';
+        return;
+    }
+
+    // Convertimos los documentos a un array para ordenarlos de más nuevo a más viejo
+    const postsArray = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Ordenar localmente (en el futuro se puede ordenar en la query de Firebase)
+    postsArray.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+    postsArray.forEach((post) => {
         // Ocultar si tiene 3 o más reportes
         if(post.reportCount >= 3) return;
 
@@ -69,7 +132,8 @@ onSnapshot(q, (snapshot) => {
         div.innerHTML = `
             <strong>${post.userName}</strong>
             <p>${post.content}</p>
-            <button class="btn-reporte" onclick="alert('Funcionalidad de reporte en construcción para el post ID: ${doc.id}')">⚠ Reportar</button>
+            <button class="btn-reporte" onclick="window.reportarPost('${post.id}')">⚠ Reportar</button>
+            <div style="clear: both;"></div>
         `;
         feedPublicaciones.appendChild(div);
     });
