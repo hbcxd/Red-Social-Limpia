@@ -5,9 +5,13 @@ import { getFirestore, collection, query, where, onSnapshot } from "https://www.
 
 // AQUI IRÁN TUS CLAVES DE FIREBASE (Lo configuraremos en el siguiente paso)
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID"
+  apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
+  authDomain: "red-social-de-dios.firebaseapp.com",
+  projectId: "red-social-de-dios",
+  storageBucket: "red-social-de-dios.firebasestorage.app",
+  messagingSenderId: "256126083920",
+  appId: "1:256126083920:web:f9265cbac956d1efe38255",
+  measurementId: "G-5X7TMJVN71"
 };
 
 // Inicializar la app
