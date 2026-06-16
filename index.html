@@ -5,253 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faro - Red Social de Edificación</title>
     <style>
-        /* Variables de Tema - Modo Claro por defecto */
         :root { 
-            --primary: #5A9BD5; 
-            --primary-hover: #4A84B5; 
-            --bg: #F5F8FA; 
-            --surface: #FFFFFF; 
-            --text: #2C3E50; 
-            --text-light: #7F8C8D; 
-            --border: #E1E8ED; 
-            --verse-bg: #EBF3FA;
-            --shadow: 0 8px 24px rgba(149, 157, 165, 0.1);
+            --primary: #5A9BD5; --primary-hover: #4A84B5; --bg: #F5F8FA; 
+            --surface: #FFFFFF; --text: #2C3E50; --text-light: #7F8C8D; 
+            --border: #E1E8ED; --verse-bg: #EBF3FA; --shadow: 0 4px 12px rgba(149, 157, 165, 0.1);
         }
 
-        /* Variables para el Modo Oscuro */
         [data-theme="dark"] {
-            --bg: #15202B;
-            --surface: #192734;
-            --text: #F5F8FA;
-            --text-light: #8899A6;
-            --border: #38444D;
-            --verse-bg: #1E2D3B;
-            --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --bg: #15202B; --surface: #192734; --text: #F5F8FA; 
+            --text-light: #8899A6; --border: #38444D; --verse-bg: #1E2D3B; 
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background-color: var(--bg); 
-            margin: 0; padding: 0; 
-            color: var(--text);
-            transition: background-color 0.3s, color 0.3s;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); transition: background-color 0.3s, color 0.3s; }
         
-        .navbar {
-            background: var(--surface); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 100; gap: 15px;
-        }
-        .navbar h1 { margin: 0; font-size: 24px; color: var(--primary); letter-spacing: 0.5px; cursor: pointer; font-weight: 800; }
+        .navbar { background: var(--surface); padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 100; gap: 15px; }
+        .navbar h1 { margin: 0; font-size: 22px; color: var(--primary); font-weight: 800; cursor: pointer; }
         .search-container { flex-grow: 1; max-width: 400px; }
-        .search-container input { width: 100%; padding: 10px 18px; border-radius: 24px; border: 1px solid var(--border); box-sizing: border-box; font-size: 14px; outline: none; background: var(--bg); color: var(--text); transition: all 0.2s; }
+        .search-container input { width: 100%; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; outline: none; background: var(--bg); color: var(--text); }
 
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
         
-        .btn { display: inline-block; width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center; box-sizing: border-box; transition: all 0.2s ease; }
+        /* Botones Principales más compactos */
+        .btn { display: inline-block; width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; box-sizing: border-box; transition: all 0.2s ease; }
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-outline { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); }
         
-        .daily-verse { background: var(--verse-bg); border-left: 4px solid var(--primary); padding: 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; box-shadow: var(--shadow); }
+        .daily-verse { background: var(--verse-bg); border-left: 4px solid var(--primary); padding: 14px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; box-shadow: var(--shadow); }
 
-        /* Navegación Principal por Pestañas Superior */
-        .feed-tabs { display: flex; margin-bottom: 15px; background: var(--surface); border-radius: 12px; padding: 6px; box-shadow: var(--shadow); }
-        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: var(--text-light); border-radius: 8px; transition: all 0.2s; }
+        /* Pestañas de Navegación Ajustadas para 5 opciones */
+        .feed-tabs { display: flex; flex-wrap: wrap; margin-bottom: 15px; background: var(--surface); border-radius: 10px; padding: 4px; box-shadow: var(--shadow); gap: 2px; }
+        .tab { flex: 1; min-width: 80px; padding: 8px 4px; text-align: center; cursor: pointer; font-weight: bold; color: var(--text-light); border-radius: 6px; font-size: 12px; transition: all 0.2s; }
         .tab.active { color: var(--primary); background: rgba(90, 155, 213, 0.15); }
 
-        .card { 
-            background: var(--surface); border-radius: 16px; padding: 20px; margin-bottom: 16px; 
-            box-shadow: var(--shadow); border: 1px solid var(--border); 
-            position: relative; transition: transform 0.2s, box-shadow 0.2s; 
-        }
+        .card { background: var(--surface); border-radius: 14px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
         
-        .profile-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; position: relative; cursor: pointer; }
-        .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: contain; background: var(--verse-bg); border: 2px solid var(--surface); padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); box-sizing: border-box; }
+        .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; position: relative; cursor: pointer; }
+        .profile-pic { width: 44px; height: 44px; border-radius: 50%; object-fit: contain; background: var(--verse-bg); border: 2px solid var(--surface); padding: 6px; box-sizing: border-box; }
         .user-meta { display: flex; flex-direction: column; }
+        .user-meta strong { font-size: 14px; }
+        .user-meta span { font-size: 12px; }
         
-        .follow-btn { position: absolute; right: 0; top: 0; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--primary); background: transparent; color: var(--primary); cursor: pointer; font-size: 12px; font-weight: bold; }
+        .follow-btn { position: absolute; right: 0; top: 0; padding: 4px 12px; border-radius: 15px; border: 1px solid var(--primary); background: transparent; color: var(--primary); cursor: pointer; font-size: 11px; font-weight: bold; }
         .follow-btn.following { background: var(--primary); color: white; }
 
-        /* Ventana Flotante de Vista Previa de Perfil */
-        .profile-preview-box {
-            display: none; position: absolute; top: 55px; left: 0; width: 280px; 
-            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; 
-            padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 99;
-        }
+        .profile-preview-box { display: none; position: absolute; top: 50px; left: 0; width: 260px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 99; }
 
-        .privacy-group { background: var(--bg); padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--border); }
-        .privacy-option { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
-        .privacy-option select { padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
-
-        /* Estilos actualizados para los iconos de la fe */
-        .avatar-grid { display: flex; gap: 14px; justify-content: center; margin: 15px 0; }
-        .avatar-option { 
-            width: 56px; height: 56px; border-radius: 50%; cursor: pointer; 
-            border: 3px solid transparent; transition: all 0.2s; 
-            background-color: var(--verse-bg); padding: 12px; 
-            box-sizing: border-box; object-fit: contain; 
-        }
+        .avatar-grid { display: flex; gap: 10px; justify-content: center; margin: 12px 0; }
+        .avatar-option { width: 48px; height: 48px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; background-color: var(--verse-bg); padding: 10px; box-sizing: border-box; object-fit: contain; }
         .avatar-option.selected { border-color: var(--primary); transform: scale(1.1); }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 200; }
-        .modal-content { background: var(--surface); padding: 28px; border-radius: 20px; width: 90%; max-width: 420px; box-shadow: var(--shadow); max-height: 85vh; overflow-y: auto; }
+        .modal-content { background: var(--surface); padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: var(--shadow); max-height: 85vh; overflow-y: auto; }
         
-        .post-actions { display: flex; gap: 24px; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 12px; }
-        .action-btn { background: none; border: none; color: var(--text-light); font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .quote-box { background: var(--bg); padding: 14px; border-left: 4px solid var(--primary); border-radius: 8px; margin: 12px 0; font-size: 14px; }
+        /* Interacciones de Publicación Compactas */
+        .post-actions { display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; flex-wrap: wrap; }
+        .action-btn { background: var(--bg); border: 1px solid transparent; color: var(--text-light); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 14px; transition: all 0.2s; }
+        .action-btn:hover { background: var(--border); }
+        .quote-box { background: var(--bg); padding: 10px; border-left: 3px solid var(--primary); border-radius: 6px; margin: 10px 0; font-size: 13px; }
         
-        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); box-sizing: border-box; resize: none; font-family: inherit; font-size: 14px; margin-bottom: 12px; background-color: var(--bg); color: var(--text); outline: none; }
-        
-        /* Contenedor de términos legales */
-        .legal-box { height: 120px; overflow-y: scroll; border: 1px solid var(--border); padding: 10px; border-radius: 8px; font-size: 12px; background: var(--bg); color: var(--text-light); margin-bottom: 12px; line-height: 1.4; }
+        textarea, input[type="text"], select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; font-family: inherit; font-size: 13px; margin-bottom: 10px; background-color: var(--bg); color: var(--text); outline: none; }
+        .legal-box { height: 100px; overflow-y: scroll; border: 1px solid var(--border); padding: 10px; border-radius: 6px; font-size: 11px; background: var(--bg); color: var(--text-light); margin-bottom: 10px; line-height: 1.4; }
+        .privacy-group { background: var(--bg); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .privacy-option { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <!-- Barra Superior -->
     <div class="navbar">
         <h1 onclick="window.location.reload()">Faro</h1>
         <div class="search-container">
-            <input type="text" id="input-busqueda" placeholder="🔍 Buscar palabras clave o @usuarios...">
+            <input type="text" id="input-busqueda" placeholder="🔍 Buscar...">
         </div>
     </div>
 
     <div class="container">
-        <!-- Versículo del Día -->
-        <div id="seccion-versiculo" class="daily-verse" style="display:none;">
-            <strong style="color: var(--primary); display: block; margin-bottom: 5px;">📖 Alimento Diario:</strong>
-            <span id="texto-versiculo">Cargando...</span>
-        </div>
-
-        <!-- Pantalla de Autenticación -->
         <div id="seccion-login" class="card" style="text-align: center; padding: 40px 20px;">
             <h2>Bienvenido a Faro</h2>
-            <p style="color: var(--text-light); margin-bottom: 25px;">La red social para conectar y edificar bajo un entorno seguro y lleno de paz.</p>
+            <p style="color: var(--text-light); margin-bottom: 25px; font-size: 14px;">La red social para conectar y edificar.</p>
             <button class="btn btn-primary" id="btn-google">Ingresar con Google</button>
         </div>
 
-        <!-- Zona Principal de la Aplicación -->
         <div id="seccion-plataforma" style="display: none;">
             
-            <!-- Selector de Segmentos Principal -->
             <div class="feed-tabs">
-                <div id="tab-global" class="tab active">Mundo Global</div>
-                <div id="tab-seguidos" class="tab">Mis Seguidos</div>
-                <div id="tab-perfil" class="tab">Mi Perfil 👤</div>
+                <div id="tab-global" class="tab active">Global</div>
+                <div id="tab-oraciones" class="tab">Oraciones 🙏</div>
+                <div id="tab-seguidos" class="tab">Seguidos</div>
+                <div id="tab-guardados" class="tab">Guardados 🔖</div>
+                <div id="tab-perfil" class="tab">Perfil 👤</div>
             </div>
 
-            <!-- VISTA: Caja de escritura -->
             <div id="contenedor-creacion-post" class="card">
-                <textarea id="input-publicacion" rows="3" placeholder="¿Qué mensaje de edificación compartirás hoy?"></textarea>
-                <button class="btn btn-primary" id="btn-publicar">Compartir Mensaje</button>
+                <textarea id="input-publicacion" rows="3" placeholder="¿Qué mensaje o petición compartirás hoy?"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 12px; color: var(--text-light); cursor: pointer; font-weight: bold;">
+                        <input type="checkbox" id="chk-peticion"> 🙏 Petición de Oración
+                    </label>
+                    <button class="btn btn-primary" id="btn-publicar" style="width: auto; padding: 8px 16px;">Compartir</button>
+                </div>
             </div>
 
-            <!-- VISTA: Bloque Exclusivo del Perfil Organizado -->
             <div id="bloque-perfil-propio" class="card" style="display:none; text-align: center;">
-                <img id="mi-perfil-foto" src="" class="profile-pic" style="width: 80px; height: 80px; margin: 0 auto 10px auto; display: block; padding: 15px;">
-                <h2 id="mi-perfil-nombre" style="margin: 5px 0;">Hermano</h2>
-                <span id="mi-perfil-tag" style="color: var(--primary); font-weight: bold; display: block; margin-bottom: 10px;">@usuario</span>
-                <p id="mi-perfil-bio" style="color: var(--text-light); font-size: 14px; margin-bottom: 15px;"></p>
-                <div style="display:flex; gap: 10px; justify-content: center;">
-                    <button id="btn-editar-perfil" class="btn btn-outline" style="width: auto; padding: 6px 20px;">⚙️ Ajustes y Cuenta</button>
-                    <button id="btn-salir" class="btn btn-outline" style="width: auto; padding: 6px 20px; border-color: #E74C3C; color: #E74C3C;">Salir</button>
+                <img id="mi-perfil-foto" src="" class="profile-pic" style="width: 70px; height: 70px; margin: 0 auto 10px auto; display: block;">
+                <h2 id="mi-perfil-nombre" style="margin: 5px 0; font-size: 18px;">Hermano</h2>
+                <span id="mi-perfil-tag" style="color: var(--primary); font-weight: bold; display: block; margin-bottom: 10px; font-size: 13px;">@usuario</span>
+                <p id="mi-perfil-bio" style="color: var(--text-light); font-size: 13px; margin-bottom: 15px;"></p>
+                <div style="display:flex; gap: 8px; justify-content: center;">
+                    <button id="btn-editar-perfil" class="btn btn-outline" style="width: auto; padding: 6px 16px;">⚙️ Ajustes</button>
+                    <button id="btn-salir" class="btn btn-outline" style="width: auto; padding: 6px 16px; border-color: #E74C3C; color: #E74C3C;">Salir</button>
                 </div>
-                <h3 style="text-align: left; margin-top: 25px; border-bottom: 2px solid var(--border); padding-bottom: 8px;">Mis Publicaciones</h3>
             </div>
         </div>
 
-        <!-- Flujo Central de Mensajes -->
         <div id="feed-publicaciones"></div>
     </div>
 
-    <!-- MODAL 1: Acuerdo de Privacidad y Términos Legales Obligatorio -->
     <div id="modal-legal" class="modal">
-        <div class="modal-content" style="max-width: 450px;">
-            <h3 style="margin-top:0; color: var(--primary);">Acuerdo de Privacidad y Normativas</h3>
-            <p style="font-size: 13px;">Para garantizar un ambiente de edificación seguro y respaldado legalmente, debes leer y aceptar los siguientes términos antes de usar Faro:</p>
-            <div class="legal-box">
-                <strong>1. Protección de Datos:</strong> Nos comprometemos a resguardar tu información de registro. No se comercializarán tus datos personales con terceros bajo ninguna circunstancia.<br><br>
-                <strong>2. Respeto y Comunidad:</strong> Queda estrictamente prohibida la publicación de contenido violento, discursos de odio o contenido difamatorio. Nos reservamos el derecho de remover publicaciones que vayan en contra de nuestro propósito de edificación y paz.<br><br>
-                <strong>3. Modulación de Privacidad:</strong> Eres dueño de la configuración de visibilidad de tu cuenta. Al activar la visualización restringida, declaras conocer que tus datos solo se mostrarán a tus seguidores explícitos.
-            </div>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; margin-bottom: 15px;">
-                <input type="checkbox" id="check-legal"> Declaro que he leído detalladamente y acepto los términos y normativas de Faro.
-            </label>
-            <button id="btn-aceptar-legal" class="btn btn-primary" disabled>Ingresar a la Plataforma</button>
+        <div class="modal-content">
+            <h3 style="margin-top:0; color: var(--primary);">Acuerdos de Faro</h3>
+            <div class="legal-box">1. Protección de Datos...<br>2. Respeto y Comunidad...<br>3. Privacidad...</div>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 15px;"><input type="checkbox" id="check-legal"> Acepto los términos.</label>
+            <button id="btn-aceptar-legal" class="btn btn-primary" disabled>Ingresar</button>
         </div>
     </div>
 
-    <!-- MODAL 2: Configuración del Perfil -->
     <div id="modal-perfil" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color: var(--primary);">Configuración General</h3>
-            
-            <!-- Selector de Avatares / Iconos Cristianos -->
-            <label style="font-size: 13px; font-weight: bold; color: var(--text-light);">Elige tu Símbolo de Perfil:</label>
+            <h3 style="margin-top:0; color: var(--primary);">Ajustes de Perfil</h3>
             <div class="avatar-grid" id="avatar-selector">
-                <img src="https://api.iconify.design/fa6-solid:book-bible.svg?color=%235A9BD5" class="avatar-option selected" title="La Palabra" onclick="seleccionarAvatar(this)">
-                <img src="https://api.iconify.design/fa6-solid:dove.svg?color=%235A9BD5" class="avatar-option" title="Espíritu de Paz" onclick="seleccionarAvatar(this)">
-                <img src="https://api.iconify.design/fa6-solid:cross.svg?color=%235A9BD5" class="avatar-option" title="Gracia y Redención" onclick="seleccionarAvatar(this)">
-                <img src="https://api.iconify.design/lucide:lighthouse.svg?color=%235A9BD5" class="avatar-option" title="Luz del Mundo" onclick="seleccionarAvatar(this)">
+                <img src="https://api.iconify.design/fa6-solid:book-bible.svg?color=%235A9BD5" class="avatar-option selected" onclick="seleccionarAvatar(this)">
+                <img src="https://api.iconify.design/fa6-solid:dove.svg?color=%235A9BD5" class="avatar-option" onclick="seleccionarAvatar(this)">
+                <img src="https://api.iconify.design/fa6-solid:cross.svg?color=%235A9BD5" class="avatar-option" onclick="seleccionarAvatar(this)">
+                <img src="https://api.iconify.design/lucide:lighthouse.svg?color=%235A9BD5" class="avatar-option" onclick="seleccionarAvatar(this)">
             </div>
-            
-            <label style="font-size: 13px; font-weight: bold; color: var(--text-light);">Nombre de Visualización:</label>
-            <input type="text" id="input-nombre">
-
-            <label style="font-size: 13px; font-weight: bold; color: var(--text-light);">Nombre de Usuario Único:</label>
-            <input type="text" id="input-username">
-            
-            <label style="font-size: 13px; font-weight: bold; color: var(--text-light);">Biografía / Descripción:</label>
-            <textarea id="input-bio" rows="2"></textarea>
-            
-            <!-- Preferencias de Privacidad -->
+            <input type="text" id="input-nombre" placeholder="Nombre de Visualización">
+            <input type="text" id="input-username" placeholder="Nombre de Usuario">
+            <textarea id="input-bio" rows="2" placeholder="Biografía"></textarea>
             <div class="privacy-group">
-                <div class="privacy-option">
-                    <label>Visibilidad de identidad:</label>
-                    <select id="select-privacidad-nombre">
-                        <option value="publico">Nombre y @Usuario</option>
-                        <option value="anonimo">Ocultar Nombre (Solo @Usuario)</option>
-                    </select>
-                </div>
-                <div class="privacy-option">
-                    <label>Quién lee tu biografía:</label>
-                    <select id="select-privacidad-bio">
-                        <option value="todos">Todos</option>
-                        <option value="seguidores">Solo Seguidores</option>
-                    </select>
-                </div>
+                <div class="privacy-option"><label>Identidad:</label><select id="select-privacidad-nombre"><option value="publico">Público</option><option value="anonimo">Anónimo</option></select></div>
+                <div class="privacy-option"><label>Biografía:</label><select id="select-privacidad-bio"><option value="todos">Todos</option><option value="seguidores">Seguidores</option></select></div>
             </div>
-
-            <!-- Preferencias de Notificaciones y Apariencia -->
             <div class="privacy-group">
-                <h4 style="margin: 0 0 8px 0; font-size: 13px; color: var(--primary);">Ajustes de la Aplicación</h4>
-                <div class="privacy-option">
-                    <label>Notificación por nuevo seguidor:</label>
-                    <input type="checkbox" id="chk-notif-seguidores" checked>
-                </div>
-                <div class="privacy-option">
-                    <label>Notificación por nuevos mensajes:</label>
-                    <input type="checkbox" id="chk-notif-mensajes" checked>
-                </div>
-                <div class="privacy-option" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px;">
-                    <label><strong>Modo Nocturno:</strong></label>
-                    <input type="checkbox" id="chk-modo-oscuro">
-                </div>
+                <div class="privacy-option"><label>Notif. Seguidores:</label><input type="checkbox" id="chk-notif-seguidores" checked></div>
+                <div class="privacy-option"><label>Notif. Mensajes:</label><input type="checkbox" id="chk-notif-mensajes" checked></div>
+                <div class="privacy-option" style="margin-top: 5px; border-top: 1px solid var(--border); padding-top: 5px;"><label><strong>Modo Nocturno:</strong></label><input type="checkbox" id="chk-modo-oscuro"></div>
             </div>
-            
-            <button id="btn-guardar-perfil" class="btn btn-primary">Guardar Ajustes</button>
+            <button id="btn-guardar-perfil" class="btn btn-primary">Guardar</button>
             <button id="btn-cerrar-perfil" class="btn btn-outline" style="border-color:transparent;">Cancelar</button>
         </div>
     </div>
 
-    <!-- MODAL 3: Citar Mensaje -->
     <div id="modal-repost" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color: var(--primary);">Citar Mensaje</h3>
+            <h3 style="margin-top:0; color: var(--primary);">Citar</h3>
             <div id="repost-preview" class="quote-box"></div>
-            <textarea id="input-repost-comentario" rows="3" placeholder="Añade tu punto de vista..."></textarea>
+            <textarea id="input-repost-comentario" rows="3" placeholder="Añade algo..."></textarea>
             <input type="hidden" id="repost-id-original">
-            <button id="btn-confirmar-repost" class="btn btn-primary">Publicar Cita</button>
+            <button id="btn-confirmar-repost" class="btn btn-primary">Publicar</button>
             <button id="btn-cerrar-repost" class="btn btn-outline">Cancelar</button>
         </div>
     </div>
