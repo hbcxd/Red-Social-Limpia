@@ -16,12 +16,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Variables de Control de Estado
+// Variables de Control de Estado (Avatar por defecto actualizado)
 let cachePublicaciones = {};
 let usuarioActualData = null;
-let filtroFeedActual = "global"; // opciones: global, seguidos, mi-perfil
+let filtroFeedActual = "global";
 let terminoBusqueda = "";
-let avatarSeleccionadoLocal = "https://api.dicebear.com/8.x/lorelei/svg?seed=Felix";
+let avatarSeleccionadoLocal = "https://api.iconify.design/fa6-solid:book-bible.svg?color=%235A9BD5";
 
 const libreriaVersiculos = {
     paz: "Jehová es mi pastor; nada me faltará... - Salmo 23:1",
@@ -45,7 +45,7 @@ async function verificarYProcederPerfil(user) {
     let snap = await getDoc(userRef);
     
     if (!snap.exists()) {
-        // Usuario Nuevo: Lanzamos obligatoriamente el flujo legal de protección
+        // Usuario Nuevo
         document.getElementById('modal-legal').style.display = 'flex';
         
         document.getElementById('check-legal').addEventListener('change', (e) => {
@@ -84,7 +84,7 @@ function inicializarDatosUsuarioLocal(data, uid) {
     cambiarVisibilidadPlataforma(true);
     solicitarPermisoNotificaciones();
     
-    // Aplicar Modo Oscuro si estaba guardado en su perfil
+    // Aplicar Modo Oscuro si estaba guardado
     if(usuarioActualData.modoOscuro) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.getElementById('chk-modo-oscuro').checked = true;
@@ -116,7 +116,7 @@ function actualizarInterfazUsuarioPropia() {
 document.getElementById('btn-google').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
 document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
 
-// --- GESTIÓN DE NOTIFICACIONES NATIVAS ---
+// --- GESTIÓN DE NOTIFICACIONES ---
 function solicitarPermisoNotificaciones() {
     if ("Notification" in window) {
         Notification.requestPermission();
@@ -125,11 +125,11 @@ function solicitarPermisoNotificaciones() {
 
 function lanzarNotificacionPush(titulo, cuerpo) {
     if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(titulo, { body: cuerpo, icon: 'https://api.dicebear.com/8.x/lorelei/svg?seed=Faro' });
+        new Notification(titulo, { body: cuerpo, icon: 'https://api.iconify.design/lucide:lighthouse.svg?color=%235A9BD5' });
     }
 }
 
-// --- AJUSTES Y MODAL DEL PERFIL ---
+// --- AJUSTES DEL PERFIL ---
 document.getElementById('btn-editar-perfil').addEventListener('click', () => {
     if (!usuarioActualData) return;
     document.getElementById('input-nombre').value = usuarioActualData.nombre;
@@ -167,7 +167,7 @@ document.getElementById('btn-guardar-perfil').addEventListener('click', async ()
     const notifMen = document.getElementById('chk-notif-mensajes').checked;
     const oscuroVal = document.getElementById('chk-modo-oscuro').checked;
     
-    if (!nombreVal || !userVal) return alert("Completa los campos obligatorios.");
+    if (!nombreVal || !userVal) return alert("Por favor, completa los campos obligatorios.");
 
     const userRef = doc(db, "usuarios", auth.currentUser.uid);
     const actualizaciones = {
@@ -179,7 +179,6 @@ document.getElementById('btn-guardar-perfil').addEventListener('click', async ()
     await updateDoc(userRef, actualizaciones);
     Object.assign(usuarioActualData, actualizaciones);
     
-    // Aplicar cambios visuales inmediatos de apariencia
     if(oscuroVal) document.documentElement.setAttribute('data-theme', 'dark');
     else document.documentElement.removeAttribute('data-theme');
 
@@ -188,7 +187,7 @@ document.getElementById('btn-guardar-perfil').addEventListener('click', async ()
     escucharFeed();
 });
 
-// --- ENRUTADOR DE PESTAÑAS (ORGANIZACIÓN DE VISTAS) ---
+// --- ENRUTADOR DE PESTAÑAS ---
 document.getElementById('tab-global').addEventListener('click', (e) => cambiarFiltroPestaña("global", e.target));
 document.getElementById('tab-seguidos').addEventListener('click', (e) => cambiarFiltroPestaña("seguidos", e.target));
 document.getElementById('tab-perfil').addEventListener('click', (e) => cambiarFiltroPestaña("mi-perfil", e.target));
@@ -198,14 +197,13 @@ function cambiarFiltroPestaña(tipo, elementoTab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     elementoTab.classList.add('active');
     
-    // Si está en su propio perfil, ocultamos la caja de creación global y mostramos la cabecera estructurada
     document.getElementById('contenedor-creacion-post').style.display = (tipo === "mi-perfil") ? "none" : "block";
     document.getElementById('bloque-perfil-propio').style.display = (tipo === "mi-perfil") ? "block" : "none";
     
     escucharFeed();
 }
 
-// --- INTERACTIVIDAD: MOUSE HOVER PARA VISTAS PREVIAS ---
+// --- INTERACTIVIDAD HOVER ---
 window.mostrarPreviewPerfil = function(idCaja) {
     document.getElementById(idCaja).style.display = 'block';
 };
@@ -213,7 +211,7 @@ window.ocultarPreviewPerfil = function(idCaja) {
     document.getElementById(idCaja).style.display = 'none';
 };
 
-// --- MOTOR DE CONTROL DE CORRIENTE DE PUBLICACIONES (FEED) ---
+// --- MOTOR DE FEED ---
 let desubscribirFeed = null;
 function escucharFeed() {
     if (desubscribirFeed) desubscribirFeed();
@@ -249,12 +247,10 @@ function escucharFeed() {
             };
         });
 
-        // Filtrar según Pestaña Activa
         if (filtroFeedActual === "seguidos") {
             const listaSeguidos = usuarioActualData?.seguidos || [];
             lista = lista.filter(p => listaSeguidos.includes(p.userId));
         } else if (filtroFeedActual === "mi-perfil") {
-            // Sección estructurada: Solo mis publicaciones ordenadas
             lista = lista.filter(p => p.userId === auth.currentUser?.uid);
         }
 
@@ -291,10 +287,9 @@ function escucharFeed() {
                         <span>@${post.autorUsername}</span>
                     </div>
                     
-                    <!-- VISTA PREVIA FLOTANTE DEL PERFIL -->
                     <div class="profile-preview-box" id="${previewId}">
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                            <img src="${post.autorFotoFinal}" style="width:40px; height:40px; border-radius:50%;">
+                            <img src="${post.autorFotoFinal}" style="width:40px; height:40px; border-radius:50%; object-fit:contain; background:var(--verse-bg); padding:5px;">
                             <div>
                                 <h5 style="margin:0; font-size:14px;">${post.autorNombreFinal}</h5>
                                 <span style="font-size:11px; color:var(--primary);">@${post.autorUsername}</span>
@@ -317,7 +312,7 @@ function escucharFeed() {
     });
 }
 
-// --- PUBLICAR ACCIÓN ---
+// --- PUBLICAR ---
 document.getElementById('btn-publicar').addEventListener('click', async () => {
     if (!auth.currentUser) return;
     const cont = document.getElementById('input-publicacion').value.trim();
@@ -335,9 +330,8 @@ document.getElementById('btn-publicar').addEventListener('click', async () => {
 
     document.getElementById('input-publicacion').value = '';
     
-    // Disparador de Notificación Simulado si la preferencia está activa
     if(usuarioActualData?.notifMensajes) {
-        lanzarNotificacionPush("¡Mensaje Publicado!", "Tu palabra de edificación ha sido enviada al feed global.");
+        lanzarNotificacionPush("¡Mensaje Compartido!", "Tu palabra ha sido publicada en el feed.");
     }
 });
 
@@ -353,9 +347,8 @@ window.alternarSeguir = async (autorId) => {
         await updateDoc(refPropia, { seguidos: arrayUnion(autorId) });
         usuarioActualData.seguidos.push(autorId);
         
-        // Notificación al instante si el usuario tiene habilitado el trigger de seguimiento
         if(usuarioActualData.notifSeguidores) {
-            lanzarNotificacionPush("Faro: Nuevo Seguidor", "¡Has comenzado a seguir una nueva cuenta!");
+            lanzarNotificacionPush("Faro", "¡Has comenzado a seguir una nueva cuenta!");
         }
     }
     escucharFeed();
@@ -368,7 +361,6 @@ document.getElementById('input-busqueda').addEventListener('input', (e) => {
 
 async function procesarAlgoritmoYVersiculo() {
     if (!auth.currentUser) return;
-    const snap = await getDoc(doc(db, "usuarios", auth.currentUser.uid));
     document.getElementById('texto-versiculo').textContent = libreriaVersiculos.general;
 }
 
