@@ -222,11 +222,12 @@ window.eliminarPost = async function(postId) {
     }
 };
 
-// Renderizar Feed
+// Renderizar Feed (Reemplaza este bloque completo en tu app.js)
 const q = query(collection(db, "publicaciones"), where("status", "==", "approved"));
 onSnapshot(q, (snapshot) => {
     feedPublicaciones.innerHTML = ''; 
     const postsArray = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Ordenamos por fecha (del más nuevo al más viejo)
     postsArray.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
     postsArray.forEach((post) => {
@@ -234,6 +235,45 @@ onSnapshot(q, (snapshot) => {
 
         const uid = auth.currentUser ? auth.currentUser.uid : null;
         const esAutor = uid === post.userId;
+        const likes = post.likes || [];
+        
+        // Verificamos si el usuario ya dio like para cambiar el color del botón
+        const haDadoLike = uid ? likes.includes(uid) : false;
+        
+        let contenidoHtml = `<p style="font-size: 16px; line-height: 1.5; margin: 10px 0;">${post.content}</p>`;
+        if (post.isRepost) {
+            contenidoHtml += `<div class="quote-box">${post.originalQuote}</div>`;
+        }
+
+        const controlesAutor = esAutor ? `<button onclick="window.eliminarPost('${post.id}')" class="action-btn" style="color:#E74C3C;">🗑 Borrar</button>` : '';
+
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+            <div class="profile-header" style="margin-bottom: 10px;">
+                <img src="${post.userFoto}" class="profile-pic" style="width: 45px; height: 45px;">
+                <div>
+                    <strong style="display:block; font-size:16px;">${post.userName}</strong>
+                </div>
+            </div>
+            ${contenidoHtml}
+            
+            <div class="post-actions">
+                <button onclick="window.darLike('${post.id}', '${JSON.stringify(likes)}')" 
+                        class="action-btn" 
+                        style="color: ${haDadoLike ? '#5A9BD5' : '#7F8C8D'}; font-weight: bold;">
+                    👍 ${likes.length}
+                </button>
+                <button onclick="window.abrirRepost('${post.id}', '${post.userName}', '${post.content.replace(/'/g, "\\'")}')" class="action-btn">
+                    🔄 Citar
+                </button>
+                ${controlesAutor}
+            </div>
+        `;
+        feedPublicaciones.appendChild(div);
+    });
+});
+
         const likes = post.likes || [];
         const haDadoLike = uid ? likes.includes(uid) : false;
         
