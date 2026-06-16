@@ -133,8 +133,44 @@ document.getElementById('btn-publicar').addEventListener('click', async () => {
         btn.disabled = false; btn.textContent = "Compartir Mensaje";
     }
 });
+document.getElementById('btn-publicar').addEventListener('click', async () => {
+    // Si no hay usuario, bloqueamos la publicación
+    if (!auth.currentUser) {
+        return alert("Para publicar tus mensajes en Lumina, primero debes iniciar sesión.");
+    }
 
+    const contenido = inputPublicacion.value.trim();
+    if (!contenido) return;
+    if (!esContenidoLimpio(contenido)) return alert("Tu mensaje contiene palabras no permitidas.");
+
+    const btn = document.getElementById('btn-publicar');
+    btn.disabled = true; btn.textContent = "Publicando...";
+
+    try {
+        await addDoc(collection(db, "publicaciones"), {
+            userId: auth.currentUser.uid,
+            userName: nombreUsuario.textContent,
+            userFoto: imgPerfil.src,
+            content: contenido,
+            timestamp: serverTimestamp(),
+            status: "approved", reportCount: 0, likes: [], isRepost: false
+        });
+        inputPublicacion.value = '';
+    } catch (error) { console.error(error); } finally {
+        btn.disabled = false; btn.textContent = "Compartir Mensaje";
+    }
+});
 // Lógica de Repost
+window.abrirRepost = function(id, autorOriginal, contenidoOriginal) {
+    // Si no hay usuario, bloqueamos y enviamos alerta
+    if (!auth.currentUser) {
+        return alert("¡Únete a Lumina! Regístrate para poder realizar repost y compartir tu mensaje con la comunidad.");
+    }
+    
+    document.getElementById('repost-id-original').value = id;
+    document.getElementById('repost-preview').innerHTML = `<strong>${autorOriginal}:</strong> ${contenidoOriginal}`;
+    modalRepost.style.display = 'flex';
+};
 const modalRepost = document.getElementById('modal-repost');
 window.abrirRepost = function(id, autorOriginal, contenidoOriginal) {
     document.getElementById('repost-id-original').value = id;
@@ -165,18 +201,21 @@ document.getElementById('btn-confirmar-repost').addEventListener('click', async 
 
 // Likes y Eliminar
 window.darLike = async function(postId, likesStr) {
-    if (!auth.currentUser) return;
-    const uid = auth.currentUser.uid;
     const postRef = doc(db, "publicaciones", postId);
-    const likes = JSON.parse(likesStr);
+    // Si no hay usuario, usamos un ID temporal para que puedan dar like
+    const uid = auth.currentUser ? auth.currentUser.uid : "anonimo_" + Math.floor(Math.random() * 1000);
     
-    if (likes.includes(uid)) {
-        await updateDoc(postRef, { likes: arrayRemove(uid) });
-    } else {
-        await updateDoc(postRef, { likes: arrayUnion(uid) });
+    try {
+        const likes = JSON.parse(likesStr);
+        if (likes.includes(uid)) {
+            await updateDoc(postRef, { likes: arrayRemove(uid) });
+        } else {
+            await updateDoc(postRef, { likes: arrayUnion(uid) });
+        }
+    } catch (error) {
+        console.error("Error al actualizar like:", error);
     }
 };
-
 window.eliminarPost = async function(postId) {
     if(confirm("¿Seguro que deseas eliminar este mensaje?")) {
         await deleteDoc(doc(db, "publicaciones", postId));
