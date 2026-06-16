@@ -16,76 +16,120 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Estado de la App
+// Variables de Control de Estado
 let cachePublicaciones = {};
 let usuarioActualData = null;
-let filtroFeedActual = "global"; 
+let filtroFeedActual = "global"; // opciones: global, seguidos, mi-perfil
 let terminoBusqueda = "";
-let avatarSeleccionadoLocal = "https://api.dicebear.com/8.x/adventurer/svg?seed=FaroLuz";
+let avatarSeleccionadoLocal = "https://api.dicebear.com/8.x/lorelei/svg?seed=Felix";
 
 const libreriaVersiculos = {
-    paz: "Jehová es mi pastor; nada me faltará. En lugares de delicados pastos me hará descansar... - Salmo 23:1-2",
-    amor: "El amor es sufrido, es benigno; el amor no tiene envidia, el amor no es jactancioso, no se envanece... - 1 Corintios 13:4",
-    fe: "Es, pues, la fe la certeza de lo que se espera, la convicción de lo que no se ve. - Hebreos 11:1",
-    esperanza: "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal... - Jeremías 29:11",
-    fortaleza: "Todo lo puedo en Cristo que me fortalece. - Filipenses 4:13",
+    paz: "Jehová es mi pastor; nada me faltará... - Salmo 23:1",
+    amor: "El amor es sufrido, es benigno; el amor no tiene envidia... - 1 Corintios 13:4",
+    fe: "Es, pues, la fe la certeza de lo que se espera... - Hebreos 11:1",
     general: "Lámpara es a mis pies tu palabra, y lumbrera a mi camino. - Salmo 119:105"
 };
 
-// --- CONTROL DE SESIÓN ---
+// --- OBSERVADOR DE SESIÓN ---
 onAuthStateChanged(auth, async (user) => {
-    const loginSec = document.getElementById('seccion-login');
-    const plataformaSec = document.getElementById('seccion-plataforma');
-    const versiculoSec = document.getElementById('seccion-versiculo');
-    
     if (user) {
-        loginSec.style.display = 'none';
-        plataformaSec.style.display = 'block';
-        versiculoSec.style.display = 'block';
-        await cargarOcrearPerfil(user);
-        procesarAlgoritmoYVersiculo();
+        await verificarYProcederPerfil(user);
     } else {
-        loginSec.style.display = 'block';
-        plataformaSec.style.display = 'none';
-        versiculoSec.style.display = 'none';
-        usuarioActualData = null;
+        cambiarVisibilidadPlataforma(false);
     }
     escucharFeed();
 });
 
-async function cargarOcrearPerfil(user) {
+async function verificarYProcederPerfil(user) {
     const userRef = doc(db, "usuarios", user.uid);
     let snap = await getDoc(userRef);
     
     if (!snap.exists()) {
-        const usernameSugerido = user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, "") + Math.floor(Math.random() * 100);
-        await setDoc(userRef, {
-            nombre: user.displayName || "Hermano en la Fe",
-            username: usernameSugerido.toLowerCase(),
-            bio: "¡Bienvenido a mi cuenta en Faro!",
-            fotoUrl: avatarSeleccionadoLocal,
-            seguidos: [],
-            privacidadNombre: "publico", // Valor inicial
-            privacidadBio: "todos",      // Valor inicial
-            intereses: { paz: 1, amor: 1, fe: 1, fortaleza: 1, esperanza: 1 }
+        // Usuario Nuevo: Lanzamos obligatoriamente el flujo legal de protección
+        document.getElementById('modal-legal').style.display = 'flex';
+        
+        document.getElementById('check-legal').addEventListener('change', (e) => {
+            document.getElementById('btn-aceptar-legal').disabled = !e.target.checked;
         });
-        snap = await getDoc(userRef);
+        
+        document.getElementById('btn-aceptar-legal').onclick = async () => {
+            document.getElementById('modal-legal').style.display = 'none';
+            const usernameSugerido = user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, "") + Math.floor(Math.random() * 100);
+            
+            await setDoc(userRef, {
+                nombre: user.displayName || "Hermano en la Fe",
+                username: usernameSugerido.toLowerCase(),
+                bio: "¡Hola! Acabo de unirme a Faro.",
+                fotoUrl: avatarSeleccionadoLocal,
+                seguidos: [],
+                privacidadNombre: "publico",
+                privacidadBio: "todos",
+                notifSeguidores: true,
+                notifMensajes: true,
+                modoOscuro: false,
+                acuerdoAceptado: true,
+                intereses: { paz: 1, amor: 1, fe: 1 }
+            });
+            
+            let nuevoSnap = await getDoc(userRef);
+            inicializarDatosUsuarioLocal(nuevoSnap.data(), user.uid);
+        };
+    } else {
+        inicializarDatosUsuarioLocal(snap.data(), user.uid);
+    }
+}
+
+function inicializarDatosUsuarioLocal(data, uid) {
+    usuarioActualData = { id: uid, ...data };
+    cambiarVisibilidadPlataforma(true);
+    solicitarPermisoNotificaciones();
+    
+    // Aplicar Modo Oscuro si estaba guardado en su perfil
+    if(usuarioActualData.modoOscuro) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('chk-modo-oscuro').checked = true;
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.getElementById('chk-modo-oscuro').checked = false;
     }
     
-    usuarioActualData = { id: user.uid, ...snap.data() };
-    
-    // UI tomando en cuenta la privacidad del propio usuario de manera local
-    document.getElementById('nombre-usuario').textContent = usuarioActualData.privacidadNombre === "publico" ? usuarioActualData.nombre : "Miembro de Faro";
-    document.getElementById('tag-usuario').textContent = `@${usuarioActualData.username}`;
-    document.getElementById('bio-usuario').textContent = usuarioActualData.bio;
-    document.getElementById('img-perfil').src = usuarioActualData.fotoUrl;
+    actualizarInterfazUsuarioPropia();
+    procesarAlgoritmoYVersiculo();
+}
+
+function cambiarVisibilidadPlataforma(autenticado) {
+    document.getElementById('seccion-login').style.display = autenticado ? 'none' : 'block';
+    document.getElementById('seccion-plataforma').style.display = autenticado ? 'block' : 'none';
+    document.getElementById('seccion-versiculo').style.display = autenticado ? 'block' : 'none';
+    if(!autenticado) usuarioActualData = null;
+}
+
+function actualizarInterfazUsuarioPropia() {
+    if (!usuarioActualData) return;
+    document.getElementById('mi-perfil-nombre').textContent = usuarioActualData.nombre;
+    document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
+    document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
+    document.getElementById('mi-perfil-foto').src = usuarioActualData.fotoUrl;
     avatarSeleccionadoLocal = usuarioActualData.fotoUrl;
 }
 
 document.getElementById('btn-google').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
 document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
 
-// --- MODAL DE PERFIL ---
+// --- GESTIÓN DE NOTIFICACIONES NATIVAS ---
+function solicitarPermisoNotificaciones() {
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
+}
+
+function lanzarNotificacionPush(titulo, cuerpo) {
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, { body: cuerpo, icon: 'https://api.dicebear.com/8.x/lorelei/svg?seed=Faro' });
+    }
+}
+
+// --- AJUSTES Y MODAL DEL PERFIL ---
 document.getElementById('btn-editar-perfil').addEventListener('click', () => {
     if (!usuarioActualData) return;
     document.getElementById('input-nombre').value = usuarioActualData.nombre;
@@ -93,10 +137,11 @@ document.getElementById('btn-editar-perfil').addEventListener('click', () => {
     document.getElementById('input-bio').value = usuarioActualData.bio;
     document.getElementById('select-privacidad-nombre').value = usuarioActualData.privacidadNombre || "publico";
     document.getElementById('select-privacidad-bio').value = usuarioActualData.privacidadBio || "todos";
+    document.getElementById('chk-notif-seguidores').checked = usuarioActualData.notifSeguidores !== false;
+    document.getElementById('chk-notif-mensajes').checked = usuarioActualData.notifMensajes !== false;
     
     document.querySelectorAll('.avatar-option').forEach(img => {
-        if(img.src === avatarSeleccionadoLocal) img.classList.add('selected');
-        else img.classList.remove('selected');
+        img.classList.toggle('selected', img.src === avatarSeleccionadoLocal);
     });
     
     document.getElementById('modal-perfil').style.display = 'flex';
@@ -113,72 +158,168 @@ window.seleccionarAvatar = function(elemento) {
 document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
     if (!auth.currentUser) return;
     
-    const nuevoNombre = document.getElementById('input-nombre').value.trim();
-    const nuevoUsername = document.getElementById('input-username').value.trim().toLowerCase().replace(/\s+/g, '');
-    const nuevaBio = document.getElementById('input-bio').value.trim();
-    const privNombre = document.getElementById('select-privacidad-nombre').value;
+    const nombreVal = document.getElementById('input-nombre').value.trim();
+    const userVal = document.getElementById('input-username').value.trim().toLowerCase().replace(/\s+/g, '');
+    const bioVal = document.getElementById('input-bio').value.trim();
+    const privNom = document.getElementById('select-privacidad-nombre').value;
     const privBio = document.getElementById('select-privacidad-bio').value;
+    const notifSeg = document.getElementById('chk-notif-seguidores').checked;
+    const notifMen = document.getElementById('chk-notif-mensajes').checked;
+    const oscuroVal = document.getElementById('chk-modo-oscuro').checked;
     
-    if (!nuevoNombre || !nuevoUsername) return alert("Los campos de identidad no pueden estar vacíos.");
-
-    if (nuevoUsername !== usuarioActualData.username) {
-        const qUsername = query(collection(db, "usuarios"), where("username", "==", nuevoUsername));
-        const snapCheck = await getDocs(qUsername);
-        if (!snapCheck.empty) return alert("Este nombre de usuario ya está tomado.");
-    }
+    if (!nombreVal || !userVal) return alert("Completa los campos obligatorios.");
 
     const userRef = doc(db, "usuarios", auth.currentUser.uid);
-    const updates = {
-        nombre: nuevoNombre,
-        username: nuevoUsername,
-        bio: nuevaBio,
-        fotoUrl: avatarSeleccionadoLocal,
-        privacidadNombre: privNombre,
-        privacidadBio: privBio
+    const actualizaciones = {
+        nombre: nombreVal, username: userVal, bio: bioVal, fotoUrl: avatarSeleccionadoLocal,
+        privacidadNombre: privNom, privacidadBio: privBio,
+        notifSeguidores: notifSeg, notifMensajes: notifMen, modoOscuro: oscuroVal
     };
     
-    await updateDoc(userRef, updates);
+    await updateDoc(userRef, actualizaciones);
+    Object.assign(usuarioActualData, actualizaciones);
+    
+    // Aplicar cambios visuales inmediatos de apariencia
+    if(oscuroVal) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
 
-    // Sincronizar estado local
-    Object.assign(usuarioActualData, updates);
-
-    document.getElementById('nombre-usuario').textContent = privNombre === "publico" ? nuevoNombre : "Miembro de Faro";
-    document.getElementById('tag-usuario').textContent = `@${nuevoUsername}`;
-    document.getElementById('bio-usuario').textContent = nuevaBio;
-    document.getElementById('img-perfil').src = avatarSeleccionadoLocal;
-
+    actualizarInterfazUsuarioPropia();
     document.getElementById('modal-perfil').style.display = 'none';
+    escucharFeed();
 });
 
-// --- ALGORITMO INTEGRADO ---
-function rastrearInteresesDelContenido(texto) {
-    if (!auth.currentUser || !usuarioActualData) return;
-    const txt = texto.toLowerCase();
-    let cambios = {};
-    if(txt.includes("paz") || txt.includes("tranquilidad")) cambios["intereses.paz"] = increment(1);
-    if(txt.includes("amor") || txt.includes("amar")) cambios["intereses.amor"] = increment(1);
-    if(txt.includes("fe") || txt.includes("creer")) cambios["intereses.fe"] = increment(1);
-    if(txt.includes("esperanza")) cambios["intereses.esperanza"] = increment(1);
-    if(txt.includes("fuerza") || txt.includes("fortaleza")) cambios["intereses.fortaleza"] = increment(1);
+// --- ENRUTADOR DE PESTAÑAS (ORGANIZACIÓN DE VISTAS) ---
+document.getElementById('tab-global').addEventListener('click', (e) => cambiarFiltroPestaña("global", e.target));
+document.getElementById('tab-seguidos').addEventListener('click', (e) => cambiarFiltroPestaña("seguidos", e.target));
+document.getElementById('tab-perfil').addEventListener('click', (e) => cambiarFiltroPestaña("mi-perfil", e.target));
+
+function cambiarFiltroPestaña(tipo, elementoTab) {
+    filtroFeedActual = tipo;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    elementoTab.classList.add('active');
     
-    if (Object.keys(cambios).length > 0) updateDoc(doc(db, "usuarios", auth.currentUser.uid), cambios);
+    // Si está en su propio perfil, ocultamos la caja de creación global y mostramos la cabecera estructurada
+    document.getElementById('contenedor-creacion-post').style.display = (tipo === "mi-perfil") ? "none" : "block";
+    document.getElementById('bloque-perfil-propio').style.display = (tipo === "mi-perfil") ? "block" : "none";
+    
+    escucharFeed();
 }
 
-async function procesarAlgoritmoYVersiculo() {
-    if (!auth.currentUser) return;
-    const snap = await getDoc(doc(db, "usuarios", auth.currentUser.uid));
-    const intereses = snap.data().intereses || { general: 1 };
-    let categoriaMaxima = "general";
-    let valorMaximo = 0;
-    Object.entries(intereses).forEach(([cat, val]) => {
-        if (val > valorMaximo) { valorMaximo = val; categoriaMaxima = cat; }
+// --- INTERACTIVIDAD: MOUSE HOVER PARA VISTAS PREVIAS ---
+window.mostrarPreviewPerfil = function(idCaja) {
+    document.getElementById(idCaja).style.display = 'block';
+};
+window.ocultarPreviewPerfil = function(idCaja) {
+    document.getElementById(idCaja).style.display = 'none';
+};
+
+// --- MOTOR DE CONTROL DE CORRIENTE DE PUBLICACIONES (FEED) ---
+let desubscribirFeed = null;
+function escucharFeed() {
+    if (desubscribirFeed) desubscribirFeed();
+    
+    desubscribirFeed = onSnapshot(query(collection(db, "publicaciones"), where("status", "==", "approved")), async (snap) => {
+        const feedContainer = document.getElementById('feed-publicaciones');
+        feedContainer.innerHTML = '';
+        cachePublicaciones = {};
+
+        const usuariosSnaps = await getDocs(query(collection(db, "usuarios")));
+        let autoresMap = {};
+        usuariosSnaps.forEach(doc => { autoresMap[doc.id] = doc.data(); });
+
+        let lista = snap.docs.map(d => {
+            const data = d.data();
+            const autorInfo = autoresMap[data.userId] || {};
+            
+            const nombreFinal = autorInfo.privacidadNombre === "anonimo" ? "Miembro de Faro" : (autorInfo.nombre || "Hermano");
+            const miId = auth.currentUser?.uid;
+            const loSigo = (usuarioActualData?.seguidos || []).includes(data.userId);
+            
+            let bioFinal = "Biografía Privada";
+            if (autorInfo.privacidadBio === "todos" || data.userId === miId || loSigo) {
+                bioFinal = autorInfo.bio || "Sin descripción.";
+            }
+
+            return { 
+                id: d.id, ...data, autorNombreFinal: nombreFinal,
+                autorUsername: autorInfo.username || "miembro",
+                autorFotoFinal: autorInfo.fotoUrl || avatarSeleccionadoLocal,
+                autorBioFinal: bioFinal,
+                autorSeguidoresCount: Object.values(autoresMap).filter(u => (u.seguidos || []).includes(data.userId)).length
+            };
+        });
+
+        // Filtrar según Pestaña Activa
+        if (filtroFeedActual === "seguidos") {
+            const listaSeguidos = usuarioActualData?.seguidos || [];
+            lista = lista.filter(p => listaSeguidos.includes(p.userId));
+        } else if (filtroFeedActual === "mi-perfil") {
+            // Sección estructurada: Solo mis publicaciones ordenadas
+            lista = lista.filter(p => p.userId === auth.currentUser?.uid);
+        }
+
+        if (terminoBusqueda) {
+            lista = lista.filter(p => p.content.toLowerCase().includes(terminoBusqueda) || p.autorUsername.includes(terminoBusqueda));
+        }
+
+        lista.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+        if(lista.length === 0) {
+            feedContainer.innerHTML = '<div class="card"><p style="text-align:center; color: var(--text-light);">No hay publicaciones para mostrar en este segmento...</p></div>';
+            return;
+        }
+
+        lista.forEach(post => {
+            if ((post.reportCount || 0) >= 3) return;
+            cachePublicaciones[post.id] = post;
+
+            const uid = auth.currentUser?.uid;
+            const haDadoLike = (post.likes || []).includes(uid);
+            const esPropio = post.userId === uid;
+            const loSigo = (usuarioActualData?.seguidos || []).includes(post.userId);
+            const previewId = `preview-${post.id}`;
+
+            let botonSeguir = (uid && !esPropio) ? `<button onclick="alternarSeguir('${post.userId}')" class="follow-btn ${loSigo ? 'following' : ''}">${loSigo ? '✓' : '+ Seguir'}</button>` : '';
+
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div class="profile-header" onmouseenter="mostrarPreviewPerfil('${previewId}')" onmouseleave="ocultarPreviewPerfil('${previewId}')">
+                    <img src="${post.autorFotoFinal}" class="profile-pic">
+                    <div class="user-meta">
+                        <strong>${post.autorNombreFinal}</strong>
+                        <span>@${post.autorUsername}</span>
+                    </div>
+                    
+                    <!-- VISTA PREVIA FLOTANTE DEL PERFIL -->
+                    <div class="profile-preview-box" id="${previewId}">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                            <img src="${post.autorFotoFinal}" style="width:40px; height:40px; border-radius:50%;">
+                            <div>
+                                <h5 style="margin:0; font-size:14px;">${post.autorNombreFinal}</h5>
+                                <span style="font-size:11px; color:var(--primary);">@${post.autorUsername}</span>
+                            </div>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-light); margin:5px 0;">${post.autorBioFinal}</p>
+                        <span style="font-size:11px; font-weight:bold; color:var(--text);">👥 Seguidores: ${post.autorSeguidoresCount}</span>
+                    </div>
+                </div>
+                ${botonSeguir}
+                <p style="margin: 10px 0; font-size: 15px;">${post.content}</p>
+                ${post.isRepost ? `<div class="quote-box">${post.originalQuote}</div>` : ''}
+                <div class="post-actions">
+                    <button onclick="darLike('${post.id}')" class="action-btn" style="color:${haDadoLike ? 'var(--primary)' : 'var(--text-light)'}">👍 ${post.likes?.length || 0}</button>
+                    <button onclick="abrirRepost('${post.id}')" class="action-btn">🔄 Citar</button>
+                </div>
+            `;
+            feedContainer.appendChild(div);
+        });
     });
-    document.getElementById('texto-versiculo').textContent = libreriaVersiculos[categoriaMaxima] || libreriaVersiculos.general;
 }
 
-// --- PUBLICAR ---
+// --- PUBLICAR ACCIÓN ---
 document.getElementById('btn-publicar').addEventListener('click', async () => {
-    if (!auth.currentUser) return alert("Inicia sesión para compartir.");
+    if (!auth.currentUser) return;
     const cont = document.getElementById('input-publicacion').value.trim();
     if (!cont) return;
 
@@ -193,8 +334,63 @@ document.getElementById('btn-publicar').addEventListener('click', async () => {
     });
 
     document.getElementById('input-publicacion').value = '';
-    rastrearInteresesDelContenido(cont);
+    
+    // Disparador de Notificación Simulado si la preferencia está activa
+    if(usuarioActualData?.notifMensajes) {
+        lanzarNotificacionPush("¡Mensaje Publicado!", "Tu palabra de edificación ha sido enviada al feed global.");
+    }
 });
+
+window.alternarSeguir = async (autorId) => {
+    if (!auth.currentUser || !usuarioActualData) return;
+    const refPropia = doc(db, "usuarios", auth.currentUser.uid);
+    const yaLoSigue = (usuarioActualData.seguidos || []).includes(autorId);
+    
+    if (yaLoSigue) {
+        await updateDoc(refPropia, { seguidos: arrayRemove(autorId) });
+        usuarioActualData.seguidos = usuarioActualData.seguidos.filter(id => id !== autorId);
+    } else {
+        await updateDoc(refPropia, { seguidos: arrayUnion(autorId) });
+        usuarioActualData.seguidos.push(autorId);
+        
+        // Notificación al instante si el usuario tiene habilitado el trigger de seguimiento
+        if(usuarioActualData.notifSeguidores) {
+            lanzarNotificacionPush("Faro: Nuevo Seguidor", "¡Has comenzado a seguir una nueva cuenta!");
+        }
+    }
+    escucharFeed();
+};
+
+document.getElementById('input-busqueda').addEventListener('input', (e) => {
+    terminoBusqueda = e.target.value.toLowerCase().trim();
+    escucharFeed();
+});
+
+async function procesarAlgoritmoYVersiculo() {
+    if (!auth.currentUser) return;
+    const snap = await getDoc(doc(db, "usuarios", auth.currentUser.uid));
+    document.getElementById('texto-versiculo').textContent = libreriaVersiculos.general;
+}
+
+window.darLike = async (postId) => {
+    const uid = auth.currentUser?.uid || "anonimo";
+    const post = cachePublicaciones[postId];
+    if (!post) return;
+    const ref = doc(db, "publicaciones", postId);
+    if ((post.likes || []).includes(uid)) {
+        await updateDoc(ref, { likes: arrayRemove(uid) });
+    } else {
+        await updateDoc(ref, { likes: arrayUnion(uid) });
+    }
+};
+
+window.abrirRepost = (postId) => {
+    const post = cachePublicaciones[postId];
+    if (!post) return;
+    document.getElementById('repost-id-original').value = postId;
+    document.getElementById('repost-preview').innerHTML = `<strong>@${post.autorUsername}:</strong> ${post.content}`;
+    document.getElementById('modal-repost').style.display = 'flex';
+};
 
 document.getElementById('btn-cerrar-repost').addEventListener('click', () => document.getElementById('modal-repost').style.display = 'none');
 
@@ -212,161 +408,4 @@ document.getElementById('btn-confirmar-repost').addEventListener('click', async 
     });
     document.getElementById('modal-repost').style.display = 'none';
     document.getElementById('input-repost-comentario').value = '';
-    rastrearInteresesDelContenido(comentario);
 });
-
-// --- FUNCIONES WINDOWS GLOBALES ---
-Object.assign(window, {
-    darLike: async (postId) => {
-        const uid = auth.currentUser ? auth.currentUser.uid : "anon_visitante";
-        const post = cachePublicaciones[postId];
-        if (!post) return;
-        const ref = doc(db, "publicaciones", postId);
-        if ((post.likes || []).includes(uid)) {
-            await updateDoc(ref, { likes: arrayRemove(uid) });
-        } else {
-            await updateDoc(ref, { likes: arrayUnion(uid) });
-            rastrearInteresesDelContenido(post.content);
-        }
-    },
-    abrirRepost: (postId) => {
-        if (!auth.currentUser) return alert("Regístrate en Faro para poder citar.");
-        const post = cachePublicaciones[postId];
-        if (!post) return;
-        document.getElementById('repost-id-original').value = postId;
-        document.getElementById('repost-preview').innerHTML = `<strong>@${post.autorUsername || 'miembro'}:</strong> ${post.content}`;
-        document.getElementById('modal-repost').style.display = 'flex';
-    },
-    reportarPost: async (postId) => {
-        if (confirm("¿Quieres reportar este mensaje?")) {
-            await updateDoc(doc(db, "publicaciones", postId), { reportCount: increment(1) });
-        }
-    },
-    alternarSeguir: async (autorId) => {
-        if (!auth.currentUser || !usuarioActualData) return alert("Inicia sesión para seguir cuentas.");
-        const refPropia = doc(db, "usuarios", auth.currentUser.uid);
-        const yaLoSigue = (usuarioActualData.seguidos || []).includes(autorId);
-        if (yaLoSigue) {
-            await updateDoc(refPropia, { seguidos: arrayRemove(autorId) });
-            usuarioActualData.seguidos = usuarioActualData.seguidos.filter(id => id !== autorId);
-        } else {
-            await updateDoc(refPropia, { seguidos: arrayUnion(autorId) });
-            usuarioActualData.seguidos.push(autorId);
-        }
-        escucharFeed();
-    }
-});
-
-document.getElementById('tab-global').addEventListener('click', (e) => cambiarTabFeed("global", e.target));
-document.getElementById('tab-seguidos').addEventListener('click', (e) => cambiarTabFeed("seguidos", e.target));
-
-function cambiarTabFeed(tipo, elementoTab) {
-    filtroFeedActual = tipo;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    elementoTab.classList.add('active');
-    escucharFeed();
-}
-
-document.getElementById('input-busqueda').addEventListener('input', (e) => {
-    terminoBusqueda = e.target.value.toLowerCase().trim();
-    escucharFeed();
-});
-
-// --- MOTOR DEL FEED CON PRIVACIDAD INTEGRADA ---
-let desubscribirFeed = null;
-function escucharFeed() {
-    if (desubscribirFeed) desubscribirFeed();
-    desubscribirFeed = onSnapshot(query(collection(db, "publicaciones"), where("status", "==", "approved")), async (snap) => {
-        const feedContainer = document.getElementById('feed-publicaciones');
-        feedContainer.innerHTML = '';
-        cachePublicaciones = {};
-
-        // Paso 1: Obtener todos los autores únicos para verificar sus configuraciones de privacidad
-        const listaAutoresIds = [...new Set(snap.docs.map(d => d.data().userId))];
-        let autoresMap = {};
-        
-        if (listaAutoresIds.length > 0) {
-            const autoresSnaps = await getDocs(query(collection(db, "usuarios")));
-            autoresSnaps.forEach(doc => { autoresMap[doc.id] = doc.data(); });
-        }
-
-        let lista = snap.docs.map(d => {
-            const data = d.data();
-            const autorInfo = autoresMap[data.userId] || {};
-            
-            // Evaluamos la privacidad del nombre del autor en tiempo real
-            const nombreAMostrar = autorInfo.privacidadNombre === "anonimo" ? "Miembro de Faro" : (autorInfo.nombre || "Hermano");
-            
-            // Evaluamos la privacidad de la biografía del autor
-            const miId = auth.currentUser?.uid;
-            const loSigo = (usuarioActualData?.seguidos || []).includes(data.userId);
-            let bioAMostrar = "Biografía Privada";
-            
-            if (autorInfo.privacidadBio === "todos" || data.userId === miId || loSigo) {
-                bioAMostrar = autorInfo.bio || "Sin biografía...";
-            }
-
-            return { 
-                id: d.id, 
-                ...data, 
-                autorNombreFinal: nombreAMostrar,
-                autorUsername: autorInfo.username || "miembro",
-                autorFotoFinal: autorInfo.fotoUrl || "https://api.dicebear.com/8.x/adventurer/svg?seed=FaroLuz",
-                autorBioFinal: bioAMostrar
-            };
-        });
-
-        // Filtrados y ordenamiento de búsqueda
-        if (terminoBusqueda) {
-            lista = lista.filter(p => p.content.toLowerCase().includes(terminoBusqueda) || p.autorNombreFinal.toLowerCase().includes(terminoBusqueda) || p.autorUsername.toLowerCase().includes(terminoBusqueda));
-        }
-
-        const listaSeguidos = usuarioActualData?.seguidos || [];
-        if (filtroFeedActual === "seguidos") lista = lista.filter(p => listaSeguidos.includes(p.userId));
-
-        lista.sort((a, b) => {
-            const aEsSeguido = listaSeguidos.includes(a.userId) ? 1 : 0;
-            const bEsSeguido = listaSeguidos.includes(b.userId) ? 1 : 0;
-            if (filtroFeedActual === "global" && aEsSeguido !== bEsSeguido) return bEsSeguido - aEsSeguido;
-            return (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0);
-        });
-
-        if(lista.length === 0) {
-            feedContainer.innerHTML = '<div class="card"><p style="text-align:center; color: var(--text-light);">No se encontraron mensajes aquí...</p></div>';
-            return;
-        }
-
-        lista.forEach(post => {
-            if ((post.reportCount || 0) >= 3) return;
-            cachePublicaciones[post.id] = post;
-
-            const uid = auth.currentUser?.uid;
-            const haDadoLike = (post.likes || []).includes(uid);
-            const esPropio = post.userId === uid;
-            const loSigo = listaSeguidos.includes(post.userId);
-
-            let botonSeguirHtml = (uid && !esPropio) ? `<button onclick="alternarSeguir('${post.userId}')" class="follow-btn ${loSigo ? 'following' : ''}">${loSigo ? '✓ Siguiendo' : '+ Seguir'}</button>` : '';
-
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.innerHTML = `
-                ${botonSeguirHtml}
-                <div class="profile-header" title="Sobre mí: ${post.autorBioFinal}">
-                    <img src="${post.autorFotoFinal}" class="profile-pic">
-                    <div class="user-meta">
-                        <strong>${post.autorNombreFinal}</strong>
-                        <span>@${post.autorUsername}</span>
-                    </div>
-                </div>
-                <p style="font-size: 15px; line-height: 1.5; margin: 5px 0;">${post.content}</p>
-                ${post.isRepost ? `<div class="quote-box">${post.originalQuote}</div>` : ''}
-                <div class="post-actions">
-                    <button onclick="darLike('${post.id}')" class="action-btn" style="color: ${haDadoLike ? 'var(--primary)' : 'var(--text-light)'}">👍 ${post.likes?.length || 0}</button>
-                    <button onclick="abrirRepost('${post.id}')" class="action-btn">🔄 Citar</button>
-                    <button onclick="reportarPost('${post.id}')" class="action-btn" style="color:#E74C3C;">🚩</button>
-                </div>
-            `;
-            feedContainer.appendChild(div);
-        });
-    });
-}
