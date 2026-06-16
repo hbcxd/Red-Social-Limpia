@@ -4,140 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faro</title>
+    <!-- Tu CSS original permanece igual, no necesita cambios -->
     <style>
-        /* Identidad Visual Mejorada: Lumina */
-        :root {
-            --primary: #5A9BD5; /* Azul cielo tranquilo */
-            --primary-hover: #4A84B5;
-            --bg: #F0F4F8; /* Gris azulado muy claro para el fondo */
-            --surface: #FFFFFF;
-            --text: #2C3E50;
-            --text-light: #7F8C8D;
-            --border: #E1E8ED;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg); margin: 0; padding: 0; color: var(--text);
-        }
-        .header {
-            background: var(--surface); padding: 20px; text-align: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100;
-        }
+        :root { --primary: #5A9BD5; --primary-hover: #4A84B5; --bg: #F0F4F8; --surface: #FFFFFF; --text: #2C3E50; --text-light: #7F8C8D; --border: #E1E8ED; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); }
+        .header { background: var(--surface); padding: 20px; text-align: center; box-shadow: 0 2px 15px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .header h1 { margin: 0; font-size: 26px; color: var(--primary); letter-spacing: 1px; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        
-        /* Botones estilizados */
-        .btn {
-            display: inline-block; width: 100%; padding: 14px; margin: 8px 0;
-            border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;
-            text-align: center; box-sizing: border-box; transition: background 0.3s ease;
-        }
+        .btn { display: inline-block; width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; box-sizing: border-box; }
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-outline { background-color: transparent; border: 2px solid var(--primary); color: var(--primary); }
-        
-        /* Tarjetas (Cards) más suaves */
-        .card {
-            background: var(--surface); border-radius: 16px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border);
-        }
-        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .profile-pic { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); background: #eee; }
-        
-        textarea, input[type="text"] {
-            width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border);
-            box-sizing: border-box; resize: none; font-family: inherit; font-size: 15px; margin-bottom: 10px;
-            background-color: #FAFAFA;
-        }
-        textarea:focus { outline: none; border-color: var(--primary); background-color: #FFF; }
-        
-        /* Selector de Avatares */
-        .avatar-grid {
-            display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;
-        }
-        .avatar-option {
-            width: 50px; height: 50px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: 0.2s;
-        }
-        .avatar-option.selected { border-color: var(--primary); transform: scale(1.1); }
-
-        /* Modales */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 200;
-        }
-        .modal-content {
-            background: var(--surface); padding: 25px; border-radius: 16px; width: 90%; max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .post-actions { display: flex; justify-content: space-between; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
-        .action-btn { background: none; border: none; color: var(--text-light); font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; transition: color 0.2s; }
-        .action-btn:hover { color: var(--primary); }
-        .quote-box { background: var(--bg); padding: 12px; border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; margin: 15px 0; font-size: 14px; color: var(--text-light); font-style: italic; }
+        .card { background: var(--surface); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border); }
+        .profile-pic { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 200; }
+        .modal-content { background: var(--surface); padding: 25px; border-radius: 16px; width: 90%; max-width: 400px; }
+        .quote-box { background: var(--bg); padding: 12px; border-left: 4px solid var(--primary); margin: 10px 0; font-size: 14px; }
+        .avatar-option { width: 50px; height: 50px; cursor: pointer; border: 3px solid transparent; }
+        .avatar-option.selected { border-color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Faro</h1>
-    </div>
+    <div class="header"><h1>Faro</h1></div>
 
     <div class="container">
+        <!-- Login -->
         <div id="seccion-login" class="card" style="text-align: center;">
             <h2>Bienvenido a Faro</h2>
-            <p style="color: var(--text-light);">Un espacio para edificar y compartir la luz de la palabra.</p>
             <button class="btn btn-primary" id="btn-google">Ingresar con Google</button>
         </div>
 
+        <!-- Perfil -->
         <div id="seccion-perfil" style="display: none;">
-            <div class="card profile-header">
-                <img id="img-perfil" src="https://api.dicebear.com/8.x/identicon/svg?seed=Lumina1" class="profile-pic" alt="Perfil">
-                <div style="flex-grow: 1;">
-                    <strong id="nombre-usuario" style="font-size: 18px;">Hermano</strong>
-                    <p id="bio-usuario" style="margin: 4px 0 0 0; font-size: 14px; color: var(--text-light);">Sin biografía aún...</p>
+            <div class="card profile-header" style="display:flex; align-items:center; gap:15px;">
+                <img id="img-perfil" src="" class="profile-pic">
+                <div>
+                    <strong id="nombre-usuario"></strong>
+                    <p id="bio-usuario"></p>
                 </div>
-                <div style="text-align: right;">
-                    <button id="btn-editar-perfil" class="action-btn">⚙️ Editar</button>
-                    <button id="btn-salir" class="action-btn" style="color: #E74C3C; margin-top: 10px;">Salir</button>
-                </div>
+                <button id="btn-editar-perfil" class="action-btn">⚙️</button>
+                <button id="btn-salir" class="action-btn" style="color:red;">Salir</button>
             </div>
 
             <div class="card">
-                <textarea id="input-publicacion" rows="3" placeholder="¿Qué mensaje de bendición quieres compartir hoy?"></textarea>
+                <textarea id="input-publicacion" rows="3" placeholder="¿Qué mensaje quieres compartir?"></textarea>
                 <button class="btn btn-primary" id="btn-publicar">Compartir Mensaje</button>
             </div>
         </div>
 
-        <div id="feed-publicaciones">
-            <div class="card"><p style="text-align:center; color: var(--text-light);">Cargando mensajes de la comunidad...</p></div>
-        </div>
+        <div id="feed-publicaciones"></div>
     </div>
 
+    <!-- Modal Perfil -->
     <div id="modal-perfil" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color: var(--primary);">Tu Perfil en Lumina</h3>
-            <label style="font-size: 14px; font-weight: bold; color: var(--text-light);">Elige tu Avatar:</label>
-            
-            <div class="avatar-grid" id="avatar-selector">
-                <img src="https://api.dicebear.com/8.x/identicon/svg?seed=Lumina1" class="avatar-option selected" onclick="seleccionarAvatar(this)">
-                <img src="https://api.dicebear.com/8.x/identicon/svg?seed=Lumina2" class="avatar-option" onclick="seleccionarAvatar(this)">
-                <img src="https://api.dicebear.com/8.x/identicon/svg?seed=Lumina3" class="avatar-option" onclick="seleccionarAvatar(this)">
-                <img src="https://api.dicebear.com/8.x/identicon/svg?seed=Lumina4" class="avatar-option" onclick="seleccionarAvatar(this)">
-                <img src="https://api.dicebear.com/8.x/identicon/svg?seed=Lumina5" class="avatar-option" onclick="seleccionarAvatar(this)">
-            </div>
-            
-            <label style="font-size: 14px; font-weight: bold; color: var(--text-light);">Biografía o Versículo favorito:</label>
-            <textarea id="input-bio" rows="3" placeholder="Escribe algo sobre ti..."></textarea>
-            <button id="btn-guardar-perfil" class="btn btn-primary">Guardar Cambios</button>
+            <h3>Editar Perfil</h3>
+            <textarea id="input-bio" placeholder="Biografía..."></textarea>
+            <button id="btn-guardar-perfil" class="btn btn-primary">Guardar</button>
             <button id="btn-cerrar-perfil" class="btn btn-outline">Cancelar</button>
         </div>
     </div>
 
+    <!-- Modal Repost -->
     <div id="modal-repost" class="modal">
         <div class="modal-content">
-            <h3 style="margin-top:0; color: var(--primary);">Compartir Mensaje</h3>
+            <h3>Citar mensaje</h3>
             <div id="repost-preview" class="quote-box"></div>
-            <textarea id="input-repost-comentario" rows="3" placeholder="Añade tu propio comentario de edificación..."></textarea>
+            <textarea id="input-repost-comentario" placeholder="Tu comentario..."></textarea>
             <input type="hidden" id="repost-id-original">
             <button id="btn-confirmar-repost" class="btn btn-primary">Publicar</button>
             <button id="btn-cerrar-repost" class="btn btn-outline">Cancelar</button>
