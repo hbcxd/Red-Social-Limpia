@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faro - Red Social de Edificación</title>
@@ -132,6 +133,13 @@
     </div>
 
     <div id="modal-perfil" class="modal">
+<div class="privacy-group">
+    <label>Actualizaciones:</label>
+    <select id="config-red">
+        <option value="wifi">Solo Wi-Fi</option>
+        <option value="todos">Datos + Wi-Fi</option>
+    </select>
+</div>
         <div class="modal-content">
             <h3 style="margin-top:0; color: var(--primary);">Ajustes de Perfil</h3>
             <div class="avatar-grid" id="avatar-selector">
