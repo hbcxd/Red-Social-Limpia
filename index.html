@@ -230,6 +230,10 @@
         
         // AQUÍ IMPORTAMOS LOS VERSÍCULOS DEL NUEVO ARCHIVO
         import { versiculosDiarios } from "./versiculos.js";
+import { versiculosDiarios } from "./versiculos.js";
+import { activarCapturaDeErrores } from "./debug.js"; // Justo después de definir las constantes de Firebase
+activarCapturaDeErrores(); 
+ <--- ESTA
 
         // ⚠️ RECUERDA PEGAR AQUÍ TU CONFIGURACIÓN DE FIREBASE ⚠️
         const firebaseConfig = {
