@@ -1,9 +1,10 @@
-const CACHE_NAME = 'faro-v1.4'; // Cambia el v1 a v2, v3, etc., cuando actualices tu código
+const CACHE_NAME = 'faro-v1.5';
 const URLS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
