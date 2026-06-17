@@ -53,6 +53,9 @@
         
         .card { background: var(--surface); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: background-color 0.3s, border-color 0.3s; }
         
+        .daily-verse { background: var(--verse-bg); border-left: 4px solid var(--primary); padding: 16px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; line-height: 1.6; color: var(--text); box-shadow: var(--shadow); }
+        .select-mini { width: auto; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 0; background-color: transparent; color: var(--primary); border: 1px solid var(--primary); cursor: pointer; font-weight: bold;}
+
         .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; }
         .profile-pic { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--btn-bg); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--primary); border: 2px solid var(--border); overflow: hidden; }
         .user-meta strong { font-size: 15px; display: block; } 
@@ -89,7 +92,6 @@
         .color-picker-container label { font-size: 14px; font-weight: 600; }
         .color-input { width: 50px; height: 35px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 0; background: none; }
         
-        /* Estilo para las alertas de notificaciones en pantalla */
         #notificacion-banner { display: none; position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: center; cursor: pointer; }
     </style>
 </head>
@@ -123,6 +125,20 @@
 
         <div id="seccion-plataforma" class="fade-transition fade-hidden">
             
+            <div id="seccion-versiculo" class="daily-verse" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: var(--primary); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">📖 Palabra del Día</strong>
+                    <select id="selector-version-rapida" class="select-mini">
+                        <option value="RV">RV</option>
+                        <option value="NTV">NTV</option>
+                        <option value="NVI">NVI</option>
+                        <option value="PDT">PDT</option>
+                    </select>
+                </div>
+                <div id="texto-versiculo" style="font-style: italic;">Cargando alimento diario...</div>
+                <div id="ref-versiculo" style="text-align: right; font-size: 13px; font-weight: 600; margin-top: 8px; color: var(--primary);"></div>
+            </div>
+
             <div id="contenedor-creacion-post" class="card">
                 <textarea id="input-publicacion" rows="3" placeholder="Escribe un mensaje o petición..."></textarea>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -180,7 +196,15 @@
                 <option value="anonimo">Anónimo (Solo mostrar @usuario)</option>
             </select>
 
-            <div class="color-picker-container">
+            <label>Versión Bíblica Preferida:</label>
+            <select id="select-biblia">
+                <option value="RV">Reina Valera (RV)</option>
+                <option value="NTV">Nueva Traducción Viviente (NTV)</option>
+                <option value="NVI">Nueva Versión Internacional (NVI)</option>
+                <option value="PDT">Palabra de Dios para Todos (PDT)</option>
+            </select>
+
+            <div class="color-picker-container" style="margin-top: 10px;">
                 <label for="input-color-perfil">Color de tu Perfil:</label>
                 <input type="color" id="input-color-perfil" class="color-input" value="#6B9AC4">
             </div>
@@ -226,7 +250,6 @@
     </div>
 
     <script type="module">
-        // IMPORTACIONES DE FIREBASE COMPLETAS (Agregado Messaging)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -252,6 +275,41 @@
         let mapaUsuariosGlobal = {}; 
         let filtroFeedActual = "global";
         let subFiltroPerfil = "publicaciones";
+
+        // --- ALGORITMO: LA PALABRA DEL DÍA ---
+        const versiculosDiarios = [
+            { ref: "Juan 3:16", RV: "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.", NTV: "Pues Dios amó tanto al mundo que dio a su único Hijo, para que todo el que crea en él no se pierda, sino que tenga vida eterna.", NVI: "Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él no se pierda, sino que tenga vida eterna.", PDT: "Dios amó tanto al mundo que dio a su Hijo único para que todo el que crea en él no se pierda, sino que tenga vida eterna." },
+            { ref: "Filipenses 4:13", RV: "Todo lo puedo en Cristo que me fortalece.", NTV: "Pues todo lo puedo hacer por medio de Cristo, quien me da las fuerzas.", NVI: "Todo lo puedo en Cristo que me fortalece.", PDT: "Puedo enfrentar cualquier situación porque Cristo me da el poder para hacerlo." },
+            { ref: "Salmos 23:1", RV: "Jehová es mi pastor; nada me faltará.", NTV: "El Señor es mi pastor; tengo todo lo que necesito.", NVI: "El Señor es mi pastor, nada me falta.", PDT: "El SEÑOR es mi pastor; tengo todo lo que necesito." },
+            { ref: "Isaías 41:10", RV: "No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia.", NTV: "No tengas miedo, porque yo estoy contigo; no te desalientes, porque yo soy tu Dios. Te daré fuerzas y te ayudaré; te sostendré con mi mano derecha victoriosa.", NVI: "Así que no temas, porque yo estoy contigo; no te angusties, porque yo soy tu Dios. Te fortaleceré y te ayudaré; te sostendré con mi diestra victoriosa.", PDT: "No te asustes, porque yo estoy contigo. No te angusties, porque yo soy tu Dios. Te daré fuerzas y te ayudaré. Te sostendré con mi mano derecha, con la que siempre gano las batallas." },
+            { ref: "Romanos 8:28", RV: "Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados.", NTV: "Y sabemos que Dios hace que todas las cosas cooperen para el bien de quienes lo aman y son llamados según el propósito que él tiene para ellos.", NVI: "Ahora bien, sabemos que Dios dispone todas las cosas para el bien de quienes lo aman, los que han sido llamados de acuerdo con su propósito.", PDT: "Sabemos que Dios obra en toda situación para el bien de los que lo aman, los que han sido llamados por Dios de acuerdo a su propósito." }
+        ];
+
+        function getVersiculoDelDia() {
+            const hoy = new Date();
+            const inicioAño = new Date(hoy.getFullYear(), 0, 0);
+            const diaDelAño = Math.floor((hoy - inicioAño) / 1000 / 60 / 60 / 24);
+            return versiculosDiarios[diaDelAño % versiculosDiarios.length];
+        }
+
+        function renderizarVersiculo() {
+            if (!usuarioActualData) return;
+            const versionPreferencia = usuarioActualData.versionBiblia || "RV";
+            const versoData = getVersiculoDelDia();
+            
+            document.getElementById('texto-versiculo').textContent = `"${versoData[versionPreferencia]}"`;
+            document.getElementById('ref-versiculo').textContent = `- ${versoData.ref} (${versionPreferencia})`;
+            document.getElementById('selector-version-rapida').value = versionPreferencia;
+        }
+
+        document.getElementById('selector-version-rapida').addEventListener('change', async (e) => {
+            const nuevaVersion = e.target.value;
+            usuarioActualData.versionBiblia = nuevaVersion;
+            renderizarVersiculo();
+            if (auth.currentUser) {
+                await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { versionBiblia: nuevaVersion });
+            }
+        });
 
         // --- REGISTRO DE SERVICE WORKER ---
         if ('serviceWorker' in navigator) {
@@ -283,7 +341,6 @@
             }
         }
 
-        // Escuchador de notificaciones en primer plano
         onMessage(messaging, (payload) => {
             const banner = document.getElementById('notificacion-banner');
             banner.textContent = `🔔 ${payload.notification.title}`;
@@ -356,7 +413,7 @@
                     username: user.email.split('@')[0].toLowerCase() + Math.floor(Math.random()*100),
                     bio: "Uniendo propósitos.",
                     seguidos: [], seguidores: [], guardados: [], privacidadNombre: "publico", modoOscuro: false,
-                    colorPerfil: "#6B9AC4", terminosAceptados: false
+                    colorPerfil: "#6B9AC4", terminosAceptados: false, versionBiblia: "RV"
                 });
                 snap = await getDoc(userRef);
             }
@@ -366,11 +423,11 @@
             if (!usuarioActualData.terminosAceptados) {
                 document.getElementById('modal-terminos').classList.add('show');
             } else {
-                // Solicitar permisos de notificación solo si ya aceptó los términos
                 solicitarPermisosNotificaciones(user.uid);
             }
             
             actualizarVistaPerfil();
+            renderizarVersiculo(); // Carga la palabra del día tras autenticar
         }
 
         function actualizarVistaPerfil() {
@@ -394,7 +451,7 @@
                 await updateDoc(userRef, { terminosAceptados: true });
                 usuarioActualData.terminosAceptados = true;
                 document.getElementById('modal-terminos').classList.remove('show');
-                solicitarPermisosNotificaciones(auth.currentUser.uid); // Pedir notificaciones al aceptar
+                solicitarPermisosNotificaciones(auth.currentUser.uid);
             } catch(e) {
                 alert("Error al guardar acuerdo: " + e.message);
             }
@@ -442,6 +499,7 @@
             document.getElementById('input-username').value = usuarioActualData.username;
             document.getElementById('input-bio').value = usuarioActualData.bio;
             document.getElementById('select-privacidad').value = usuarioActualData.privacidadNombre || "publico";
+            document.getElementById('select-biblia').value = usuarioActualData.versionBiblia || "RV";
             document.getElementById('chk-modo-oscuro').checked = usuarioActualData.modoOscuro || false;
             document.getElementById('input-color-perfil').value = usuarioActualData.colorPerfil || "#6B9AC4";
             modalAjustes.classList.add('show');
@@ -459,6 +517,7 @@
                 username: document.getElementById('input-username').value,
                 bio: document.getElementById('input-bio').value,
                 privacidadNombre: document.getElementById('select-privacidad').value,
+                versionBiblia: document.getElementById('select-biblia').value,
                 modoOscuro: document.getElementById('chk-modo-oscuro').checked,
                 colorPerfil: document.getElementById('input-color-perfil').value
             };
@@ -471,6 +530,7 @@
                 else document.documentElement.removeAttribute('data-theme');
                 
                 actualizarVistaPerfil();
+                renderizarVersiculo(); // Actualiza la versión del versículo si se cambió
                 modalAjustes.classList.remove('show');
             } catch (error) {
                 alert("Error al actualizar perfil: " + error.message);
@@ -488,6 +548,9 @@
                 e.target.classList.add('active');
                 filtroFeedActual = e.target.getAttribute('data-tab');
                 
+                // Mostrar versículo solo en Inicio Global
+                document.getElementById('seccion-versiculo').style.display = (filtroFeedActual === "global") ? "block" : "none";
+
                 if (filtroFeedActual === "perfil") {
                     document.getElementById('contenedor-creacion-post').style.display = "none";
                     document.getElementById('bloque-perfil-propio').style.display = "block";
@@ -578,6 +641,9 @@
         function escucharFeed() {
             if (desubscribirFeed) desubscribirFeed();
             
+            // Garantizar que la caja del versículo esté visible solo en "global"
+            document.getElementById('seccion-versiculo').style.display = (filtroFeedActual === "global" && auth.currentUser) ? "block" : "none";
+
             const q = query(collection(db, "publicaciones")); 
             
             desubscribirFeed = onSnapshot(q, async (snap) => {
