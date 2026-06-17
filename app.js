@@ -17,160 +17,189 @@ const db = getFirestore(app);
 
 let cachePublicaciones = {};
 let usuarioActualData = null;
-let filtroFeedActual = "global"; // global, oraciones, seguidos, guardados, mi-perfil
+let mapaUsuariosGlobal = {}; // Para el modal de visita
+let filtroFeedActual = "global";
 let terminoBusqueda = "";
 let avatarSeleccionadoLocal = "https://api.iconify.design/fa6-solid:book-bible.svg?color=%235A9BD5";
 
+// --- GESTIÓN DE PWA E INSTALACIÓN ---
+let eventoInstalacion;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    eventoInstalacion = e;
+    document.getElementById('btn-instalar').style.display = 'block';
+});
+
+document.getElementById('btn-instalar').addEventListener('click', async () => {
+    if (eventoInstalacion) {
+        eventoInstalacion.prompt();
+        const { outcome } = await eventoInstalacion.userChoice;
+        if (outcome === 'accepted') document.getElementById('btn-instalar').style.display = 'none';
+        eventoInstalacion = null;
+    }
+});
+
+// --- SERVICE WORKER Y ACTUALIZACIONES ---
+let nuevoWorker;
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+            nuevoWorker = reg.installing;
+            nuevoWorker.addEventListener('statechange', () => {
+                if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Verificación de configuración de red (Simulada para Web API, base para nativo)
+                    const redActual = navigator.connection ? navigator.connection.type : 'unknown';
+                    const pref = usuarioActualData?.configRed || 'todos';
+                    if (pref === 'todos' || (pref === 'wifi' && redActual === 'wifi')) {
+                        document.getElementById('banner-actualizacion').style.display = 'block';
+                    }
+                }
+            });
+        });
+    });
+}
+
+window.recargarParaActualizar = () => {
+    if (nuevoWorker) nuevoWorker.postMessage({ action: 'skipWaiting' });
+    window.location.reload();
+};
+
+// --- ALGORITMO VERSÍCULO DIARIO (ZONA HORARIA DEL DISPOSITIVO) ---
+const bibliotecaVersiculos = [
+    "Jehová es mi pastor; nada me faltará. - Salmo 23:1",
+    "Todo lo puedo en Cristo que me fortalece. - Filipenses 4:13",
+    "El amor es sufrido, es benigno... - 1 Corintios 13:4",
+    "Lámpara es a mis pies tu palabra, y lumbrera a mi camino. - Salmo 119:105",
+    "La paz os dejo, mi paz os doy; yo no os la doy como el mundo la da. - Juan 14:27",
+    "Es, pues, la fe la certeza de lo que se espera... - Hebreos 11:1"
+];
+
+function cargarVersiculoDelDia() {
+    // Genera una cadena única basada en la fecha LOCAL del dispositivo
+    const hoy = new Date();
+    const cadenaFechaLocal = `${hoy.getFullYear()}-${hoy.getMonth()}-${hoy.getDate()}`;
+    
+    // Convertimos la fecha en un número para elegir consistentemente el índice del versículo
+    let suma = 0;
+    for(let i=0; i<cadenaFechaLocal.length; i++) suma += cadenaFechaLocal.charCodeAt(i);
+    
+    const indice = suma % bibliotecaVersiculos.length;
+    document.getElementById('texto-versiculo').textContent = bibliotecaVersiculos[indice];
+}
+
+// --- SESIÓN Y USUARIOS ---
 onAuthStateChanged(auth, async (user) => {
-    if (user) await verificarYProcederPerfil(user);
-    else cambiarVisibilidadPlataforma(false);
+    if (user) {
+        cargarVersiculoDelDia();
+        await verificarYProcederPerfil(user);
+    } else {
+        cambiarVisibilidadPlataforma(false);
+    }
     escucharFeed();
 });
 
 async function verificarYProcederPerfil(user) {
     const userRef = doc(db, "usuarios", user.uid);
     let snap = await getDoc(userRef);
-    
     if (!snap.exists()) {
-        document.getElementById('modal-legal').style.display = 'flex';
-        document.getElementById('check-legal').addEventListener('change', e => document.getElementById('btn-aceptar-legal').disabled = !e.target.checked);
-        
-        document.getElementById('btn-aceptar-legal').onclick = async () => {
-            document.getElementById('modal-legal').style.display = 'none';
-            await setDoc(userRef, {
-                nombre: user.displayName || "Hermano",
-                username: user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() + Math.floor(Math.random()*100),
-                bio: "¡Hola! Acabo de unirme a Faro.",
-                fotoUrl: avatarSeleccionadoLocal,
-                seguidos: [],
-                guardados: [], // Nuevo arreglo para favoritos
-                privacidadNombre: "publico", privacidadBio: "todos",
-                notifSeguidores: true, notifMensajes: true, modoOscuro: false,
-                acuerdoAceptado: true
-            });
-            let nuevoSnap = await getDoc(userRef);
-            inicializarDatosUsuarioLocal(nuevoSnap.data(), user.uid);
-        };
-    } else {
-        inicializarDatosUsuarioLocal(snap.data(), user.uid);
+        await setDoc(userRef, {
+            nombre: user.displayName || "Hermano",
+            username: user.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, "").toLowerCase() + Math.floor(Math.random()*100),
+            bio: "¡Hola! Acabo de unirme a Faro.",
+            fotoUrl: avatarSeleccionadoLocal,
+            seguidos: [], guardados: [], privacidadNombre: "publico", modoOscuro: false, configRed: "todos"
+        });
+        snap = await getDoc(userRef);
     }
-}
-
-function inicializarDatosUsuarioLocal(data, uid) {
-    usuarioActualData = { id: uid, guardados: [], ...data };
+    usuarioActualData = { id: user.uid, ...snap.data() };
     cambiarVisibilidadPlataforma(true);
+    
     if(usuarioActualData.modoOscuro) {
         document.documentElement.setAttribute('data-theme', 'dark');
         document.getElementById('chk-modo-oscuro').checked = true;
     }
-    actualizarInterfazUsuarioPropia();
-}
-
-function cambiarVisibilidadPlataforma(authOk) {
-    document.getElementById('seccion-login').style.display = authOk ? 'none' : 'block';
-    document.getElementById('seccion-plataforma').style.display = authOk ? 'block' : 'none';
-}
-
-function actualizarInterfazUsuarioPropia() {
-    if (!usuarioActualData) return;
     document.getElementById('mi-perfil-nombre').textContent = usuarioActualData.nombre;
     document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
     document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
     document.getElementById('mi-perfil-foto').src = usuarioActualData.fotoUrl;
 }
 
+function cambiarVisibilidadPlataforma(authOk) {
+    document.getElementById('seccion-login').style.display = authOk ? 'none' : 'block';
+    document.getElementById('seccion-plataforma').style.display = authOk ? 'block' : 'none';
+    document.getElementById('seccion-versiculo').style.display = authOk ? 'block' : 'none';
+}
+
 document.getElementById('btn-google').addEventListener('click', () => signInWithPopup(auth, new GoogleAuthProvider()));
 document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
 
-// --- ENRUTADOR DE 5 PESTAÑAS ---
+// --- ENRUTADOR ---
 ['global', 'oraciones', 'seguidos', 'guardados', 'perfil'].forEach(tab => {
     document.getElementById(`tab-${tab}`).addEventListener('click', (e) => {
         filtroFeedActual = tab === 'perfil' ? 'mi-perfil' : tab;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         e.target.classList.add('active');
-        
         document.getElementById('contenedor-creacion-post').style.display = (filtroFeedActual === "mi-perfil") ? "none" : "block";
         document.getElementById('bloque-perfil-propio').style.display = (filtroFeedActual === "mi-perfil") ? "block" : "none";
         escucharFeed();
     });
 });
 
-// --- MOTOR DE FEED ---
+// --- MOTOR DE FEED Y LÓGICA DE PRIVACIDAD ---
 let desubscribirFeed = null;
 function escucharFeed() {
     if (desubscribirFeed) desubscribirFeed();
-    
     desubscribirFeed = onSnapshot(query(collection(db, "publicaciones"), where("status", "==", "approved")), async (snap) => {
         const feedContainer = document.getElementById('feed-publicaciones');
         feedContainer.innerHTML = '';
-        cachePublicaciones = {};
-
+        
         const usuariosSnaps = await getDocs(query(collection(db, "usuarios")));
-        let autoresMap = {};
-        usuariosSnaps.forEach(doc => { autoresMap[doc.id] = doc.data(); });
+        usuariosSnaps.forEach(doc => { mapaUsuariosGlobal[doc.id] = doc.data(); });
 
         let lista = snap.docs.map(d => {
             const data = d.data();
-            const autorInfo = autoresMap[data.userId] || {};
+            const autorInfo = mapaUsuariosGlobal[data.userId] || {};
+            const esPropio = data.userId === auth.currentUser?.uid;
+            
+            // LOGICA DE PRIVACIDAD EN EL FEED: Si es anónimo y no soy yo, oculta el nombre.
+            const nombreMostrar = (autorInfo.privacidadNombre === "anonimo" && !esPropio) 
+                ? "Miembro de Faro" : (autorInfo.nombre || "Hermano");
+
             return { 
                 id: d.id, ...data, 
-                autorNombreFinal: autorInfo.privacidadNombre === "anonimo" ? "Miembro" : (autorInfo.nombre || "Hermano"),
+                autorId: data.userId,
+                autorNombreFeed: nombreMostrar,
                 autorUsername: autorInfo.username || "miembro",
                 autorFotoFinal: autorInfo.fotoUrl || avatarSeleccionadoLocal
             };
         });
 
-        // Lógica de Filtros por Pestaña
-        if (filtroFeedActual === "global") {
-            lista = lista.filter(p => !p.isPrayer); // Solo posts normales
-        } else if (filtroFeedActual === "oraciones") {
-            lista = lista.filter(p => p.isPrayer); // Solo peticiones
-        } else if (filtroFeedActual === "seguidos") {
-            const listaSeguidos = usuarioActualData?.seguidos || [];
-            lista = lista.filter(p => listaSeguidos.includes(p.userId) && !p.isPrayer);
-        } else if (filtroFeedActual === "guardados") {
-            const listaGuardados = usuarioActualData?.guardados || [];
-            lista = lista.filter(p => listaGuardados.includes(p.id));
-        } else if (filtroFeedActual === "mi-perfil") {
-            lista = lista.filter(p => p.userId === auth.currentUser?.uid);
-        }
+        if (filtroFeedActual === "global") lista = lista.filter(p => !p.isPrayer);
+        else if (filtroFeedActual === "oraciones") lista = lista.filter(p => p.isPrayer);
+        else if (filtroFeedActual === "seguidos") lista = lista.filter(p => (usuarioActualData?.seguidos || []).includes(p.userId));
+        else if (filtroFeedActual === "guardados") lista = lista.filter(p => (usuarioActualData?.guardados || []).includes(p.id));
+        else if (filtroFeedActual === "mi-perfil") lista = lista.filter(p => p.userId === auth.currentUser?.uid);
 
-        if (terminoBusqueda) lista = lista.filter(p => p.content.toLowerCase().includes(terminoBusqueda));
         lista.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-        if(lista.length === 0) {
-            feedContainer.innerHTML = '<div class="card"><p style="text-align:center; font-size:13px; color: var(--text-light);">No hay publicaciones aquí...</p></div>';
-            return;
-        }
 
         lista.forEach(post => {
             cachePublicaciones[post.id] = post;
-            const uid = auth.currentUser?.uid;
-            const haDadoLike = (post.likes || []).includes(uid);
             const estaGuardado = (usuarioActualData?.guardados || []).includes(post.id);
-            const esPropio = post.userId === uid;
-            
-            // Botón Dinámico: Orando vs Útil
-            const btnPrincipal = post.isPrayer 
-                ? `<button onclick="darLike('${post.id}')" class="action-btn" style="color:${haDadoLike ? 'var(--primary)' : 'var(--text-light)'}">🙏 Orando ${post.likes?.length || 0}</button>`
-                : `<button onclick="darLike('${post.id}')" class="action-btn" style="color:${haDadoLike ? 'var(--primary)' : 'var(--text-light)'}">👍 Útil ${post.likes?.length || 0}</button>`;
+            const btnLike = post.isPrayer 
+                ? `<button class="action-btn">🙏 Orando ${(post.likes||[]).length}</button>`
+                : `<button class="action-btn">👍 Útil ${(post.likes||[]).length}</button>`;
 
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `
-                <div class="profile-header">
+                <div class="profile-header" onclick="abrirPerfilVisitante('${post.autorId}')">
                     <img src="${post.autorFotoFinal}" class="profile-pic">
-                    <div class="user-meta"><strong>${post.autorNombreFinal}</strong><span>@${post.autorUsername}</span></div>
+                    <div class="user-meta"><strong>${post.autorNombreFeed}</strong><span>@${post.autorUsername}</span></div>
                 </div>
-                <p style="margin: 8px 0; font-size: 14px; line-height: 1.4;">${post.content}</p>
-                ${post.isRepost ? `<div class="quote-box">${post.originalQuote}</div>` : ''}
-                
+                <p style="margin: 8px 0; font-size: 14px;">${post.content}</p>
                 <div class="post-actions">
-                    ${btnPrincipal}
-                    <button onclick="abrirRepost('${post.id}')" class="action-btn">🔄 Citar</button>
-                    <button onclick="alternarGuardado('${post.id}')" class="action-btn" style="color:${estaGuardado ? 'var(--primary)' : 'var(--text-light)'}">
-                        ${estaGuardado ? '🔖 Guardado' : '🔖 Guardar'}
-                    </button>
+                    ${btnLike}
+                    <button onclick="alternarGuardado('${post.id}')" class="action-btn" style="color:${estaGuardado ? 'var(--primary)' : 'var(--text-light)'}">🔖 ${estaGuardado ? 'Guardado' : 'Guardar'}</button>
                 </div>
             `;
             feedContainer.appendChild(div);
@@ -178,49 +207,81 @@ function escucharFeed() {
     });
 }
 
-// --- CREAR PUBLICACIÓN / PETICIÓN ---
+// --- VISITA A PERFIL DE TERCEROS (Ignora Privacidad) ---
+window.abrirPerfilVisitante = (uid) => {
+    const dataReal = mapaUsuariosGlobal[uid];
+    if(!dataReal) return;
+    // Aquí siempre se muestra el nombre real, independientemente del ajuste "anónimo" para el feed.
+    document.getElementById('visita-foto').src = dataReal.fotoUrl || avatarSeleccionadoLocal;
+    document.getElementById('visita-nombre').textContent = dataReal.nombre;
+    document.getElementById('visita-tag').textContent = `@${dataReal.username}`;
+    document.getElementById('visita-bio').textContent = dataReal.bio || "Sin descripción.";
+    document.getElementById('modal-visitante').style.display = 'flex';
+};
+document.getElementById('btn-cerrar-visitante').addEventListener('click', () => document.getElementById('modal-visitante').style.display = 'none');
+
+// --- CREAR PUBLICACIÓN ---
 document.getElementById('btn-publicar').addEventListener('click', async () => {
-    if (!auth.currentUser) return;
     const cont = document.getElementById('input-publicacion').value.trim();
-    const esPeticion = document.getElementById('chk-peticion').checked;
     if (!cont) return;
-
     await addDoc(collection(db, "publicaciones"), {
-        userId: auth.currentUser.uid,
-        timestamp: serverTimestamp(),
-        status: "approved", likes: [], content: cont,
-        isRepost: false,
-        isPrayer: esPeticion // Guardamos el tipo
+        userId: auth.currentUser.uid, timestamp: serverTimestamp(), status: "approved",
+        likes: [], content: cont, isRepost: false, isPrayer: document.getElementById('chk-peticion').checked
     });
-
     document.getElementById('input-publicacion').value = '';
     document.getElementById('chk-peticion').checked = false;
 });
 
-// --- GUARDAR FAVORITOS ---
 window.alternarGuardado = async (postId) => {
-    if (!auth.currentUser || !usuarioActualData) return;
     const ref = doc(db, "usuarios", auth.currentUser.uid);
-    const guardadosAct = usuarioActualData.guardados || [];
-    
-    if (guardadosAct.includes(postId)) {
+    if ((usuarioActualData.guardados || []).includes(postId)) {
         await updateDoc(ref, { guardados: arrayRemove(postId) });
-        usuarioActualData.guardados = guardadosAct.filter(id => id !== postId);
+        usuarioActualData.guardados = usuarioActualData.guardados.filter(id => id !== postId);
     } else {
         await updateDoc(ref, { guardados: arrayUnion(postId) });
         usuarioActualData.guardados.push(postId);
     }
-    escucharFeed(); // Refresca colores de botones
+    escucharFeed();
 };
 
-window.darLike = async (postId) => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-    const ref = doc(db, "publicaciones", postId);
-    if ((cachePublicaciones[postId].likes || []).includes(uid)) await updateDoc(ref, { likes: arrayRemove(uid) });
-    else await updateDoc(ref, { likes: arrayUnion(uid) });
+// --- AJUSTES DE PERFIL ---
+window.seleccionarAvatar = (el) => {
+    document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('selected'));
+    el.classList.add('selected');
+    avatarSeleccionadoLocal = el.src;
 };
 
-// Modales y Ajustes (Omitido el código repetitivo de UI del perfil por concisión, se mantiene igual al paso anterior)
+document.getElementById('btn-editar-perfil').addEventListener('click', () => {
+    document.getElementById('input-nombre').value = usuarioActualData.nombre;
+    document.getElementById('input-username').value = usuarioActualData.username;
+    document.getElementById('input-bio').value = usuarioActualData.bio;
+    document.getElementById('select-privacidad-nombre').value = usuarioActualData.privacidadNombre || "publico";
+    document.getElementById('config-red').value = usuarioActualData.configRed || "todos";
+    document.getElementById('modal-perfil').style.display = 'flex';
+});
+
 document.getElementById('btn-cerrar-perfil').addEventListener('click', () => document.getElementById('modal-perfil').style.display = 'none');
-document.getElementById('btn-editar-perfil').addEventListener('click', () => document.getElementById('modal-perfil').style.display = 'flex');
+
+document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
+    const objActualizaciones = {
+        nombre: document.getElementById('input-nombre').value,
+        username: document.getElementById('input-username').value,
+        bio: document.getElementById('input-bio').value,
+        fotoUrl: avatarSeleccionadoLocal,
+        privacidadNombre: document.getElementById('select-privacidad-nombre').value,
+        modoOscuro: document.getElementById('chk-modo-oscuro').checked,
+        configRed: document.getElementById('config-red').value
+    };
+    
+    await updateDoc(doc(db, "usuarios", auth.currentUser.uid), objActualizaciones);
+    Object.assign(usuarioActualData, objActualizaciones);
+    
+    if(objActualizaciones.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    
+    document.getElementById('mi-perfil-nombre').textContent = usuarioActualData.nombre;
+    document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
+    document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
+    document.getElementById('modal-perfil').style.display = 'none';
+    escucharFeed();
+});
