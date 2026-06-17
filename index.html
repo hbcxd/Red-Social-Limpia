@@ -27,7 +27,6 @@
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); transition: background-color 0.3s, color 0.3s; }
         
-        /* Animaciones para transiciones fluidas */
         .fade-transition { transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; opacity: 1; transform: translateY(0); }
         .fade-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; width: 100%; visibility: hidden; }
 
@@ -59,7 +58,7 @@
         .user-meta strong { font-size: 15px; display: block; } 
         .user-meta span { font-size: 13px; color: var(--text-light); }
         
-        .post-content { margin: 10px 0 16px 0; font-size: 15px; line-height: 1.5; }
+        .post-content { margin: 10px 0 16px 0; font-size: 15px; line-height: 1.5; white-space: pre-wrap;}
         .post-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; align-items: center; }
         .action-btn { background: var(--btn-bg); border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
         .action-btn:hover { background: var(--btn-hover); color: var(--text); }
@@ -89,6 +88,9 @@
         .color-picker-container { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
         .color-picker-container label { font-size: 14px; font-weight: 600; }
         .color-input { width: 50px; height: 35px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 0; background: none; }
+        
+        /* Estilo para las alertas de notificaciones en pantalla */
+        #notificacion-banner { display: none; position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -107,6 +109,8 @@
             <div class="nav-item" data-tab="perfil">Perfil</div>
         </div>
     </div>
+
+    <div id="notificacion-banner">🔔 Nueva notificación</div>
 
     <div class="container">
         
@@ -195,12 +199,11 @@
                 <h3>Términos, Condiciones y Privacidad</h3>
             </div>
             <div style="font-size: 13px; line-height: 1.6; max-height: 260px; overflow-y: auto; margin-bottom: 20px; color: var(--text); padding-right: 5px;">
-                <p><strong>1. Marco de Convivencia Legal:</strong> Al ingresar a Faro, usted se compromete a usar esta app exclusivamente para fines de edificación mutua, compartiendo mensajes legítimos, lecturas y peticiones de oración de manera honorable.</p>
-                <p><strong>2. Contenido Prohibido:</strong> Queda terminantemente prohibida la publicación de material difamatorio, violento, pornográfico, acosador o que atente contra la dignidad de cualquier miembro. El incumplimiento causará la baja definitiva del perfil.</p>
-                <p><strong>3. Protección de Datos (Privacidad):</strong> De conformidad con normativas internacionales de protección de datos, Faro garantiza que no comercializa sus datos. Usted retiene la propiedad de lo que publica y cuenta con el derecho integrado de cambiar su perfil a un formato 100% Anónimo para proteger su identidad civil.</p>
-                <p><strong>4. Herramienta de Moderación:</strong> La comunidad cuenta con un botón de reporte directo. Cualquier publicación señalada será sometida a auditoría técnica y removida de inmediato si infringe las condiciones aceptadas.</p>
+                <p><strong>1. Marco de Convivencia Legal:</strong> Al ingresar a Faro, usted se compromete a usar esta app exclusivamente para fines de edificación mutua.</p>
+                <p><strong>2. Contenido Prohibido:</strong> Queda terminantemente prohibida la publicación de material difamatorio, violento o que atente contra la dignidad de cualquier miembro.</p>
+                <p><strong>3. Notificaciones y Privacidad:</strong> Solicitaremos permiso para enviar notificaciones push. Faro garantiza que no comercializa sus datos de usuario o actividad.</p>
             </div>
-            <button class="btn btn-primary" id="btn-aceptar-terminos">Acepto los Términos y la Política de Privacidad</button>
+            <button class="btn btn-primary" id="btn-aceptar-terminos">Acepto los Términos</button>
         </div>
     </div>
 
@@ -223,9 +226,11 @@
     </div>
 
     <script type="module">
+        // IMPORTACIONES DE FIREBASE COMPLETAS (Agregado Messaging)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
         // ⚠️ RECUERDA PEGAR AQUÍ TU CONFIGURACIÓN DE FIREBASE ⚠️
         const firebaseConfig = {
@@ -241,6 +246,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
 
         let usuarioActualData = null;
         let mapaUsuariosGlobal = {}; 
@@ -255,6 +261,35 @@
                     .catch(err => console.error('Error SW:', err));
             });
         }
+
+        // --- SISTEMA DE NOTIFICACIONES PUSH (FCM) ---
+        async function solicitarPermisosNotificaciones(userId) {
+            try {
+                const permiso = await Notification.requestPermission();
+                if (permiso === 'granted') {
+                    // ⚠️ IMPORTANTE: Pega tu llave VAPID aquí
+                    const currentToken = await getToken(messaging, { 
+                        vapidKey: 'BMXEapO152zU5C2NCR9joZWClL0SK2mDUro7Hev8qtkJdvRB0Z8HwcrK_HvkIYED_Q1NKMjVuBd0r3zKLYwEMLY', 
+                        serviceWorkerRegistration: await navigator.serviceWorker.ready
+                    });
+                    
+                    if (currentToken) {
+                        const userRef = doc(db, "usuarios", userId);
+                        await updateDoc(userRef, { fcmToken: currentToken });
+                    }
+                }
+            } catch (error) {
+                console.error('Error notificaciones:', error);
+            }
+        }
+
+        // Escuchador de notificaciones en primer plano
+        onMessage(messaging, (payload) => {
+            const banner = document.getElementById('notificacion-banner');
+            banner.textContent = `🔔 ${payload.notification.title}`;
+            banner.style.display = 'block';
+            setTimeout(() => { banner.style.display = 'none'; }, 4000);
+        });
 
         // --- PWA INSTALACIÓN ---
         let eventoInstalacion;
@@ -282,7 +317,6 @@
             setTimeout(() => {
                 elOcultar.style.position = 'absolute';
                 elOcultar.style.visibility = 'hidden';
-                
                 elMostrar.style.position = 'relative';
                 elMostrar.style.visibility = 'visible';
                 elMostrar.classList.remove('fade-hidden');
@@ -322,17 +356,18 @@
                     username: user.email.split('@')[0].toLowerCase() + Math.floor(Math.random()*100),
                     bio: "Uniendo propósitos.",
                     seguidos: [], seguidores: [], guardados: [], privacidadNombre: "publico", modoOscuro: false,
-                    colorPerfil: "#6B9AC4",
-                    terminosAceptados: false
+                    colorPerfil: "#6B9AC4", terminosAceptados: false
                 });
                 snap = await getDoc(userRef);
             }
             usuarioActualData = { id: user.uid, ...snap.data() };
             if(usuarioActualData.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
             
-            // Verificar aceptación legal obligatoria
             if (!usuarioActualData.terminosAceptados) {
                 document.getElementById('modal-terminos').classList.add('show');
+            } else {
+                // Solicitar permisos de notificación solo si ya aceptó los términos
+                solicitarPermisosNotificaciones(user.uid);
             }
             
             actualizarVistaPerfil();
@@ -343,14 +378,11 @@
             document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
             document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
             
-            // Renderizar Avatar Propio con el Color Elegido
             const avatarDiv = document.getElementById('mi-perfil-avatar');
             avatarDiv.textContent = obtenerInicial(usuarioActualData.nombre);
             const userColor = usuarioActualData.colorPerfil || "#6B9AC4";
             avatarDiv.style.background = userColor;
             avatarDiv.style.color = "white";
-
-            // Modificar borde superior de la tarjeta del perfil propio
             document.getElementById('bloque-perfil-propio').style.borderTop = `5px solid ${userColor}`;
         }
 
@@ -362,6 +394,7 @@
                 await updateDoc(userRef, { terminosAceptados: true });
                 usuarioActualData.terminosAceptados = true;
                 document.getElementById('modal-terminos').classList.remove('show');
+                solicitarPermisosNotificaciones(auth.currentUser.uid); // Pedir notificaciones al aceptar
             } catch(e) {
                 alert("Error al guardar acuerdo: " + e.message);
             }
@@ -466,7 +499,7 @@
             });
         });
 
-        // --- LÓGICA INTERACTIVA GLOBAL (LIKES, CITAS, REPORTES Y PERFIL PÚBLICO) ---
+        // --- LÓGICA INTERACTIVA GLOBAL ---
         window.toggleLike = async (postId) => {
             if (!auth.currentUser) return;
             const userId = auth.currentUser.uid;
@@ -491,26 +524,23 @@
         window.citarPost = (username, content) => {
             const textarea = document.getElementById('input-publicacion');
             textarea.value = `Cita de @${username}: "${content.substring(0, 70)}${content.length > 70 ? '...' : ''}" ➜ `;
-            
-            // Regresar a la pestaña de Inicio/Global automáticamente para publicar
             const activeTab = document.querySelector('.nav-item[data-tab="global"]');
             if (activeTab) activeTab.click();
-            
             textarea.focus();
         };
 
         window.reportarPost = async (postId) => {
             if (!auth.currentUser) return;
-            if (confirm("¿Deseas enviar un reporte de esta publicación al equipo legal y de moderación de Faro?")) {
+            if (confirm("¿Deseas enviar un reporte de esta publicación al equipo de Faro?")) {
                 try {
                     await addDoc(collection(db, "reportes"), {
                         postId: postId,
                         reporterId: auth.currentUser.uid,
                         timestamp: serverTimestamp()
                     });
-                    alert("Publicación reportada correctamente. Se procesará en nuestro panel de revisión.");
+                    alert("Publicación reportada correctamente.");
                 } catch(e) {
-                    alert("Error al procesar reporte: " + e.message);
+                    alert("Error: " + e.message);
                 }
             }
         };
@@ -522,7 +552,6 @@
             const esPropio = autorId === auth.currentUser?.uid;
             const esAnonimo = autorInfo.privacidadNombre === "anonimo" && !esPropio;
 
-            // Ajustar vista previa según la privacidad elegida por el usuario
             const nombreM = esAnonimo ? "Usuario Anónimo" : (autorInfo.nombre || "Usuario");
             const usernameM = `@${autorInfo.username}`;
             const bioM = esAnonimo ? "Este usuario resguarda su identidad por privacidad." : (autorInfo.bio || "Sin biografía.");
@@ -544,7 +573,7 @@
             document.getElementById('modal-perfil-publico').classList.remove('show');
         });
 
-        // --- MOTOR DE FEED COMPLETO ---
+        // --- MOTOR DE FEED ---
         let desubscribirFeed = null;
         function escucharFeed() {
             if (desubscribirFeed) desubscribirFeed();
@@ -562,24 +591,15 @@
                     const data = d.data();
                     const autorInfo = mapaUsuariosGlobal[data.userId] || {};
                     const esPropio = data.userId === auth.currentUser?.uid;
-                    
-                    // Aplicar regla estricta de privacidad en el feed
                     const nombreMostrar = (autorInfo.privacidadNombre === "anonimo" && !esPropio) ? "Anónimo" : (autorInfo.nombre || "Usuario");
                     return { id: d.id, ...data, autorNombreFeed: nombreMostrar, autorUsername: autorInfo.username };
                 });
 
-                // Filtrado por pestañas en cliente
-                if (filtroFeedActual === "oraciones") {
-                    lista = lista.filter(p => p.isPrayer === true);
-                } else if (filtroFeedActual === "perfil") {
-                    lista = lista.filter(p => p.userId === auth.currentUser?.uid);
-                } else if (filtroFeedActual === "seguidos" && usuarioActualData) {
-                    lista = lista.filter(p => (usuarioActualData.seguidos || []).includes(p.userId));
-                } else if (filtroFeedActual === "guardados" && usuarioActualData) {
-                    lista = lista.filter(p => (usuarioActualData.guardados || []).includes(p.id));
-                }
+                if (filtroFeedActual === "oraciones") lista = lista.filter(p => p.isPrayer === true);
+                else if (filtroFeedActual === "perfil") lista = lista.filter(p => p.userId === auth.currentUser?.uid);
+                else if (filtroFeedActual === "seguidos" && usuarioActualData) lista = lista.filter(p => (usuarioActualData.seguidos || []).includes(p.userId));
+                else if (filtroFeedActual === "guardados" && usuarioActualData) lista = lista.filter(p => (usuarioActualData.guardados || []).includes(p.id));
 
-                // Ordenar de forma descendente por timestamp
                 lista.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
                 if(lista.length === 0) {
@@ -589,8 +609,6 @@
 
                 lista.forEach(post => {
                     const inicialAvatar = obtenerInicial(post.autorNombreFeed);
-                    
-                    // Determinar el color del avatar en base a sus configuraciones de color
                     const configAutor = mapaUsuariosGlobal[post.userId] || {};
                     const colorAvatar = post.autorNombreFeed === "Anónimo" ? 'var(--text-light)' : (configAutor.colorPerfil || 'var(--primary)');
                     
@@ -610,12 +628,8 @@
                             <button class="action-btn ${yaTieneLike ? 'active' : ''}" onclick="window.toggleLike('${post.id}')" style="${yaTieneLike ? 'color: var(--primary); background: rgba(107, 154, 196, 0.12); font-weight: bold;' : ''}">
                                 ${textoBotonInteraccion} <span>${likesList.length}</span>
                             </button>
-                            <button class="action-btn" onclick="window.citarPost('${post.autorUsername}', '${post.content.replace(/'/g, "\\'")}')">
-                                💬 Citar
-                            </button>
-                            <button class="action-btn" onclick="window.reportarPost('${post.id}')" style="margin-left: auto; background: transparent; color: var(--text-light); padding: 4px 8px;">
-                                ⚠️ Reportar
-                            </button>
+                            <button class="action-btn" onclick="window.citarPost('${post.autorUsername}', '${post.content.replace(/'/g, "\\'")}')">💬 Citar</button>
+                            <button class="action-btn" onclick="window.reportarPost('${post.id}')" style="margin-left: auto; background: transparent; color: var(--text-light); padding: 4px 8px;">⚠️ Reportar</button>
                         </div>
                     `;
                     feedContainer.appendChild(div);
