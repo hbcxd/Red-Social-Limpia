@@ -2,7 +2,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'faro-v1.9'; // Subimos la versión
+const CACHE_NAME = 'faro-v1.7'; // Subimos la versión
 const URLS_TO_CACHE = [
   './',
   './index.html',
