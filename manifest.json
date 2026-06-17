@@ -1,21 +1,21 @@
 {
-  "name": "Faro - Red Social de Edificación",
+  "name": "Faro - Comunidad",
   "short_name": "Faro",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F8FA",
-  "theme_color": "#5A9BD5",
-  "description": "Una red social enfocada en la edificación, oración y la Palabra de Dios.",
+  "background_color": "#F9FBFD",
+  "theme_color": "#6B9AC4",
+  "description": "Una red social enfocada en la edificación y la Palabra.",
   "icons": [
     {
-      "src": "https://api.iconify.design/lucide:lighthouse.svg?color=%235A9BD5",
+      "src": "icono-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "https://api.iconify.design/lucide:lighthouse.svg?color=%235A9BD5",
+      "src": "icono-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }
