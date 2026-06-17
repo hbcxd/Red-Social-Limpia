@@ -60,8 +60,8 @@
         .user-meta span { font-size: 13px; color: var(--text-light); }
         
         .post-content { margin: 10px 0 16px 0; font-size: 15px; line-height: 1.5; }
-        .post-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; }
-        .action-btn { background: var(--btn-bg); border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
+        .post-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; align-items: center; }
+        .action-btn { background: var(--btn-bg); border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
         .action-btn:hover { background: var(--btn-hover); color: var(--text); }
         .action-btn.active { color: var(--primary); background: rgba(107, 154, 196, 0.1); }
         
@@ -85,6 +85,10 @@
         .modal-header h3 { margin: 0; font-size: 18px; }
         .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); transition: color 0.2s; }
         .close-btn:hover { color: var(--text); }
+        
+        .color-picker-container { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .color-picker-container label { font-size: 14px; font-weight: 600; }
+        .color-input { width: 50px; height: 35px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 0; background: none; }
     </style>
 </head>
 <body>
@@ -125,9 +129,9 @@
                 </div>
             </div>
 
-            <div id="bloque-perfil-propio" class="card" style="display:none;">
+            <div id="bloque-perfil-propio" class="card" style="display:none; transition: border-top 0.3s;">
                 <div style="text-align: center;">
-                    <div id="mi-perfil-avatar" class="profile-pic" style="width: 80px; height: 80px; margin: 0 auto; font-size: 32px;"></div>
+                    <div id="mi-perfil-avatar" class="profile-pic" style="width: 80px; height: 80px; margin: 0 auto; font-size: 32px; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"></div>
                     <h2 id="mi-perfil-nombre" style="margin: 10px 0 5px 0; font-size: 20px;"></h2>
                     <span id="mi-perfil-tag" style="color: var(--text-light); display: block; margin-bottom: 15px; font-size: 14px;"></span>
                     <p id="mi-perfil-bio" style="color: var(--text); font-size: 14px; margin-bottom: 20px; line-height: 1.5;"></p>
@@ -171,30 +175,68 @@
                 <option value="publico">Público (Mostrar mi nombre)</option>
                 <option value="anonimo">Anónimo (Solo mostrar @usuario)</option>
             </select>
+
+            <div class="color-picker-container">
+                <label for="input-color-perfil">Color de tu Perfil:</label>
+                <input type="color" id="input-color-perfil" class="color-input" value="#6B9AC4">
+            </div>
             
-            <label style="display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer;">
+            <label style="display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer; margin-bottom: 15px;">
                 <input type="checkbox" id="chk-modo-oscuro"> Modo Oscuro
             </label>
             
-            <button class="btn btn-primary" id="btn-guardar-perfil" style="margin-top: 20px;">Guardar Cambios</button>
+            <button class="btn btn-primary" id="btn-guardar-perfil" style="margin-top: 10px;">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <div id="modal-terminos" class="modal">
+        <div class="modal-content" style="max-width: 460px;">
+            <div class="modal-header">
+                <h3>Términos, Condiciones y Privacidad</h3>
+            </div>
+            <div style="font-size: 13px; line-height: 1.6; max-height: 260px; overflow-y: auto; margin-bottom: 20px; color: var(--text); padding-right: 5px;">
+                <p><strong>1. Marco de Convivencia Legal:</strong> Al ingresar a Faro, usted se compromete a usar esta app exclusivamente para fines de edificación mutua, compartiendo mensajes legítimos, lecturas y peticiones de oración de manera honorable.</p>
+                <p><strong>2. Contenido Prohibido:</strong> Queda terminantemente prohibida la publicación de material difamatorio, violento, pornográfico, acosador o que atente contra la dignidad de cualquier miembro. El incumplimiento causará la baja definitiva del perfil.</p>
+                <p><strong>3. Protección de Datos (Privacidad):</strong> De conformidad con normativas internacionales de protección de datos, Faro garantiza que no comercializa sus datos. Usted retiene la propiedad de lo que publica y cuenta con el derecho integrado de cambiar su perfil a un formato 100% Anónimo para proteger su identidad civil.</p>
+                <p><strong>4. Herramienta de Moderación:</strong> La comunidad cuenta con un botón de reporte directo. Cualquier publicación señalada será sometida a auditoría técnica y removida de inmediato si infringe las condiciones aceptadas.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-aceptar-terminos">Acepto los Términos y la Política de Privacidad</button>
+        </div>
+    </div>
+
+    <div id="modal-perfil-publico" class="modal">
+        <div class="modal-content" style="padding: 0; overflow: hidden; max-width: 440px;">
+            <div id="pp-header-bg" style="padding: 35px 20px; text-align: center; position: relative; transition: background-color 0.3s;">
+                <button class="close-btn" id="cerrar-perfil-publico" style="position: absolute; top: 12px; right: 18px; color: white; font-size: 28px; background: none; border: none; cursor: pointer;">&times;</button>
+                <div id="pp-avatar" class="profile-pic" style="width: 75px; height: 75px; margin: 0 auto 10px auto; font-size: 28px; background: #fff; color: var(--primary); border: 2px solid #fff;"></div>
+                <h3 id="pp-nombre" style="margin: 0; color: white; font-size: 20px;"></h3>
+                <span id="pp-username" style="color: rgba(255, 255, 255, 0.85); font-size: 14px; display: block; margin-top: 2px;"></span>
+            </div>
+            <div style="padding: 20px;">
+                <p id="pp-bio" style="font-size: 14px; line-height: 1.5; margin-bottom: 20px; color: var(--text); text-align: center; white-space: pre-wrap;"></p>
+                <div class="stats-bar" style="border-top: 1px solid var(--border); padding-top: 15px; margin-bottom: 0;">
+                    <div class="stat-item"><strong id="pp-stat-seguidores">0</strong><span>Seguidores</span></div>
+                    <div class="stat-item"><strong id="pp-stat-seguidos">0</strong><span>Siguiendo</span></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         // ⚠️ RECUERDA PEGAR AQUÍ TU CONFIGURACIÓN DE FIREBASE ⚠️
         const firebaseConfig = {
-  apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
-  authDomain: "red-social-de-dios.firebaseapp.com",
-  projectId: "red-social-de-dios",
-  storageBucket: "red-social-de-dios.firebasestorage.app",
-  messagingSenderId: "256126083920",
-  appId: "1:256126083920:web:f9265cbac956d1efe38255",
-  measurementId: "G-5X7TMJVN71"
-};
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_DOMINIO",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_STORAGE",
+            messagingSenderId: "TU_SENDER",
+            appId: "TU_APP_ID"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -243,7 +285,7 @@
                 elMostrar.style.position = 'relative';
                 elMostrar.style.visibility = 'visible';
                 elMostrar.classList.remove('fade-hidden');
-            }, 400); // Espera a que termine la animación CSS
+            }, 400); 
         }
 
         function obtenerInicial(nombre) {
@@ -265,6 +307,7 @@
             } else {
                 document.getElementById('menu-navegacion').classList.add('fade-hidden');
                 transicionSuave('seccion-plataforma', 'seccion-login');
+                document.getElementById('modal-terminos').classList.remove('show');
             }
             escucharFeed();
         });
@@ -277,12 +320,20 @@
                     nombre: user.displayName || "Usuario",
                     username: user.email.split('@')[0].toLowerCase() + Math.floor(Math.random()*100),
                     bio: "Uniendo propósitos.",
-                    seguidos: [], seguidores: [], guardados: [], privacidadNombre: "publico", modoOscuro: false
+                    seguidos: [], seguidores: [], guardados: [], privacidadNombre: "publico", modoOscuro: false,
+                    colorPerfil: "#6B9AC4",
+                    terminosAceptados: false
                 });
                 snap = await getDoc(userRef);
             }
             usuarioActualData = { id: user.uid, ...snap.data() };
             if(usuarioActualData.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
+            
+            // Verificar aceptación legal obligatoria
+            if (!usuarioActualData.terminosAceptados) {
+                document.getElementById('modal-terminos').classList.add('show');
+            }
+            
             actualizarVistaPerfil();
         }
 
@@ -291,12 +342,29 @@
             document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
             document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
             
-            // Renderizar Avatar Propio
+            // Renderizar Avatar Propio con el Color Elegido
             const avatarDiv = document.getElementById('mi-perfil-avatar');
             avatarDiv.textContent = obtenerInicial(usuarioActualData.nombre);
-            avatarDiv.style.background = "var(--primary)";
+            const userColor = usuarioActualData.colorPerfil || "#6B9AC4";
+            avatarDiv.style.background = userColor;
             avatarDiv.style.color = "white";
+
+            // Modificar borde superior de la tarjeta del perfil propio
+            document.getElementById('bloque-perfil-propio').style.borderTop = `5px solid ${userColor}`;
         }
+
+        // --- MANEJO DE MARCO LEGAL ---
+        document.getElementById('btn-aceptar-terminos').addEventListener('click', async () => {
+            if (!auth.currentUser) return;
+            const userRef = doc(db, "usuarios", auth.currentUser.uid);
+            try {
+                await updateDoc(userRef, { terminosAceptados: true });
+                usuarioActualData.terminosAceptados = true;
+                document.getElementById('modal-terminos').classList.remove('show');
+            } catch(e) {
+                alert("Error al guardar acuerdo: " + e.message);
+            }
+        });
 
         // --- CREAR PUBLICACIÓN ---
         document.getElementById('btn-publicar').addEventListener('click', async () => {
@@ -305,6 +373,10 @@
             const btn = document.getElementById('btn-publicar');
 
             if (!contenido.trim()) return;
+            if (usuarioActualData && !usuarioActualData.terminosAceptados) {
+                document.getElementById('modal-terminos').classList.add('show');
+                return;
+            }
 
             btn.disabled = true;
             btn.textContent = "Enviando...";
@@ -337,6 +409,7 @@
             document.getElementById('input-bio').value = usuarioActualData.bio;
             document.getElementById('select-privacidad').value = usuarioActualData.privacidadNombre || "publico";
             document.getElementById('chk-modo-oscuro').checked = usuarioActualData.modoOscuro || false;
+            document.getElementById('input-color-perfil').value = usuarioActualData.colorPerfil || "#6B9AC4";
             modalAjustes.classList.add('show');
         });
 
@@ -352,20 +425,26 @@
                 username: document.getElementById('input-username').value,
                 bio: document.getElementById('input-bio').value,
                 privacidadNombre: document.getElementById('select-privacidad').value,
-                modoOscuro: document.getElementById('chk-modo-oscuro').checked
+                modoOscuro: document.getElementById('chk-modo-oscuro').checked,
+                colorPerfil: document.getElementById('input-color-perfil').value
             };
             
-            await updateDoc(doc(db, "usuarios", auth.currentUser.uid), nuevosDatos);
-            usuarioActualData = { ...usuarioActualData, ...nuevosDatos };
-            
-            if(nuevosDatos.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
-            else document.documentElement.removeAttribute('data-theme');
-            
-            actualizarVistaPerfil();
-            modalAjustes.classList.remove('show');
-            btn.disabled = false;
-            btn.textContent = "Guardar Cambios";
-            escucharFeed(); // Refrescar nombres en el feed
+            try {
+                await updateDoc(doc(db, "usuarios", auth.currentUser.uid), nuevosDatos);
+                usuarioActualData = { ...usuarioActualData, ...nuevosDatos };
+                
+                if(nuevosDatos.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
+                else document.documentElement.removeAttribute('data-theme');
+                
+                actualizarVistaPerfil();
+                modalAjustes.classList.remove('show');
+            } catch (error) {
+                alert("Error al actualizar perfil: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Guardar Cambios";
+                escucharFeed(); 
+            }
         });
 
         // --- NAVEGACIÓN ---
@@ -386,12 +465,89 @@
             });
         });
 
-        // --- MOTOR DE FEED RESTAURADO ---
+        // --- LÓGICA INTERACTIVA GLOBAL (LIKES, CITAS, REPORTES Y PERFIL PÚBLICO) ---
+        window.toggleLike = async (postId) => {
+            if (!auth.currentUser) return;
+            const userId = auth.currentUser.uid;
+            const postRef = doc(db, "publicaciones", postId);
+            
+            try {
+                const postSnap = await getDoc(postRef);
+                if (postSnap.exists()) {
+                    const data = postSnap.data();
+                    const likesActuales = data.likes || [];
+                    if (likesActuales.includes(userId)) {
+                        await updateDoc(postRef, { likes: arrayRemove(userId) });
+                    } else {
+                        await updateDoc(postRef, { likes: arrayUnion(userId) });
+                    }
+                }
+            } catch (e) {
+                console.error("Error en Like:", e);
+            }
+        };
+
+        window.citarPost = (username, content) => {
+            const textarea = document.getElementById('input-publicacion');
+            textarea.value = `Cita de @${username}: "${content.substring(0, 70)}${content.length > 70 ? '...' : ''}" ➜ `;
+            
+            // Regresar a la pestaña de Inicio/Global automáticamente para publicar
+            const activeTab = document.querySelector('.nav-item[data-tab="global"]');
+            if (activeTab) activeTab.click();
+            
+            textarea.focus();
+        };
+
+        window.reportarPost = async (postId) => {
+            if (!auth.currentUser) return;
+            if (confirm("¿Deseas enviar un reporte de esta publicación al equipo legal y de moderación de Faro?")) {
+                try {
+                    await addDoc(collection(db, "reportes"), {
+                        postId: postId,
+                        reporterId: auth.currentUser.uid,
+                        timestamp: serverTimestamp()
+                    });
+                    alert("Publicación reportada correctamente. Se procesará en nuestro panel de revisión.");
+                } catch(e) {
+                    alert("Error al procesar reporte: " + e.message);
+                }
+            }
+        };
+
+        window.verPerfilPublico = async (autorId) => {
+            const autorInfo = mapaUsuariosGlobal[autorId];
+            if (!autorInfo) return;
+
+            const esPropio = autorId === auth.currentUser?.uid;
+            const esAnonimo = autorInfo.privacidadNombre === "anonimo" && !esPropio;
+
+            // Ajustar vista previa según la privacidad elegida por el usuario
+            const nombreM = esAnonimo ? "Usuario Anónimo" : (autorInfo.nombre || "Usuario");
+            const usernameM = `@${autorInfo.username}`;
+            const bioM = esAnonimo ? "Este usuario resguarda su identidad por privacidad." : (autorInfo.bio || "Sin biografía.");
+            const colorM = autorInfo.colorPerfil || "#6B9AC4";
+
+            document.getElementById('pp-header-bg').style.backgroundColor = colorM;
+            document.getElementById('pp-avatar').textContent = obtenerInicial(nombreM);
+            document.getElementById('pp-avatar').style.color = colorM;
+            document.getElementById('pp-nombre').textContent = nombreM;
+            document.getElementById('pp-username').textContent = usernameM;
+            document.getElementById('pp-bio').textContent = bioM;
+            document.getElementById('pp-stat-seguidores').textContent = (autorInfo.seguidores || []).length;
+            document.getElementById('pp-stat-seguidos').textContent = (autorInfo.seguidos || []).length;
+
+            document.getElementById('modal-perfil-publico').classList.add('show');
+        };
+
+        document.getElementById('cerrar-perfil-publico').addEventListener('click', () => {
+            document.getElementById('modal-perfil-publico').classList.remove('show');
+        });
+
+        // --- MOTOR DE FEED COMPLETO ---
         let desubscribirFeed = null;
         function escucharFeed() {
             if (desubscribirFeed) desubscribirFeed();
             
-            // Usando query con ordenamiento (requiere índice en Firebase, si falla el orden quita orderBy)
             const q = query(collection(db, "publicaciones")); 
             
             desubscribirFeed = onSnapshot(q, async (snap) => {
@@ -405,28 +561,60 @@
                     const data = d.data();
                     const autorInfo = mapaUsuariosGlobal[data.userId] || {};
                     const esPropio = data.userId === auth.currentUser?.uid;
-                    const nombreMostrar = (autorInfo.privacidadNombre === "anonimo" && !esPropio) ? `@${autorInfo.username}` : (autorInfo.nombre || "Usuario");
+                    
+                    // Aplicar regla estricta de privacidad en el feed
+                    const nombreMostrar = (autorInfo.privacidadNombre === "anonimo" && !esPropio) ? "Anónimo" : (autorInfo.nombre || "Usuario");
                     return { id: d.id, ...data, autorNombreFeed: nombreMostrar, autorUsername: autorInfo.username };
                 });
 
-                // Ordenar localmente por si Firebase no tiene el índice creado aún
+                // Filtrado por pestañas en cliente
+                if (filtroFeedActual === "oraciones") {
+                    lista = lista.filter(p => p.isPrayer === true);
+                } else if (filtroFeedActual === "perfil") {
+                    lista = lista.filter(p => p.userId === auth.currentUser?.uid);
+                } else if (filtroFeedActual === "seguidos" && usuarioActualData) {
+                    lista = lista.filter(p => (usuarioActualData.seguidos || []).includes(p.userId));
+                } else if (filtroFeedActual === "guardados" && usuarioActualData) {
+                    lista = lista.filter(p => (usuarioActualData.guardados || []).includes(p.id));
+                }
+
+                // Ordenar de forma descendente por timestamp
                 lista.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                if(lista.length === 0) {
+                    feedContainer.innerHTML = '<p style="text-align:center; color: var(--text-light); margin-top:30px; font-size:14px;">No hay publicaciones disponibles en esta sección.</p>';
+                    return;
+                }
 
                 lista.forEach(post => {
                     const inicialAvatar = obtenerInicial(post.autorNombreFeed);
-                    const colorAvatar = post.autorNombreFeed.startsWith('@') ? 'var(--text-light)' : 'var(--primary)';
                     
+                    // Determinar el color del avatar en base a sus configuraciones de color
+                    const configAutor = mapaUsuariosGlobal[post.userId] || {};
+                    const colorAvatar = post.autorNombreFeed === "Anónimo" ? 'var(--text-light)' : (configAutor.colorPerfil || 'var(--primary)');
+                    
+                    const likesList = post.likes || [];
+                    const yaTieneLike = likesList.includes(auth.currentUser?.uid);
+                    const textoBotonInteraccion = post.isPrayer ? '🙏 Orando' : '❤️ Me gusta';
+
                     const div = document.createElement('div');
                     div.className = 'card fade-transition';
                     div.innerHTML = `
-                        <div class="profile-header">
-                            <div class="profile-pic" style="background: ${colorAvatar}; color: white; border: none;">${inicialAvatar}</div>
+                        <div class="profile-header" onclick="window.verPerfilPublico('${post.userId}')">
+                            <div class="profile-pic" style="background: ${colorAvatar}; color: white; border: none; font-weight: bold;">${inicialAvatar}</div>
                             <div class="user-meta"><strong>${post.autorNombreFeed}</strong><span>@${post.autorUsername}</span></div>
                         </div>
                         <div class="post-content">${post.content}</div>
                         <div class="post-actions">
-                            <button class="action-btn">${post.isPrayer ? 'Orando' : 'Me gusta'} ${(post.likes || []).length}</button>
-                            <button class="action-btn">Citar</button>
+                            <button class="action-btn ${yaTieneLike ? 'active' : ''}" onclick="window.toggleLike('${post.id}')" style="${yaTieneLike ? 'color: var(--primary); background: rgba(107, 154, 196, 0.12); font-weight: bold;' : ''}">
+                                ${textoBotonInteraccion} <span>${likesList.length}</span>
+                            </button>
+                            <button class="action-btn" onclick="window.citarPost('${post.autorUsername}', '${post.content.replace(/'/g, "\\'")}')">
+                                💬 Citar
+                            </button>
+                            <button class="action-btn" onclick="window.reportarPost('${post.id}')" style="margin-left: auto; background: transparent; color: var(--text-light); padding: 4px 8px;">
+                                ⚠️ Reportar
+                            </button>
                         </div>
                     `;
                     feedContainer.appendChild(div);
