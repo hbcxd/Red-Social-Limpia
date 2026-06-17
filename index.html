@@ -223,49 +223,37 @@
     </div>
 
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, query, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+        
+        // Importaciones limpias
+        import { versiculosDiarios } from "./versiculos.js";
+        import { activarCapturaDeErrores } from "./debug.js";
 
-// IMPORTACIONES CORRECTAS
-import { versiculosDiarios } from "./versiculos.js";
-import { activarCapturaDeErrores } from "./debug.js";
+        // Inicializamos inmediatamente el detector de errores en pantalla
+        activarCapturaDeErrores();
 
-// INICIALIZACIÓN INMEDIATA DEL DEBUGGER
-activarCapturaDeErrores();
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
+            authDomain: "red-social-de-dios.firebaseapp.com",
+            projectId: "red-social-de-dios",
+            storageBucket: "red-social-de-dios.firebasestorage.app",
+            messagingSenderId: "256126083920",
+            appId: "1:256126083920:web:f9265cbac956d1efe38255",
+            measurementId: "G-5X7TMJVN71"
+        };
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
-    authDomain: "red-social-de-dios.firebaseapp.com",
-    projectId: "red-social-de-dios",
-    storageBucket: "red-social-de-dios.firebasestorage.app",
-    messagingSenderId: "256126083920",
-    appId: "1:256126083920:web:f9265cbac956d1efe38255"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const messaging = getMessaging(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const messaging = getMessaging(app);
 
         let usuarioActualData = null;
         let mapaUsuariosGlobal = {}; 
         let filtroFeedActual = "global";
         let subFiltroPerfil = "publicaciones";
-
-// LOGIN MEJORADO CON CATCH PARA DEBUG
-document.getElementById('btn-google').addEventListener('click', async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-        await signInWithPopup(auth, provider);
-    } catch (error) {
-        // Esto activará el cartel rojo que creamos en debug.js
-        throw new Error("Login Fallido: " + error.code + " - " + error.message);
-    }
-});
-
-// ... el resto de tu lógica (onAuthStateChanged, etc.) ...
 
         // --- ZONA HORARIA Y ALGORITMO ---
         async function obtenerZonaHorariaPorIP() {
@@ -298,7 +286,6 @@ document.getElementById('btn-google').addEventListener('click', async () => {
             const zonaHoraria = await obtenerZonaHorariaPorIP();
             const fechaHoy = obtenerFechaEnZonaHoraria(zonaHoraria);
             
-            // Combinación: Fecha + ID único de Firebase
             const semillaUsuario = `${fechaHoy}_${auth.currentUser.uid}`;
             const indiceSeleccionado = calcularIndicePersonalizado(semillaUsuario, versiculosDiarios.length);
             const versoData = versiculosDiarios[indiceSeleccionado];
@@ -346,7 +333,15 @@ document.getElementById('btn-google').addEventListener('click', async () => {
 
         // --- SESIÓN Y PERFIL ---
         document.getElementById('btn-google').addEventListener('click', () => {
-            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Error login: " + err.message));
+            const provider = new GoogleAuthProvider();
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("Inicio de sesión exitoso con Google:", result.user);
+                })
+                .catch(err => {
+                    // Lanzamos el error para que sea capturado en pantalla por debug.js
+                    throw new Error("Fallo en Autenticación Firebase: " + err.code + " -> " + err.message);
+                });
         });
         
         document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
