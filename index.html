@@ -6,51 +6,28 @@
     <title>Faro</title>
     <link rel="manifest" href="./manifest.json">
     <style>
-        /* Paleta de colores serena y profesional */
-        :root { 
-            --primary: #6B9AC4; --primary-hover: #5A87B0; 
-            --bg: #F9FBFD; --surface: #FFFFFF; 
-            --text: #34495E; --text-light: #95A5A6; 
-            --border: #EAEDED; --verse-bg: #F4F8FB; 
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            --btn-bg: #F0F4F8; --btn-hover: #E1E8ED;
-        }
-
-        [data-theme="dark"] { 
-            --primary: #74A4CF; --primary-hover: #8AB4D9; 
-            --bg: #1A2228; --surface: #242D35; 
-            --text: #ECF0F1; --text-light: #7F8C8D; 
-            --border: #34404B; --verse-bg: #1E272E; 
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            --btn-bg: #2C3842; --btn-hover: #3A4854;
-        }
-
+        :root { --primary: #6B9AC4; --primary-hover: #5A87B0; --bg: #F9FBFD; --surface: #FFFFFF; --text: #34495E; --text-light: #95A5A6; --border: #EAEDED; --verse-bg: #F4F8FB; --shadow: 0 2px 8px rgba(0, 0, 0, 0.04); --btn-bg: #F0F4F8; --btn-hover: #E1E8ED; }
+        [data-theme="dark"] { --primary: #74A4CF; --primary-hover: #8AB4D9; --bg: #1A2228; --surface: #242D35; --text: #ECF0F1; --text-light: #7F8C8D; --border: #34404B; --verse-bg: #1E272E; --shadow: 0 2px 8px rgba(0, 0, 0, 0.2); --btn-bg: #2C3842; --btn-hover: #3A4854; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); transition: background-color 0.3s, color 0.3s; }
         
         .fade-transition { transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out; opacity: 1; transform: translateY(0); }
         .fade-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; position: absolute; width: 100%; visibility: hidden; }
-
         .navbar { background: var(--surface); padding: 15px 20px 10px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; transition: background-color 0.3s; }
         .nav-header { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .navbar h1 { margin: 0; font-size: 22px; color: var(--primary); font-weight: 700; cursor: pointer; letter-spacing: -0.5px; }
         
         #btn-instalar { display: none; background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         #btn-instalar:hover { background: var(--primary-hover); }
-
         .top-nav-menu { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .top-nav-menu::-webkit-scrollbar { display: none; }
         .nav-item { white-space: nowrap; font-size: 14px; font-weight: 600; color: var(--text-light); cursor: pointer; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: all 0.2s; }
         .nav-item.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
         .container { max-width: 600px; margin: 0 auto; padding: 20px 15px; position: relative; min-height: 80vh; }
-        
         .btn { display: inline-block; width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; box-sizing: border-box; transition: all 0.2s ease; }
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text); }
-        .btn-outline:hover { background-color: var(--btn-bg); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        
         .card { background: var(--surface); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: background-color 0.3s, border-color 0.3s; }
         
         .daily-verse { background: var(--verse-bg); border-left: 4px solid var(--primary); padding: 16px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; line-height: 1.6; color: var(--text); box-shadow: var(--shadow); }
@@ -64,7 +41,6 @@
         .post-content { margin: 10px 0 16px 0; font-size: 15px; line-height: 1.5; white-space: pre-wrap;}
         .post-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; align-items: center; }
         .action-btn { background: var(--btn-bg); border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
-        .action-btn:hover { background: var(--btn-hover); color: var(--text); }
         .action-btn.active { color: var(--primary); background: rgba(107, 154, 196, 0.1); }
         
         textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; font-family: inherit; font-size: 14px; margin-bottom: 12px; background-color: var(--bg); color: var(--text); outline: none; transition: border 0.2s, background-color 0.3s; }
@@ -86,12 +62,9 @@
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .modal-header h3 { margin: 0; font-size: 18px; }
         .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); transition: color 0.2s; }
-        .close-btn:hover { color: var(--text); }
         
         .color-picker-container { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .color-picker-container label { font-size: 14px; font-weight: 600; }
         .color-input { width: 50px; height: 35px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 0; background: none; }
-        
         #notificacion-banner { display: none; position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; text-align: center; cursor: pointer; }
     </style>
 </head>
@@ -223,9 +196,9 @@
                 <h3>Términos, Condiciones y Privacidad</h3>
             </div>
             <div style="font-size: 13px; line-height: 1.6; max-height: 260px; overflow-y: auto; margin-bottom: 20px; color: var(--text); padding-right: 5px;">
-                <p><strong>1. Marco de Convivencia Legal:</strong> Al ingresar a Faro, usted se compromete a usar esta app exclusivamente para fines de edificación mutua.</p>
-                <p><strong>2. Contenido Prohibido:</strong> Queda terminantemente prohibida la publicación de material difamatorio, violento o que atente contra la dignidad de cualquier miembro.</p>
-                <p><strong>3. Notificaciones y Privacidad:</strong> Solicitaremos permiso para enviar notificaciones push. Faro garantiza que no comercializa sus datos de usuario o actividad.</p>
+                <p><strong>1. Marco Legal:</strong> Al ingresar a Faro, usted se compromete a usar esta app para edificación.</p>
+                <p><strong>2. Contenido Prohibido:</strong> Prohibida la publicación de material difamatorio o violento.</p>
+                <p><strong>3. Privacidad:</strong> Faro no comercializa sus datos. Solicitaremos permiso para notificaciones push.</p>
             </div>
             <button class="btn btn-primary" id="btn-aceptar-terminos">Acepto los Términos</button>
         </div>
@@ -234,8 +207,8 @@
     <div id="modal-perfil-publico" class="modal">
         <div class="modal-content" style="padding: 0; overflow: hidden; max-width: 440px;">
             <div id="pp-header-bg" style="padding: 35px 20px; text-align: center; position: relative; transition: background-color 0.3s;">
-                <button class="close-btn" id="cerrar-perfil-publico" style="position: absolute; top: 12px; right: 18px; color: white; font-size: 28px; background: none; border: none; cursor: pointer;">&times;</button>
-                <div id="pp-avatar" class="profile-pic" style="width: 75px; height: 75px; margin: 0 auto 10px auto; font-size: 28px; background: #fff; color: var(--primary); border: 2px solid #fff;"></div>
+                <button class="close-btn" id="cerrar-perfil-publico" style="position: absolute; top: 12px; right: 18px; color: white; font-size: 28px;">&times;</button>
+                <div id="pp-avatar" class="profile-pic" style="width: 75px; height: 75px; margin: 0 auto 10px auto; font-size: 28px; background: #fff; border: 2px solid #fff;"></div>
                 <h3 id="pp-nombre" style="margin: 0; color: white; font-size: 20px;"></h3>
                 <span id="pp-username" style="color: rgba(255, 255, 255, 0.85); font-size: 14px; display: block; margin-top: 2px;"></span>
             </div>
@@ -254,6 +227,9 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+        
+        // AQUÍ IMPORTAMOS LOS VERSÍCULOS DEL NUEVO ARCHIVO
+        import { versiculosDiarios } from "./versiculos.js";
 
         // ⚠️ RECUERDA PEGAR AQUÍ TU CONFIGURACIÓN DE FIREBASE ⚠️
         const firebaseConfig = {
@@ -276,26 +252,43 @@
         let filtroFeedActual = "global";
         let subFiltroPerfil = "publicaciones";
 
-        // --- ALGORITMO: LA PALABRA DEL DÍA ---
-        const versiculosDiarios = [
-            { ref: "Juan 3:16", RV: "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.", NTV: "Pues Dios amó tanto al mundo que dio a su único Hijo, para que todo el que crea en él no se pierda, sino que tenga vida eterna.", NVI: "Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él no se pierda, sino que tenga vida eterna.", PDT: "Dios amó tanto al mundo que dio a su Hijo único para que todo el que crea en él no se pierda, sino que tenga vida eterna." },
-            { ref: "Filipenses 4:13", RV: "Todo lo puedo en Cristo que me fortalece.", NTV: "Pues todo lo puedo hacer por medio de Cristo, quien me da las fuerzas.", NVI: "Todo lo puedo en Cristo que me fortalece.", PDT: "Puedo enfrentar cualquier situación porque Cristo me da el poder para hacerlo." },
-            { ref: "Salmos 23:1", RV: "Jehová es mi pastor; nada me faltará.", NTV: "El Señor es mi pastor; tengo todo lo que necesito.", NVI: "El Señor es mi pastor, nada me falta.", PDT: "El SEÑOR es mi pastor; tengo todo lo que necesito." },
-            { ref: "Isaías 41:10", RV: "No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia.", NTV: "No tengas miedo, porque yo estoy contigo; no te desalientes, porque yo soy tu Dios. Te daré fuerzas y te ayudaré; te sostendré con mi mano derecha victoriosa.", NVI: "Así que no temas, porque yo estoy contigo; no te angusties, porque yo soy tu Dios. Te fortaleceré y te ayudaré; te sostendré con mi diestra victoriosa.", PDT: "No te asustes, porque yo estoy contigo. No te angusties, porque yo soy tu Dios. Te daré fuerzas y te ayudaré. Te sostendré con mi mano derecha, con la que siempre gano las batallas." },
-            { ref: "Romanos 8:28", RV: "Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados.", NTV: "Y sabemos que Dios hace que todas las cosas cooperen para el bien de quienes lo aman y son llamados según el propósito que él tiene para ellos.", NVI: "Ahora bien, sabemos que Dios dispone todas las cosas para el bien de quienes lo aman, los que han sido llamados de acuerdo con su propósito.", PDT: "Sabemos que Dios obra en toda situación para el bien de los que lo aman, los que han sido llamados por Dios de acuerdo a su propósito." }
-        ];
-
-        function getVersiculoDelDia() {
-            const hoy = new Date();
-            const inicioAño = new Date(hoy.getFullYear(), 0, 0);
-            const diaDelAño = Math.floor((hoy - inicioAño) / 1000 / 60 / 60 / 24);
-            return versiculosDiarios[diaDelAño % versiculosDiarios.length];
+        // --- ZONA HORARIA Y ALGORITMO ---
+        async function obtenerZonaHorariaPorIP() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                if (!res.ok) throw new Error("Error IP");
+                const datos = await res.json();
+                return datos.timezone; 
+            } catch (e) {
+                return Intl.DateTimeFormat().resolvedOptions().timeZone;
+            }
         }
 
-        function renderizarVersiculo() {
-            if (!usuarioActualData) return;
+        function obtenerFechaEnZonaHoraria(zonaHoraria) {
+            const opciones = { timeZone: zonaHoraria, year: 'numeric', month: '2-digit', day: '2-digit' };
+            return new Intl.DateTimeFormat('fr-CA', opciones).format(new Date());
+        }
+
+        function calcularIndicePersonalizado(semillaUnica, maximo) {
+            let hash = 0;
+            for (let i = 0; i < semillaUnica.length; i++) {
+                hash = semillaUnica.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return Math.abs(hash) % maximo;
+        }
+
+        async function renderizarVersiculo() {
+            if (!usuarioActualData || !auth.currentUser) return;
+            
+            const zonaHoraria = await obtenerZonaHorariaPorIP();
+            const fechaHoy = obtenerFechaEnZonaHoraria(zonaHoraria);
+            
+            // Combinación: Fecha + ID único de Firebase
+            const semillaUsuario = `${fechaHoy}_${auth.currentUser.uid}`;
+            const indiceSeleccionado = calcularIndicePersonalizado(semillaUsuario, versiculosDiarios.length);
+            const versoData = versiculosDiarios[indiceSeleccionado];
+            
             const versionPreferencia = usuarioActualData.versionBiblia || "RV";
-            const versoData = getVersiculoDelDia();
             
             document.getElementById('texto-versiculo').textContent = `"${versoData[versionPreferencia]}"`;
             document.getElementById('ref-versiculo').textContent = `- ${versoData.ref} (${versionPreferencia})`;
@@ -305,40 +298,28 @@
         document.getElementById('selector-version-rapida').addEventListener('change', async (e) => {
             const nuevaVersion = e.target.value;
             usuarioActualData.versionBiblia = nuevaVersion;
-            renderizarVersiculo();
-            if (auth.currentUser) {
-                await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { versionBiblia: nuevaVersion });
-            }
+            await renderizarVersiculo();
+            if (auth.currentUser) await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { versionBiblia: nuevaVersion });
         });
 
-        // --- REGISTRO DE SERVICE WORKER ---
+        // --- SERVICE WORKER Y NOTIFICACIONES ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registrado', reg.scope))
-                    .catch(err => console.error('Error SW:', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error('Error SW:', err));
             });
         }
 
-        // --- SISTEMA DE NOTIFICACIONES PUSH (FCM) ---
         async function solicitarPermisosNotificaciones(userId) {
             try {
                 const permiso = await Notification.requestPermission();
                 if (permiso === 'granted') {
-                    // ⚠️ IMPORTANTE: Pega tu llave VAPID aquí
                     const currentToken = await getToken(messaging, { 
                         vapidKey: 'BMXEapO152zU5C2NCR9joZWClL0SK2mDUro7Hev8qtkJdvRB0Z8HwcrK_HvkIYED_Q1NKMjVuBd0r3zKLYwEMLY', 
                         serviceWorkerRegistration: await navigator.serviceWorker.ready
                     });
-                    
-                    if (currentToken) {
-                        const userRef = doc(db, "usuarios", userId);
-                        await updateDoc(userRef, { fcmToken: currentToken });
-                    }
+                    if (currentToken) await updateDoc(doc(db, "usuarios", userId), { fcmToken: currentToken });
                 }
-            } catch (error) {
-                console.error('Error notificaciones:', error);
-            }
+            } catch (error) { console.error('Error notificaciones:', error); }
         }
 
         onMessage(messaging, (payload) => {
@@ -348,45 +329,9 @@
             setTimeout(() => { banner.style.display = 'none'; }, 4000);
         });
 
-        // --- PWA INSTALACIÓN ---
-        let eventoInstalacion;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            eventoInstalacion = e;
-            document.getElementById('btn-instalar').style.display = 'block';
-        });
-
-        document.getElementById('btn-instalar').addEventListener('click', async () => {
-            if (eventoInstalacion) {
-                eventoInstalacion.prompt();
-                const { outcome } = await eventoInstalacion.userChoice;
-                if (outcome === 'accepted') document.getElementById('btn-instalar').style.display = 'none';
-                eventoInstalacion = null;
-            }
-        });
-
-        // --- FUNCIONES DE TRANSICIÓN Y UI ---
-        function transicionSuave(ocultarId, mostrarId) {
-            const elOcultar = document.getElementById(ocultarId);
-            const elMostrar = document.getElementById(mostrarId);
-            
-            elOcultar.classList.add('fade-hidden');
-            setTimeout(() => {
-                elOcultar.style.position = 'absolute';
-                elOcultar.style.visibility = 'hidden';
-                elMostrar.style.position = 'relative';
-                elMostrar.style.visibility = 'visible';
-                elMostrar.classList.remove('fade-hidden');
-            }, 400); 
-        }
-
-        function obtenerInicial(nombre) {
-            return nombre ? nombre.charAt(0).toUpperCase() : '?';
-        }
-
-        // --- SESIÓN ---
+        // --- SESIÓN Y PERFIL ---
         document.getElementById('btn-google').addEventListener('click', () => {
-            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Error de inicio de sesión: " + err.message));
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Error login: " + err.message));
         });
         
         document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
@@ -411,89 +356,175 @@
                 await setDoc(userRef, {
                     nombre: user.displayName || "Usuario",
                     username: user.email.split('@')[0].toLowerCase() + Math.floor(Math.random()*100),
-                    bio: "Uniendo propósitos.",
-                    seguidos: [], seguidores: [], guardados: [], privacidadNombre: "publico", modoOscuro: false,
-                    colorPerfil: "#6B9AC4", terminosAceptados: false, versionBiblia: "RV"
+                    bio: "Uniendo propósitos.", seguidos: [], seguidores: [], guardados: [],
+                    privacidadNombre: "publico", modoOscuro: false, colorPerfil: "#6B9AC4",
+                    terminosAceptados: false, versionBiblia: "RV"
                 });
                 snap = await getDoc(userRef);
             }
             usuarioActualData = { id: user.uid, ...snap.data() };
             if(usuarioActualData.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
             
-            if (!usuarioActualData.terminosAceptados) {
-                document.getElementById('modal-terminos').classList.add('show');
-            } else {
-                solicitarPermisosNotificaciones(user.uid);
-            }
+            if (!usuarioActualData.terminosAceptados) document.getElementById('modal-terminos').classList.add('show');
+            else solicitarPermisosNotificaciones(user.uid);
             
             actualizarVistaPerfil();
-            renderizarVersiculo(); // Carga la palabra del día tras autenticar
+            await renderizarVersiculo(); 
         }
 
         function actualizarVistaPerfil() {
             document.getElementById('mi-perfil-nombre').textContent = usuarioActualData.nombre;
             document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
             document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
-            
             const avatarDiv = document.getElementById('mi-perfil-avatar');
-            avatarDiv.textContent = obtenerInicial(usuarioActualData.nombre);
+            avatarDiv.textContent = usuarioActualData.nombre ? usuarioActualData.nombre.charAt(0).toUpperCase() : '?';
             const userColor = usuarioActualData.colorPerfil || "#6B9AC4";
             avatarDiv.style.background = userColor;
             avatarDiv.style.color = "white";
             document.getElementById('bloque-perfil-propio').style.borderTop = `5px solid ${userColor}`;
         }
 
-        // --- MANEJO DE MARCO LEGAL ---
         document.getElementById('btn-aceptar-terminos').addEventListener('click', async () => {
             if (!auth.currentUser) return;
-            const userRef = doc(db, "usuarios", auth.currentUser.uid);
             try {
-                await updateDoc(userRef, { terminosAceptados: true });
+                await updateDoc(doc(db, "usuarios", auth.currentUser.uid), { terminosAceptados: true });
                 usuarioActualData.terminosAceptados = true;
                 document.getElementById('modal-terminos').classList.remove('show');
                 solicitarPermisosNotificaciones(auth.currentUser.uid);
-            } catch(e) {
-                alert("Error al guardar acuerdo: " + e.message);
-            }
+            } catch(e) { alert("Error: " + e.message); }
         });
 
-        // --- CREAR PUBLICACIÓN ---
+        // --- PUBLICACIONES Y FEED ---
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const contenido = document.getElementById('input-publicacion').value;
             const esPeticion = document.getElementById('chk-peticion').checked;
             const btn = document.getElementById('btn-publicar');
-
             if (!contenido.trim()) return;
-            if (usuarioActualData && !usuarioActualData.terminosAceptados) {
-                document.getElementById('modal-terminos').classList.add('show');
-                return;
-            }
+            if (usuarioActualData && !usuarioActualData.terminosAceptados) return document.getElementById('modal-terminos').classList.add('show');
 
             btn.disabled = true;
             btn.textContent = "Enviando...";
-
             try {
                 await addDoc(collection(db, "publicaciones"), {
-                    userId: auth.currentUser.uid,
-                    content: contenido,
-                    isPrayer: esPeticion,
-                    likes: [],
-                    timestamp: serverTimestamp(),
-                    status: "approved"
+                    userId: auth.currentUser.uid, content: contenido, isPrayer: esPeticion,
+                    likes: [], timestamp: serverTimestamp(), status: "approved"
                 });
                 document.getElementById('input-publicacion').value = "";
                 document.getElementById('chk-peticion').checked = false;
-            } catch (error) {
-                alert("Error al publicar: " + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Publicar";
-            }
+            } catch (error) { alert("Error: " + error.message); } 
+            finally { btn.disabled = false; btn.textContent = "Publicar"; }
         });
 
-        // --- LÓGICA DE MODAL AJUSTES ---
-        const modalAjustes = document.getElementById('modal-ajustes');
-        
+        // NAVEGACIÓN
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                e.target.classList.add('active');
+                filtroFeedActual = e.target.getAttribute('data-tab');
+                document.getElementById('seccion-versiculo').style.display = (filtroFeedActual === "global" && auth.currentUser) ? "block" : "none";
+                if (filtroFeedActual === "perfil") {
+                    document.getElementById('contenedor-creacion-post').style.display = "none";
+                    document.getElementById('bloque-perfil-propio').style.display = "block";
+                } else {
+                    document.getElementById('contenedor-creacion-post').style.display = "block";
+                    document.getElementById('bloque-perfil-propio').style.display = "none";
+                }
+                escucharFeed();
+            });
+        });
+
+        // --- FUNCIONES GLOBALES Y RENDERIZADO DEL FEED ---
+        window.toggleLike = async (postId) => {
+            if (!auth.currentUser) return;
+            const postRef = doc(db, "publicaciones", postId);
+            const postSnap = await getDoc(postRef);
+            if (postSnap.exists()) {
+                const likes = postSnap.data().likes || [];
+                await updateDoc(postRef, { likes: likes.includes(auth.currentUser.uid) ? arrayRemove(auth.currentUser.uid) : arrayUnion(auth.currentUser.uid) });
+            }
+        };
+
+        window.citarPost = (username, content) => {
+            document.getElementById('input-publicacion').value = `Cita de @${username}: "${content.substring(0, 70)}..." ➜ `;
+            const tabGlobal = document.querySelector('.nav-item[data-tab="global"]');
+            if (tabGlobal) tabGlobal.click();
+            document.getElementById('input-publicacion').focus();
+        };
+
+        window.reportarPost = async (postId) => {
+            if (!auth.currentUser) return;
+            if (confirm("¿Deseas enviar un reporte a Faro?")) {
+                await addDoc(collection(db, "reportes"), { postId, reporterId: auth.currentUser.uid, timestamp: serverTimestamp() });
+                alert("Reporte enviado.");
+            }
+        };
+
+        window.verPerfilPublico = (autorId) => {
+            const autorInfo = mapaUsuariosGlobal[autorId];
+            if (!autorInfo) return;
+            const esAnonimo = autorInfo.privacidadNombre === "anonimo" && autorId !== auth.currentUser?.uid;
+            
+            const colorM = autorInfo.colorPerfil || "#6B9AC4";
+            document.getElementById('pp-header-bg').style.backgroundColor = colorM;
+            document.getElementById('pp-avatar').textContent = (esAnonimo ? "Usuario Anónimo" : (autorInfo.nombre || "Usuario")).charAt(0).toUpperCase();
+            document.getElementById('pp-avatar').style.color = colorM;
+            document.getElementById('pp-nombre').textContent = esAnonimo ? "Usuario Anónimo" : (autorInfo.nombre || "Usuario");
+            document.getElementById('pp-username').textContent = `@${autorInfo.username}`;
+            document.getElementById('pp-bio').textContent = esAnonimo ? "Privacidad activada." : (autorInfo.bio || "");
+            document.getElementById('modal-perfil-publico').classList.add('show');
+        };
+
+        document.getElementById('cerrar-perfil-publico').addEventListener('click', () => document.getElementById('modal-perfil-publico').classList.remove('show'));
+
+        let desubscribirFeed = null;
+        function escucharFeed() {
+            if (desubscribirFeed) desubscribirFeed();
+            document.getElementById('seccion-versiculo').style.display = (filtroFeedActual === "global" && auth.currentUser) ? "block" : "none";
+
+            desubscribirFeed = onSnapshot(query(collection(db, "publicaciones")), async (snap) => {
+                const feedContainer = document.getElementById('feed-publicaciones');
+                feedContainer.innerHTML = '';
+                
+                const usuariosSnaps = await getDocs(collection(db, "usuarios"));
+                usuariosSnaps.forEach(d => { mapaUsuariosGlobal[d.id] = d.data(); });
+
+                let lista = snap.docs.map(d => {
+                    const data = d.data();
+                    const autorInfo = mapaUsuariosGlobal[data.userId] || {};
+                    const esAnonimo = autorInfo.privacidadNombre === "anonimo" && data.userId !== auth.currentUser?.uid;
+                    return { id: d.id, ...data, autorNombreFeed: esAnonimo ? "Anónimo" : (autorInfo.nombre || "Usuario"), autorUsername: autorInfo.username };
+                });
+
+                if (filtroFeedActual === "oraciones") lista = lista.filter(p => p.isPrayer);
+                else if (filtroFeedActual === "perfil") lista = lista.filter(p => p.userId === auth.currentUser?.uid);
+                else if (filtroFeedActual === "seguidos" && usuarioActualData) lista = lista.filter(p => (usuarioActualData.seguidos || []).includes(p.userId));
+
+                lista.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+
+                lista.forEach(post => {
+                    const colorAvatar = post.autorNombreFeed === "Anónimo" ? 'var(--text-light)' : ((mapaUsuariosGlobal[post.userId]||{}).colorPerfil || 'var(--primary)');
+                    const yaTieneLike = (post.likes || []).includes(auth.currentUser?.uid);
+                    
+                    const div = document.createElement('div');
+                    div.className = 'card fade-transition';
+                    div.innerHTML = `
+                        <div class="profile-header" onclick="window.verPerfilPublico('${post.userId}')">
+                            <div class="profile-pic" style="background: ${colorAvatar}; color: white; border: none;">${post.autorNombreFeed.charAt(0).toUpperCase()}</div>
+                            <div class="user-meta"><strong>${post.autorNombreFeed}</strong><span>@${post.autorUsername}</span></div>
+                        </div>
+                        <div class="post-content">${post.content}</div>
+                        <div class="post-actions">
+                            <button class="action-btn ${yaTieneLike ? 'active' : ''}" onclick="window.toggleLike('${post.id}')" style="${yaTieneLike ? 'color: var(--primary); background: rgba(107, 154, 196, 0.12);' : ''}">${post.isPrayer ? '🙏 Orando' : '❤️ Me gusta'} ${(post.likes||[]).length}</button>
+                            <button class="action-btn" onclick="window.citarPost('${post.autorUsername}', '${post.content.replace(/'/g, "\\'")}')">💬 Citar</button>
+                            <button class="action-btn" onclick="window.reportarPost('${post.id}')" style="margin-left: auto; background: transparent; padding: 4px;">⚠️</button>
+                        </div>
+                    `;
+                    feedContainer.appendChild(div);
+                });
+            });
+        }
+
+        // --- FUNCIONALIDADES EXTRAS ---
         document.getElementById('btn-editar-perfil').addEventListener('click', () => {
             document.getElementById('input-nombre').value = usuarioActualData.nombre;
             document.getElementById('input-username').value = usuarioActualData.username;
@@ -502,16 +533,15 @@
             document.getElementById('select-biblia').value = usuarioActualData.versionBiblia || "RV";
             document.getElementById('chk-modo-oscuro').checked = usuarioActualData.modoOscuro || false;
             document.getElementById('input-color-perfil').value = usuarioActualData.colorPerfil || "#6B9AC4";
-            modalAjustes.classList.add('show');
+            document.getElementById('modal-ajustes').classList.add('show');
         });
 
-        document.getElementById('cerrar-ajustes').addEventListener('click', () => modalAjustes.classList.remove('show'));
+        document.getElementById('cerrar-ajustes').addEventListener('click', () => document.getElementById('modal-ajustes').classList.remove('show'));
 
         document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
             const btn = document.getElementById('btn-guardar-perfil');
             btn.disabled = true;
-            btn.textContent = "Guardando...";
-
+            
             const nuevosDatos = {
                 nombre: document.getElementById('input-nombre').value,
                 username: document.getElementById('input-username').value,
@@ -525,182 +555,19 @@
             try {
                 await updateDoc(doc(db, "usuarios", auth.currentUser.uid), nuevosDatos);
                 usuarioActualData = { ...usuarioActualData, ...nuevosDatos };
-                
                 if(nuevosDatos.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
                 else document.documentElement.removeAttribute('data-theme');
-                
                 actualizarVistaPerfil();
-                renderizarVersiculo(); // Actualiza la versión del versículo si se cambió
-                modalAjustes.classList.remove('show');
-            } catch (error) {
-                alert("Error al actualizar perfil: " + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "Guardar Cambios";
-                escucharFeed(); 
-            }
+                await renderizarVersiculo();
+                document.getElementById('modal-ajustes').classList.remove('show');
+            } catch(e) { alert("Error: " + e.message); } 
+            finally { btn.disabled = false; escucharFeed(); }
         });
 
-        // --- NAVEGACIÓN ---
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                e.target.classList.add('active');
-                filtroFeedActual = e.target.getAttribute('data-tab');
-                
-                // Mostrar versículo solo en Inicio Global
-                document.getElementById('seccion-versiculo').style.display = (filtroFeedActual === "global") ? "block" : "none";
-
-                if (filtroFeedActual === "perfil") {
-                    document.getElementById('contenedor-creacion-post').style.display = "none";
-                    document.getElementById('bloque-perfil-propio').style.display = "block";
-                } else {
-                    document.getElementById('contenedor-creacion-post').style.display = "block";
-                    document.getElementById('bloque-perfil-propio').style.display = "none";
-                }
-                escucharFeed();
-            });
-        });
-
-        // --- LÓGICA INTERACTIVA GLOBAL ---
-        window.toggleLike = async (postId) => {
-            if (!auth.currentUser) return;
-            const userId = auth.currentUser.uid;
-            const postRef = doc(db, "publicaciones", postId);
-            
-            try {
-                const postSnap = await getDoc(postRef);
-                if (postSnap.exists()) {
-                    const data = postSnap.data();
-                    const likesActuales = data.likes || [];
-                    if (likesActuales.includes(userId)) {
-                        await updateDoc(postRef, { likes: arrayRemove(userId) });
-                    } else {
-                        await updateDoc(postRef, { likes: arrayUnion(userId) });
-                    }
-                }
-            } catch (e) {
-                console.error("Error en Like:", e);
-            }
-        };
-
-        window.citarPost = (username, content) => {
-            const textarea = document.getElementById('input-publicacion');
-            textarea.value = `Cita de @${username}: "${content.substring(0, 70)}${content.length > 70 ? '...' : ''}" ➜ `;
-            const activeTab = document.querySelector('.nav-item[data-tab="global"]');
-            if (activeTab) activeTab.click();
-            textarea.focus();
-        };
-
-        window.reportarPost = async (postId) => {
-            if (!auth.currentUser) return;
-            if (confirm("¿Deseas enviar un reporte de esta publicación al equipo de Faro?")) {
-                try {
-                    await addDoc(collection(db, "reportes"), {
-                        postId: postId,
-                        reporterId: auth.currentUser.uid,
-                        timestamp: serverTimestamp()
-                    });
-                    alert("Publicación reportada correctamente.");
-                } catch(e) {
-                    alert("Error: " + e.message);
-                }
-            }
-        };
-
-        window.verPerfilPublico = async (autorId) => {
-            const autorInfo = mapaUsuariosGlobal[autorId];
-            if (!autorInfo) return;
-
-            const esPropio = autorId === auth.currentUser?.uid;
-            const esAnonimo = autorInfo.privacidadNombre === "anonimo" && !esPropio;
-
-            const nombreM = esAnonimo ? "Usuario Anónimo" : (autorInfo.nombre || "Usuario");
-            const usernameM = `@${autorInfo.username}`;
-            const bioM = esAnonimo ? "Este usuario resguarda su identidad por privacidad." : (autorInfo.bio || "Sin biografía.");
-            const colorM = autorInfo.colorPerfil || "#6B9AC4";
-
-            document.getElementById('pp-header-bg').style.backgroundColor = colorM;
-            document.getElementById('pp-avatar').textContent = obtenerInicial(nombreM);
-            document.getElementById('pp-avatar').style.color = colorM;
-            document.getElementById('pp-nombre').textContent = nombreM;
-            document.getElementById('pp-username').textContent = usernameM;
-            document.getElementById('pp-bio').textContent = bioM;
-            document.getElementById('pp-stat-seguidores').textContent = (autorInfo.seguidores || []).length;
-            document.getElementById('pp-stat-seguidos').textContent = (autorInfo.seguidos || []).length;
-
-            document.getElementById('modal-perfil-publico').classList.add('show');
-        };
-
-        document.getElementById('cerrar-perfil-publico').addEventListener('click', () => {
-            document.getElementById('modal-perfil-publico').classList.remove('show');
-        });
-
-        // --- MOTOR DE FEED ---
-        let desubscribirFeed = null;
-        function escucharFeed() {
-            if (desubscribirFeed) desubscribirFeed();
-            
-            // Garantizar que la caja del versículo esté visible solo en "global"
-            document.getElementById('seccion-versiculo').style.display = (filtroFeedActual === "global" && auth.currentUser) ? "block" : "none";
-
-            const q = query(collection(db, "publicaciones")); 
-            
-            desubscribirFeed = onSnapshot(q, async (snap) => {
-                const feedContainer = document.getElementById('feed-publicaciones');
-                feedContainer.innerHTML = '';
-                
-                const usuariosSnaps = await getDocs(collection(db, "usuarios"));
-                usuariosSnaps.forEach(d => { mapaUsuariosGlobal[d.id] = d.data(); });
-
-                let lista = snap.docs.map(d => {
-                    const data = d.data();
-                    const autorInfo = mapaUsuariosGlobal[data.userId] || {};
-                    const esPropio = data.userId === auth.currentUser?.uid;
-                    const nombreMostrar = (autorInfo.privacidadNombre === "anonimo" && !esPropio) ? "Anónimo" : (autorInfo.nombre || "Usuario");
-                    return { id: d.id, ...data, autorNombreFeed: nombreMostrar, autorUsername: autorInfo.username };
-                });
-
-                if (filtroFeedActual === "oraciones") lista = lista.filter(p => p.isPrayer === true);
-                else if (filtroFeedActual === "perfil") lista = lista.filter(p => p.userId === auth.currentUser?.uid);
-                else if (filtroFeedActual === "seguidos" && usuarioActualData) lista = lista.filter(p => (usuarioActualData.seguidos || []).includes(p.userId));
-                else if (filtroFeedActual === "guardados" && usuarioActualData) lista = lista.filter(p => (usuarioActualData.guardados || []).includes(p.id));
-
-                lista.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-                if(lista.length === 0) {
-                    feedContainer.innerHTML = '<p style="text-align:center; color: var(--text-light); margin-top:30px; font-size:14px;">No hay publicaciones disponibles en esta sección.</p>';
-                    return;
-                }
-
-                lista.forEach(post => {
-                    const inicialAvatar = obtenerInicial(post.autorNombreFeed);
-                    const configAutor = mapaUsuariosGlobal[post.userId] || {};
-                    const colorAvatar = post.autorNombreFeed === "Anónimo" ? 'var(--text-light)' : (configAutor.colorPerfil || 'var(--primary)');
-                    
-                    const likesList = post.likes || [];
-                    const yaTieneLike = likesList.includes(auth.currentUser?.uid);
-                    const textoBotonInteraccion = post.isPrayer ? '🙏 Orando' : '❤️ Me gusta';
-
-                    const div = document.createElement('div');
-                    div.className = 'card fade-transition';
-                    div.innerHTML = `
-                        <div class="profile-header" onclick="window.verPerfilPublico('${post.userId}')">
-                            <div class="profile-pic" style="background: ${colorAvatar}; color: white; border: none; font-weight: bold;">${inicialAvatar}</div>
-                            <div class="user-meta"><strong>${post.autorNombreFeed}</strong><span>@${post.autorUsername}</span></div>
-                        </div>
-                        <div class="post-content">${post.content}</div>
-                        <div class="post-actions">
-                            <button class="action-btn ${yaTieneLike ? 'active' : ''}" onclick="window.toggleLike('${post.id}')" style="${yaTieneLike ? 'color: var(--primary); background: rgba(107, 154, 196, 0.12); font-weight: bold;' : ''}">
-                                ${textoBotonInteraccion} <span>${likesList.length}</span>
-                            </button>
-                            <button class="action-btn" onclick="window.citarPost('${post.autorUsername}', '${post.content.replace(/'/g, "\\'")}')">💬 Citar</button>
-                            <button class="action-btn" onclick="window.reportarPost('${post.id}')" style="margin-left: auto; background: transparent; color: var(--text-light); padding: 4px 8px;">⚠️ Reportar</button>
-                        </div>
-                    `;
-                    feedContainer.appendChild(div);
-                });
-            });
+        function transicionSuave(ocId, moId) {
+            const o = document.getElementById(ocId), m = document.getElementById(moId);
+            o.classList.add('fade-hidden');
+            setTimeout(() => { o.style.position = 'absolute'; o.style.visibility = 'hidden'; m.style.position = 'relative'; m.style.visibility = 'visible'; m.classList.remove('fade-hidden'); }, 400); 
         }
     </script>
 </body>
