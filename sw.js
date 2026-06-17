@@ -7,6 +7,7 @@ const URLS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './versiculos.js',
   './icon-192.png',
   './icon-512.png'
 ];
