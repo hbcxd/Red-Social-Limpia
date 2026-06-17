@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Faro</title>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <style>
         /* Paleta de colores serena y profesional */
         :root { 
@@ -27,15 +27,12 @@
 
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text); transition: background-color 0.3s, color 0.3s; }
         
-        /* Barra de Navegación Principal */
         .navbar { background: var(--surface); padding: 15px 20px 10px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
         .nav-header { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .navbar h1 { margin: 0; font-size: 22px; color: var(--primary); font-weight: 700; cursor: pointer; letter-spacing: -0.5px; }
         
-        /* Botón Instalar Profesional */
         #btn-instalar { display: none; background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
 
-        /* Menú de pestañas superior */
         .top-nav-menu { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .top-nav-menu::-webkit-scrollbar { display: none; }
         .nav-item { white-space: nowrap; font-size: 14px; font-weight: 600; color: var(--text-light); cursor: pointer; padding-bottom: 6px; border-bottom: 2px solid transparent; transition: all 0.2s; }
@@ -43,36 +40,26 @@
 
         .container { max-width: 600px; margin: 0 auto; padding: 20px 15px; }
         
-        /* Botones suaves */
         .btn { display: inline-block; width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; box-sizing: border-box; transition: all 0.2s ease; }
         .btn-primary { background-color: var(--primary); color: white; }
         .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-outline:hover { background-color: var(--btn-bg); }
         
-        .daily-verse { background: var(--verse-bg); border-left: 3px solid var(--primary); padding: 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.5; color: var(--text); }
-        
         .card { background: var(--surface); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
         
-        /* Perfil y vistas */
         .profile-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; }
         .profile-pic { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--btn-bg); }
         .user-meta strong { font-size: 15px; display: block; } 
         .user-meta span { font-size: 13px; color: var(--text-light); }
         
-        /* Interacciones de publicación */
         .post-content { margin: 10px 0 16px 0; font-size: 15px; line-height: 1.5; }
         .post-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 12px; flex-wrap: wrap; }
         .action-btn { background: var(--btn-bg); border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 20px; transition: all 0.2s; }
         .action-btn:hover { background: var(--btn-hover); color: var(--text); }
         .action-btn.active { color: var(--primary); background: rgba(107, 154, 196, 0.1); }
         
-        .quote-box { background: var(--verse-bg); padding: 12px 16px; border-radius: 8px; margin: 12px 0; font-size: 14px; color: var(--text); border: 1px solid var(--border); }
-        
-        /* Entradas de texto */
         textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); box-sizing: border-box; font-family: inherit; font-size: 14px; margin-bottom: 12px; background-color: var(--bg); color: var(--text); outline: none; transition: border 0.2s; }
-        textarea:focus, input[type="text"]:focus { border-color: var(--primary); }
         
-        /* Sub-pestañas del perfil */
         .profile-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 15px; }
         .profile-tab { flex: 1; text-align: center; padding: 10px; font-size: 14px; font-weight: 600; color: var(--text-light); cursor: pointer; }
         .profile-tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
@@ -82,9 +69,12 @@
         .stat-item strong { display: block; font-size: 16px; color: var(--text); }
         .stat-item span { font-size: 12px; color: var(--text-light); }
 
-        /* Modales */
+        /* Estilos de los Modales Restaurados */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(2px); }
         .modal-content { background: var(--surface); padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .modal-header h3 { margin: 0; font-size: 18px; }
+        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); }
     </style>
 </head>
 <body>
@@ -95,7 +85,6 @@
             <button id="btn-instalar">Instalar App</button>
         </div>
         
-        <!-- Nueva Navegación Superior -->
         <div class="top-nav-menu" id="menu-navegacion" style="display: none;">
             <div class="nav-item active" data-tab="global">Inicio</div>
             <div class="nav-item" data-tab="seguidos">Red</div>
@@ -106,10 +95,6 @@
     </div>
 
     <div class="container">
-        <div id="seccion-versiculo" class="daily-verse" style="display:none;">
-            <span id="texto-versiculo">Cargando alimento diario...</span>
-        </div>
-
         <div id="seccion-login" class="card" style="text-align: center; padding: 40px 20px;">
             <h2 style="font-weight: 600; margin-bottom: 10px;">Bienvenido a Faro</h2>
             <p style="color: var(--text-light); margin-bottom: 24px; font-size: 14px;">Un espacio sereno para edificar.</p>
@@ -128,10 +113,9 @@
                 </div>
             </div>
 
-            <!-- Perfil Rediseñado -->
             <div id="bloque-perfil-propio" class="card" style="display:none;">
                 <div style="text-align: center;">
-                    <img id="mi-perfil-foto" src="" class="profile-pic" style="width: 80px; height: 80px; margin: 0 auto; display: block;">
+                    <div class="profile-pic" style="width: 80px; height: 80px; margin: 0 auto; display: block;"></div>
                     <h2 id="mi-perfil-nombre" style="margin: 10px 0 5px 0; font-size: 20px;"></h2>
                     <span id="mi-perfil-tag" style="color: var(--text-light); display: block; margin-bottom: 15px; font-size: 14px;"></span>
                     <p id="mi-perfil-bio" style="color: var(--text); font-size: 14px; margin-bottom: 20px; line-height: 1.5;"></p>
@@ -147,7 +131,6 @@
                     </div>
                 </div>
 
-                <!-- Sub-pestañas de Perfil -->
                 <div class="profile-tabs">
                     <div class="profile-tab active" id="subtab-publicaciones">Publicaciones</div>
                     <div class="profile-tab" id="subtab-citas">Citas</div>
@@ -158,8 +141,202 @@
         <div id="feed-publicaciones"></div>
     </div>
 
-    <!-- Modal Ajustes (Omití el HTML de los modales para mantener el mensaje corto, pero puedes mantener los mismos modales del paso anterior, solo quítale los emojis a los textos como "Cancelar", "Guardar") -->
+    <div id="modal-ajustes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ajustes de Perfil</h3>
+                <button class="close-btn" id="cerrar-ajustes">&times;</button>
+            </div>
+            <label>Nombre a mostrar:</label>
+            <input type="text" id="input-nombre" placeholder="Tu nombre">
+            <label>Usuario (@):</label>
+            <input type="text" id="input-username" placeholder="tu_usuario">
+            <label>Biografía:</label>
+            <textarea id="input-bio" rows="2" placeholder="Unas palabras sobre ti..."></textarea>
+            
+            <label>Privacidad de Nombre:</label>
+            <select id="select-privacidad">
+                <option value="publico">Público (Mostrar mi nombre)</option>
+                <option value="anonimo">Anónimo (Solo mostrar @usuario)</option>
+            </select>
+            
+            <label style="display: flex; align-items: center; gap: 10px; margin-top: 15px; cursor: pointer;">
+                <input type="checkbox" id="chk-modo-oscuro"> Modo Oscuro
+            </label>
+            
+            <button class="btn btn-primary" id="btn-guardar-perfil" style="margin-top: 20px;">Guardar Cambios</button>
+        </div>
+    </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // ⚠️ PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_DOMINIO",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_STORAGE",
+            messagingSenderId: "TU_SENDER",
+            appId: "TU_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let usuarioActualData = null;
+        let mapaUsuariosGlobal = {}; 
+        let filtroFeedActual = "global";
+        let subFiltroPerfil = "publicaciones";
+
+        // --- REGISTRO DE SERVICE WORKER ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registrado', reg.scope))
+                    .catch(err => console.error('Error SW:', err));
+            });
+        }
+
+        // --- PWA INSTALACIÓN ---
+        let eventoInstalacion;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            eventoInstalacion = e;
+            document.getElementById('btn-instalar').style.display = 'block';
+        });
+
+        document.getElementById('btn-instalar').addEventListener('click', async () => {
+            if (eventoInstalacion) {
+                eventoInstalacion.prompt();
+                const { outcome } = await eventoInstalacion.userChoice;
+                if (outcome === 'accepted') document.getElementById('btn-instalar').style.display = 'none';
+                eventoInstalacion = null;
+            }
+        });
+
+        // --- SESIÓN ---
+        document.getElementById('btn-google').addEventListener('click', () => {
+            signInWithPopup(auth, new GoogleAuthProvider()).catch(err => alert("Error de inicio de sesión: " + err.message));
+        });
+        
+        document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('menu-navegacion').style.display = 'flex';
+                await verificarPerfil(user);
+            } else {
+                document.getElementById('seccion-login').style.display = 'block';
+                document.getElementById('seccion-plataforma').style.display = 'none';
+                document.getElementById('menu-navegacion').style.display = 'none';
+            }
+            escucharFeed();
+        });
+
+        async function verificarPerfil(user) {
+            const userRef = doc(db, "usuarios", user.uid);
+            let snap = await getDoc(userRef);
+            if (!snap.exists()) {
+                await setDoc(userRef, {
+                    nombre: user.displayName || "Usuario",
+                    username: user.email.split('@')[0].toLowerCase() + Math.floor(Math.random()*100),
+                    bio: "Uniendo propósitos.",
+                    seguidos: [], seguidores: [], guardados: [], privacidadNombre: "publico", modoOscuro: false
+                });
+                snap = await getDoc(userRef);
+            }
+            usuarioActualData = { id: user.uid, ...snap.data() };
+            document.getElementById('seccion-login').style.display = 'none';
+            document.getElementById('seccion-plataforma').style.display = 'block';
+            
+            if(usuarioActualData.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
+            actualizarVistaPerfil();
+        }
+
+        function actualizarVistaPerfil() {
+            document.getElementById('mi-perfil-nombre').textContent = usuarioActualData.nombre;
+            document.getElementById('mi-perfil-tag').textContent = `@${usuarioActualData.username}`;
+            document.getElementById('mi-perfil-bio').textContent = usuarioActualData.bio;
+        }
+
+        // --- LÓGICA DE MODAL AJUSTES ---
+        const modalAjustes = document.getElementById('modal-ajustes');
+        
+        document.getElementById('btn-editar-perfil').addEventListener('click', () => {
+            document.getElementById('input-nombre').value = usuarioActualData.nombre;
+            document.getElementById('input-username').value = usuarioActualData.username;
+            document.getElementById('input-bio').value = usuarioActualData.bio;
+            document.getElementById('select-privacidad').value = usuarioActualData.privacidadNombre || "publico";
+            document.getElementById('chk-modo-oscuro').checked = usuarioActualData.modoOscuro || false;
+            modalAjustes.style.display = 'flex';
+        });
+
+        document.getElementById('cerrar-ajustes').addEventListener('click', () => modalAjustes.style.display = 'none');
+
+        document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
+            const nuevosDatos = {
+                nombre: document.getElementById('input-nombre').value,
+                username: document.getElementById('input-username').value,
+                bio: document.getElementById('input-bio').value,
+                privacidadNombre: document.getElementById('select-privacidad').value,
+                modoOscuro: document.getElementById('chk-modo-oscuro').checked
+            };
+            
+            await updateDoc(doc(db, "usuarios", auth.currentUser.uid), nuevosDatos);
+            usuarioActualData = { ...usuarioActualData, ...nuevosDatos };
+            
+            if(nuevosDatos.modoOscuro) document.documentElement.setAttribute('data-theme', 'dark');
+            else document.documentElement.removeAttribute('data-theme');
+            
+            actualizarVistaPerfil();
+            modalAjustes.style.display = 'none';
+            escucharFeed(); // Refrescar nombres en el feed
+        });
+
+        // --- NAVEGACIÓN ---
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                e.target.classList.add('active');
+                filtroFeedActual = e.target.getAttribute('data-tab');
+                
+                document.getElementById('contenedor-creacion-post').style.display = (filtroFeedActual === "perfil") ? "none" : "block";
+                document.getElementById('bloque-perfil-propio').style.display = (filtroFeedActual === "perfil") ? "block" : "none";
+                escucharFeed();
+            });
+        });
+
+        // --- MOTOR DE FEED BÁSICO (Para asegurar que no dé error) ---
+        let desubscribirFeed = null;
+        function escucharFeed() {
+            if (desubscribirFeed) desubscribirFeed();
+            desubscribirFeed = onSnapshot(collection(db, "publicaciones"), async (snap) => {
+                const feedContainer = document.getElementById('feed-publicaciones');
+                feedContainer.innerHTML = '';
+                
+                const usuariosSnaps = await getDocs(collection(db, "usuarios"));
+                usuariosSnaps.forEach(d => { mapaUsuariosGlobal[d.id] = d.data(); });
+
+                let lista = snap.docs.map(d => {
+                    const data = d.data();
+                    const autorInfo = mapaUsuariosGlobal[data.userId] || {};
+                    const esPropio = data.userId === auth.currentUser?.uid;
+                    const nombreMostrar = (autorInfo.privacidadNombre === "anonimo" && !esPropio) ? `@${autorInfo.username}` : (autorInfo.nombre || "Usuario");
+                    return { id: d.id, ...data, autorNombreFeed: nombreMostrar, autorUsername: autorInfo.username };
+                });
+
+                lista.forEach(post => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `<div class="profile-header"><div class="user-meta"><strong>${post.autorNombreFeed}</strong><span>@${post.autorUsername}</span></div></div><div class="post-content">${post.content}</div>`;
+                    feedContainer.appendChild(div);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
