@@ -32,8 +32,9 @@
         /* PANTALLA LOGIN */
         #pantalla-login { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--card); }
         .logo-faro { font-size: 3rem; margin-bottom: 10px; }
-        .btn-google { background: #fff; color: #333; border: 1px solid #ddd; padding: 12px 24px; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; margin-top: 20px; }
-        .btn-google:hover { background: #f9f9f9; }
+        .btn-google { background: #fff; color: #333; border: 1px solid #ddd; padding: 12px 24px; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: transform 0.2s; }
+        .btn-google:hover { background: #f9f9f9; transform: scale(0.98); }
+        .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* TOPBAR Y NAVEGACIÓN */
         header { position: sticky; top: 0; background: var(--card); padding: 15px; border-bottom: 1px solid var(--border); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
@@ -76,15 +77,17 @@
 </head>
 <body>
 
-    <div id="pantalla-login" class="oculto">
+    <div id="pantalla-login">
         <div class="logo-faro">⛵</div>
         <h1 style="font-size: 28px; margin-bottom: 10px;">Faro</h1>
         <p style="color: var(--text-light); max-width: 300px; margin-bottom: 20px;">Edifica tu vida y conecta con la comunidad.</p>
+        
         <button id="btn-google" class="btn-google">
             <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" width="20" alt="G">
             Entrar con Google
         </button>
-        <p id="login-status" style="margin-top: 15px; font-size: 14px; color: var(--primary);"></p>
+        
+        <p id="login-status" style="margin-top: 15px; font-size: 14px; color: var(--text-light); font-weight: bold;">Verificando sesión...</p>
     </div>
 
     <div id="pantalla-app" class="oculto fade-in">
@@ -132,14 +135,13 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        // Usamos signInWithRedirect + getRedirectResult para máxima compatibilidad móvil
+        // Importamos getRedirectResult para asegurar la sesión al recargar la página
         import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
-        // Importa tus versículos (Asegúrate de que el archivo versiculos.js esté en la misma carpeta)
         import { versiculosDiarios } from "./versiculos.js";
 
-        // Configuración de Firebase
+        // 1. Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
             authDomain: "red-social-de-dios.firebaseapp.com",
@@ -157,103 +159,115 @@
         let usuarioActual = null;
         let filtroActual = "global";
 
-        // DOM Elements
+        // Elementos del DOM
         const pantallaLogin = document.getElementById('pantalla-login');
         const pantallaApp = document.getElementById('pantalla-app');
         const loginStatus = document.getElementById('login-status');
+        const btnGoogle = document.getElementById('btn-google');
 
         /* ==============================================
-           1. SISTEMA DE AUTENTICACIÓN
+           1. SISTEMA DE AUTENTICACIÓN (ROBUSTO)
            ============================================== */
         
-        // Interceptar el retorno de Google (soluciona problemas de carga en móviles)
+        // A. Revisar si venimos de una redirección de Google
         getRedirectResult(auth).then((result) => {
-            if (result) loginStatus.innerText = "¡Inicio exitoso! Cargando Faro...";
+            if (result) {
+                loginStatus.innerText = "¡Inicio exitoso! Preparando tu entorno...";
+                loginStatus.style.color = "var(--primary)";
+            }
         }).catch((error) => {
-            loginStatus.innerText = "Error: " + error.message;
-            loginStatus.style.color = "red";
+            loginStatus.innerText = "Fallo en el inicio: " + error.message;
+            loginStatus.style.color = "var(--danger)";
+            btnGoogle.disabled = false;
         });
 
-        // Botón Login
-        document.getElementById('btn-google').addEventListener('click', () => {
+        // B. Botón de Iniciar Sesión
+        btnGoogle.addEventListener('click', () => {
+            btnGoogle.disabled = true;
             loginStatus.innerText = "Redirigiendo a Google...";
             const provider = new GoogleAuthProvider();
+            // Esto asegura que siempre pregunte qué cuenta usar
+            provider.setCustomParameters({ prompt: 'select_account' }); 
             signInWithRedirect(auth, provider);
         });
 
-        // Botón Logout
+        // C. Botón de Cerrar Sesión
         document.getElementById('btn-logout').addEventListener('click', () => {
             signOut(auth);
         });
 
-        // Observador de Estado de Sesión (El cerebro del acceso)
+        // D. Observador Principal de Estado (Se dispara automáticamente al abrir la app o regresar del login)
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Hay usuario: Mostramos la red social
                 usuarioActual = user;
                 pantallaLogin.classList.add('oculto');
                 pantallaApp.classList.remove('oculto');
                 
-                // Configurar Perfil
+                // Configurar Perfil y Cargar contenido
                 await verificarYCrearPerfil(user);
                 mostrarVersiculoDiario();
                 cargarFeedRealtime();
             } else {
+                // No hay usuario: Mostramos la pantalla de login
                 usuarioActual = null;
                 pantallaApp.classList.add('oculto');
                 pantallaLogin.classList.remove('oculto');
+                loginStatus.innerText = "Listo para iniciar sesión.";
+                btnGoogle.disabled = false;
             }
         });
 
+        // E. Crear perfil en Firestore si es nuevo
         async function verificarYCrearPerfil(user) {
             const userRef = doc(db, "usuarios", user.uid);
-            const userSnap = await getDoc(userRef);
-            
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    nombre: user.displayName,
-                    email: user.email,
-                    creadoEn: serverTimestamp(),
-                    bio: "Buscando la luz."
-                });
+            try {
+                const userSnap = await getDoc(userRef);
+                if (!userSnap.exists()) {
+                    await setDoc(userRef, {
+                        nombre: user.displayName,
+                        email: user.email,
+                        creadoEn: serverTimestamp(),
+                        bio: "Buscando la luz."
+                    });
+                }
+                // Actualizar UI del Perfil
+                document.getElementById('perfil-nombre').innerText = user.displayName;
+                document.getElementById('perfil-email').innerText = user.email;
+                document.getElementById('perfil-avatar').innerText = user.displayName ? user.displayName.charAt(0).toUpperCase() : '?';
+            } catch (err) {
+                console.error("Error al leer/crear perfil:", err);
+                // Si falla aquí, suele ser por las Reglas de Firestore
             }
-            
-            // Actualizar UI del Perfil
-            document.getElementById('perfil-nombre').innerText = user.displayName;
-            document.getElementById('perfil-email').innerText = user.email;
-            document.getElementById('perfil-avatar').innerText = user.displayName.charAt(0).toUpperCase();
         }
 
         /* ==============================================
-           2. SISTEMA DE NAVEGACIÓN Y TEMA
+           2. NAVEGACIÓN Y TEMA
            ============================================== */
         
         const navBtns = document.querySelectorAll('.nav-btn');
         navBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                // Cambiar estilos de botones
                 navBtns.forEach(b => b.classList.remove('activo'));
                 btn.classList.add('activo');
 
-                // Cambiar Vistas
                 const targetId = btn.getAttribute('data-target');
                 document.getElementById('vista-feed').classList.add('oculto');
                 document.getElementById('vista-perfil').classList.add('oculto');
                 document.getElementById(targetId).classList.remove('oculto');
 
-                // Aplicar Filtro
                 filtroActual = btn.getAttribute('data-filtro');
-                cargarFeedRealtime(); // Recargar datos según el filtro
+                cargarFeedRealtime();
             });
         });
 
-        // Modo Oscuro Toggle
         document.getElementById('btn-tema').addEventListener('click', () => {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
             document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
         });
 
         /* ==============================================
-           3. VERSÍCULO DIARIO (Manejo local pseudo-aleatorio)
+           3. VERSÍCULO DIARIO
            ============================================== */
         function mostrarVersiculoDiario() {
             if(!versiculosDiarios || versiculosDiarios.length === 0) return;
@@ -269,7 +283,6 @@
            4. PUBLICACIONES Y FEED REALTIME
            ============================================== */
         
-        // Crear Post
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const input = document.getElementById('input-post');
             const isPrayer = document.getElementById('chk-oracion').checked;
@@ -284,7 +297,7 @@
             try {
                 await addDoc(collection(db, "publicaciones"), {
                     userId: usuarioActual.uid,
-                    autor: usuarioActual.displayName,
+                    autor: usuarioActual.displayName || "Anónimo",
                     texto: text,
                     isPrayer: isPrayer,
                     likes: [],
@@ -300,10 +313,9 @@
             }
         });
 
-        // Escuchar Posts (Tiempo real)
         let unsubscribe = null;
         function cargarFeedRealtime() {
-            if (unsubscribe) unsubscribe(); // Limpiar escucha anterior
+            if (unsubscribe) unsubscribe();
 
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
             
@@ -314,7 +326,6 @@
                     const post = doc.data();
                     post.id = doc.id;
                     
-                    // Aplicar filtros lógicos
                     let mostrar = true;
                     if (filtroActual === "oraciones" && !post.isPrayer) mostrar = false;
                     if (filtroActual === "perfil" && post.userId !== usuarioActual.uid) mostrar = false;
@@ -346,16 +357,24 @@
 
                 const contenedor = filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts';
                 document.getElementById(contenedor).innerHTML = html || '<p class="loader">No hay publicaciones aquí todavía.</p>';
+            }, (error) => {
+                // Si las reglas de Firestore bloquean la lectura, lo mostrará aquí
+                console.error("Error cargando feed:", error);
+                document.getElementById(filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts').innerHTML = 
+                    `<p class="loader" style="color: red;">Error: Revisa las reglas de seguridad de Firestore.</p>`;
             });
         }
 
-        // Función Global para Likes
         window.darLike = async (postId, yaDioLike) => {
             const postRef = doc(db, "publicaciones", postId);
-            if (yaDioLike) {
-                await updateDoc(postRef, { likes: arrayRemove(usuarioActual.uid) });
-            } else {
-                await updateDoc(postRef, { likes: arrayUnion(usuarioActual.uid) });
+            try {
+                if (yaDioLike) {
+                    await updateDoc(postRef, { likes: arrayRemove(usuarioActual.uid) });
+                } else {
+                    await updateDoc(postRef, { likes: arrayUnion(usuarioActual.uid) });
+                }
+            } catch (e) {
+                console.error("Error al dar like:", e);
             }
         };
 
