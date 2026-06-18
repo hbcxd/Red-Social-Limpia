@@ -13,8 +13,7 @@
             --bg: #f4f7f6; --card: #ffffff; --text: #2d3748; --text-light: #718096;
             --primary: #4A90E2; --primary-hover: #357ABD; --primary-light: #ebf4ff;
             --border: #e2e8f0; --shadow: 0 4px 12px rgba(0,0,0,0.05);
-            --danger: #e53e3e;
-            --success: #38a169;
+            --danger: #e53e3e; --success: #38a169;
         }
 
         [data-theme="dark"] {
@@ -24,7 +23,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; padding-bottom: 70px; }
+        body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; padding-top: 120px; }
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
         /* UTILIDADES */
@@ -32,119 +31,123 @@
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* PANTALLA DE CARGA GLOBAL PWA */
+        /* PANTALLAS LOGISTICA */
         #pantalla-carga { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        /* PANTALLA LOGIN */
         #pantalla-login { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--card); padding: 20px; }
         
-        /* DISEÑO DEL FARO EN CSS PÚRO */
+        /* LOGO FARO ANIMADO */
         .faro-css { position: relative; width: 80px; height: 120px; margin-bottom: 20px; }
         .faro-base { position: absolute; bottom: 0; left: 15px; right: 15px; height: 90px; background: var(--primary); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); border-radius: 2px; }
         .faro-franja { position: absolute; top: 30px; left: 11px; right: 11px; height: 20px; background: var(--card); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
         .faro-luz { position: absolute; top: 15px; left: 25px; right: 25px; height: 20px; background: #fff59d; border-radius: 5px; box-shadow: 0 0 30px 15px rgba(255, 235, 59, 0.6); animation: rotarLuz 3s infinite alternate ease-in-out; }
         .faro-techo { position: absolute; top: 5px; left: 20px; right: 20px; height: 10px; background: var(--text); clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%); }
-        
-        @keyframes rotarLuz { 
-            0% { transform: scaleX(0.8); box-shadow: -20px 0 30px 10px rgba(255, 235, 59, 0.4); opacity: 0.7; } 
-            100% { transform: scaleX(1.2); box-shadow: 20px 0 40px 15px rgba(255, 235, 59, 0.8); opacity: 1; } 
-        }
+        @keyframes rotarLuz { 0% { transform: scaleX(0.8); opacity: 0.7; } 100% { transform: scaleX(1.2); opacity: 1; } }
 
         .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: all 0.3s; }
         .btn-google:hover { background: var(--primary); color: #fff; }
-        .btn-google:disabled { opacity: 0.5; pointer-events: none; border-color: var(--text-light); color: var(--text-light); }
 
-        /* TOPBAR Y NAVEGACIÓN */
-        header { position: sticky; top: 0; background: var(--card); padding: 15px; border-bottom: 1px solid var(--border); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { font-size: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        /* ESTRUCTURA FIJA SUPERIOR (HEADER + NAVEGACIÓN) */
+        .header-fijo-container { position: fixed; top: 0; left: 0; right: 0; background: var(--card); z-index: 1000; border-bottom: 1px solid var(--border); box-shadow: var(--shadow); }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; }
+        header h1 { font-size: 18px; color: var(--primary); display: flex; align-items: center; gap: 6px; }
         
-        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-btn { background: transparent; border: none; color: var(--text-light); font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 20px; transition: all 0.2s; }
+        nav { display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding: 5px 0; }
+        .nav-btn { background: transparent; border: none; color: var(--text-light); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 10px; border-radius: 12px; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .nav-btn.activo { color: var(--primary); background: var(--primary-light); }
 
-        /* COMPONENTES APP */
+        /* COMPONENTES COMPARTIDOS */
         .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .versiculo-box { border-left: 4px solid var(--primary); background: var(--primary-light); text-align: center; }
-        
-        .input-post { width: 100%; min-height: 80px; background: transparent; border: none; color: var(--text); font-size: 16px; resize: none; outline: none; margin-bottom: 10px; }
+        .input-post { width: 100%; min-height: 70px; background: transparent; border: none; color: var(--text); font-size: 15px; resize: none; outline: none; margin-bottom: 10px; }
         .btn-primary { background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
         .btn-primary:disabled { opacity: 0.6; }
 
+        /* PUBLICACIÓN INDIVIDUAL */
         .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; font-size: 20px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
         .post-meta { display: flex; flex-direction: column; flex-grow: 1; }
-        .post-meta strong { font-size: 15px; }
-        .post-meta span { font-size: 12px; color: var(--text-light); }
+        .post-meta .name-display { font-size: 14px; font-weight: bold; }
+        .post-meta .username-display { font-size: 12px; color: var(--text-light); font-weight: 500; }
         .post-content { font-size: 15px; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; }
         .post-actions { display: flex; gap: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
-        .btn-action { background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+        .btn-action { background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
         .btn-action.like-activo { color: var(--danger); }
         .btn-action.save-activo { color: #ecc94b; }
         
-        .btn-seguir { background: var(--primary-light); color: var(--primary); border: none; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-seguir { background: var(--primary-light); color: var(--primary); border: none; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .btn-seguir.siguiendo { background: var(--border); color: var(--text-light); }
 
-        /* PERFIL INTERFAZ */
-        .perfil-header { text-align: center; padding: 20px 0; }
-        .avatar-lg { width: 80px; height: 80px; font-size: 30px; margin: 0 auto 10px; border-radius: 50%; object-fit: cover; }
+        /* PERFIL E INTERFAZ AJUSTES */
+        .perfil-header { text-align: center; padding: 15px 0; }
+        .avatar-lg { width: 75px; height: 75px; font-size: 36px; margin: 0 auto 10px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); }
         .stats-box { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .stat-item { display: flex; flex-direction: column; font-size: 14px; color: var(--text-light); }
-        .stat-item strong { font-size: 18px; color: var(--text); }
+        .stat-item { display: flex; flex-direction: column; font-size: 13px; color: var(--text-light); }
+        .stat-item strong { font-size: 16px; color: var(--text); }
         
-        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; margin-bottom: 10px; font-size: 14px; outline: none; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; color: var(--text); cursor: pointer; }
         .btn-outline { border: 1px solid var(--border); background: transparent; color: var(--text); padding: 8px 15px; border-radius: 15px; cursor: pointer; margin-top: 10px; }
-        .loader { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; }
+        .loader { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div id="pantalla-carga">
         <div class="faro-css" style="transform: scale(0.6);">
-            <div class="faro-techo"></div>
-            <div class="faro-luz"></div>
-            <div class="faro-base"><div class="faro-franja"></div></div>
+            <div class="faro-techo"></div><div class="faro-luz"></div><div class="faro-base"><div class="faro-franja"></div></div>
         </div>
         <p style="color: var(--primary); font-weight: bold; margin-top: 10px;">Iluminando...</p>
     </div>
 
     <div id="pantalla-login" class="oculto">
         <div class="faro-css">
-            <div class="faro-techo"></div>
-            <div class="faro-luz"></div>
-            <div class="faro-base"><div class="faro-franja"></div></div>
+            <div class="faro-techo"></div><div class="faro-luz"></div><div class="faro-base"><div class="faro-franja"></div></div>
         </div>
         <h1 style="font-size: 32px; margin-bottom: 10px; color: var(--text);">Faro</h1>
         <p style="color: var(--text-light); max-width: 280px; margin-bottom: 30px; font-size: 15px;">Encuentra luz y conecta con tu comunidad espiritual.</p>
         <button id="btn-google" class="btn-google"><span>G</span> Continuar con Google</button>
     </div>
 
-    <div id="pantalla-app" class="oculto fade-in">
-        <header>
-            <h1><span>⛵</span> Faro</h1>
-            <button id="btn-tema" class="btn-outline" style="margin: 0; border: none; font-size: 18px;">🌓</button>
-        </header>
+    <div id="pantalla-app" class="oculto">
+        
+        <div class="header-fijo-container">
+            <header>
+                <h1><span>⛵</span> Faro</h1>
+                <button id="btn-tema" class="btn-outline" style="margin: 0; border: none; font-size: 18px;">🌓</button>
+            </header>
+            <nav>
+                <button class="nav-btn activo" data-target="vista-feed" data-filtro="global"><span>🌍</span>Inicio</button>
+                <button class="nav-btn" data-target="vista-feed" data-filtro="oraciones"><span>🙏</span>Oraciones</button>
+                <button class="nav-btn" data-target="vista-feed" data-filtro="guardados"><span>🔖</span>Guardados</button>
+                <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil"><span>👤</span>Perfil</button>
+            </nav>
+        </div>
 
         <div class="container" id="vista-feed">
             <div class="card versiculo-box">
-                <p id="txt-versiculo" style="font-size: 16px; font-weight: 500; font-style: italic; margin-bottom: 8px;">Cargando alimento diario...</p>
-                <p id="ref-versiculo" style="font-size: 13px; color: var(--text-light);"></p>
+                <p id="txt-versiculo" style="font-size: 15px; font-weight: 500; font-style: italic; margin-bottom: 4px;">Cargando alimento diario...</p>
+                <p id="ref-versiculo" style="font-size: 12px; color: var(--text-light);"></p>
             </div>
 
-            <div class="card">
+            <div class="card" id="caja-publicacion">
                 <textarea id="input-post" class="input-post" placeholder="¿Qué hay en tu corazón hoy?"></textarea>
-                <div style="display: flex; justify-content: right;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label class="checkbox-group" style="margin: 0;">
+                        <input type="checkbox" id="chk-oracion"> 🙏 Es petición de oración
+                    </label>
                     <button id="btn-publicar" class="btn-primary">Compartir</button>
                 </div>
             </div>
 
-            <div id="feed-posts" class="loader">Cargando la comunidad...</div>
+            <div id="feed-posts" class="loader">Uniendo la hermandad...</div>
         </div>
 
         <div class="container oculto" id="vista-perfil">
             <div class="card perfil-header">
-                <img class="avatar-lg" id="perfil-avatar" src="https://api.dicebear.com/8.x/identicon/svg?seed=Faro">
-                <h2 id="perfil-nombre">Cargando...</h2>
-                <p id="perfil-bio" style="color: var(--text-light); font-size: 14px; font-style: italic; margin-top: 4px;"></p>
+                <div class="avatar-lg" id="perfil-avatar">⛵</div>
+                <h2 id="perfil-nombre-display">Cargando...</h2>
+                <p id="perfil-username-display" style="color: var(--primary); font-size: 14px; font-weight: 600;"></p>
+                <p id="perfil-bio" style="color: var(--text-light); font-size: 13px; font-style: italic; margin-top: 6px;"></p>
                 
                 <div class="stats-box">
                     <div class="stat-item"><strong id="count-seguidores">0</strong>Seguidores</div>
@@ -152,31 +155,46 @@
                     <div class="stat-item"><strong id="count-guardados">0</strong>Guardados</div>
                 </div>
 
-                <div style="text-align: left; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
-                    <h4 style="font-size: 14px; margin-bottom: 10px; color: var(--primary);">Configurar mi perfil</h4>
-                    <input type="text" id="edit-nombre" class="form-control" placeholder="Tu nombre visible">
-                    <input type="text" id="edit-bio" class="form-control" placeholder="Escribe tu biografía o frase de fe">
-                    <button id="btn-guardar-perfil" class="btn-primary" style="width: 100%; font-size: 14px;">Guardar Cambios</button>
+                <div style="text-align: left; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">⚙️ Panel de Ajustes del Perfil</h4>
+                    
+                    <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre Completo:</label>
+                    <input type="text" id="edit-nombre" class="form-control" placeholder="Tu Nombre y Apellido">
+                    
+                    <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre de Usuario (@username):</label>
+                    <input type="text" id="edit-username" class="form-control" placeholder="ejemplo: juan_fe">
+
+                    <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Biografía espiritual:</label>
+                    <input type="text" id="edit-bio" class="form-control" placeholder="Frase de fe o testimonio breve">
+
+                    <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Identidad Visual Cristiana:</label>
+                    <select id="edit-simbolo" class="form-control">
+                        <option value="⛵">⛵ Faro de Luz</option>
+                        <option value="📖">📖 Santa Biblia</option>
+                        <option value="⚔️">⚔️ Espada del Espíritu</option>
+                        <option value="✝️">✝️ Cruz de Redención</option>
+                    </select>
+
+                    <h5 style="font-size: 12px; margin: 10px 0 5px; color: var(--text-light);">Visibilidad y Privacidad:</h5>
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="edit-ver-nombre" checked> Mostrar mi Nombre y Apellido al público
+                    </label>
+                    
+                    <button id="btn-guardar-perfil" class="btn-primary" style="width: 100%; font-size: 14px; margin-top: 5px;">Guardar y Aplicar Cambios</button>
                 </div>
 
-                <button id="btn-logout" class="btn-outline" style="color: var(--danger); border-color: var(--danger); width: 100%; margin-top: 20px;">Cerrar Sesión</button>
+                <button id="btn-logout" class="btn-outline" style="color: var(--danger); border-color: var(--danger); width: 100%; margin-top: 15px;">Cerrar Sesión</button>
             </div>
             
-            <h3 style="margin-bottom: 10px; font-size: 16px;" id="titulo-subfeed">Mis Publicaciones</h3>
-            <div id="feed-perfil" class="loader">Cargando tus datos...</div>
+            <h3 style="margin-bottom: 10px; font-size: 15px;">Mis Publicaciones</h3>
+            <div id="feed-perfil" class="loader">Cargando tu bitácora...</div>
         </div>
-
-        <nav>
-            <button class="nav-btn activo" data-target="vista-feed" data-filtro="global">🌍 Inicio</button>
-            <button class="nav-btn" data-target="vista-feed" data-filtro="guardados">🔖 Guardados</button>
-            <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil">👤 Mi Perfil</button>
-        </nav>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
         import { versiculosDiarios } from "./versiculos.js";
 
@@ -202,7 +220,7 @@
         const pantallaApp = document.getElementById('pantalla-app');
         const btnGoogle = document.getElementById('btn-google');
 
-        /* OBSERVADOR DE SESIÓN */
+        /* ESCUCHA E INTERFERENCIA DE USUARIO */
         onAuthStateChanged(auth, async (user) => {
             pantallaCarga.classList.add('oculto');
             if (user) {
@@ -210,13 +228,12 @@
                 pantallaLogin.classList.add('oculto');
                 pantallaApp.classList.remove('oculto');
                 
-                // Escuchar perfil del usuario logueado en tiempo real
                 onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
                         datosUsuarioDocumento = docSnap.data();
-                        renderizarDatosPerfil(datosUsuarioDocumento);
+                        renderizarAjustesPerfil(datosUsuarioDocumento);
                     } else {
-                        crearPerfilInicial(user);
+                        crearPerfilPorDefecto(user);
                     }
                 });
 
@@ -230,31 +247,28 @@
             }
         });
 
-        /* AUTENTICACIÓN POPUP (PWA PERFECT) */
         btnGoogle.addEventListener('click', async () => {
             btnGoogle.disabled = true;
-            btnGoogle.innerHTML = `⏳ Conectando...`;
             const provider = new GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
             try {
                 await signInWithPopup(auth, provider);
             } catch (error) {
                 btnGoogle.disabled = false;
-                btnGoogle.innerHTML = `<span>G</span> Continuar con Google`;
-                alert("Error de inicio: " + error.message);
+                alert("Error: " + error.message);
             }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
-        /* GESTIÓN DE PERFIL EN FIRESTORE */
-        async function crearPerfilInicial(user) {
-            const defaultFoto = user.photoURL || `https://api.dicebear.com/8.x/identicon/svg?seed=${user.uid}`;
+        async function crearPerfilPorDefecto(user) {
+            const parseName = user.displayName || "Fiel Faro";
+            const genUsername = parseName.toLowerCase().replace(/\s+/g, '_') + Math.floor(Math.random() * 100);
             await setDoc(doc(db, "usuarios", user.uid), {
-                nombre: user.displayName || "Usuario Faro",
-                email: user.email,
-                fotoUrl: defaultFoto,
-                bio: "Buscando la luz en comunidad.",
+                nombre: parseName,
+                username: genUsername,
+                bio: "Buscando la palabra viva.",
+                simbolo: "⛵",
+                mostrarNombrePublico: true,
                 seguidos: [],
                 seguidores: [],
                 guardados: [],
@@ -262,67 +276,78 @@
             });
         }
 
-        function renderizarDatosPerfil(datos) {
-            document.getElementById('perfil-nombre').innerText = datos.nombre || "Usuario";
+        function renderizarAjustesPerfil(datos) {
+            document.getElementById('perfil-nombre-display').innerText = datos.mostrarNombrePublico ? (datos.nombre || "Sin Nombre") : "Nombre Privado";
+            document.getElementById('perfil-username-display').innerText = `@${datos.username || 'usuario'}`;
             document.getElementById('perfil-bio').innerText = datos.bio || "";
-            document.getElementById('perfil-avatar').src = datos.fotoUrl || "https://api.dicebear.com/8.x/identicon/svg?seed=Faro";
+            document.getElementById('perfil-avatar').innerText = datos.simbolo || "⛵";
             
-            // Rellenar campos de edición
+            // Asignación a Inputs del Panel
             document.getElementById('edit-nombre').value = datos.nombre || "";
+            document.getElementById('edit-username').value = datos.username || "";
             document.getElementById('edit-bio').value = datos.bio || "";
+            document.getElementById('edit-simbolo').value = datos.simbolo || "⛵";
+            document.getElementById('edit-ver-nombre').checked = datos.mostrarNombrePublico !== false;
 
-            // Contadores numéricos con validaciones de arreglos nativos
-            document.getElementById('count-seguidores').innerText = datos.seguidores ? datos.seguidores.length : 0;
-            document.getElementById('count-seguidos').innerText = datos.seguidos ? datos.seguidos.length : 0;
-            document.getElementById('count-guardados').innerText = datos.guardados ? datos.guardados.length : 0;
+            document.getElementById('count-seguidores').innerText = datos.seguidores?.length || 0;
+            document.getElementById('count-seguidos').innerText = datos.seguidos?.length || 0;
+            document.getElementById('count-guardados').innerText = datos.guardados?.length || 0;
         }
 
-        // Modificar Perfil desde la Interfaz
+        /* GUARDAR CONFIGURACIÓN DESDE EL PANEL */
         document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
-            const nuevoNombre = document.getElementById('edit-nombre').value.trim();
-            const nuevaBio = document.getElementById('edit-bio').value.trim();
-            if(!nuevoNombre) return alert("El nombre no puede estar vacío.");
+            const nombreText = document.getElementById('edit-nombre').value.trim();
+            const usernameText = document.getElementById('edit-username').value.trim().toLowerCase().replace(/\s+/g, '');
+            const bioText = document.getElementById('edit-bio').value.trim();
+            const simboloSelect = document.getElementById('edit-simbolo').value;
+            const publicarNombre = document.getElementById('edit-ver-nombre').checked;
+
+            if(!nombreText || !usernameText) return alert("Faltan campos obligatorios.");
 
             try {
-                await updateDoc(doc(db, "usuarios", usuarioActual.uid), {
-                    nombre: nuevoNombre,
-                    bio: nuevaBio
+                await updateDoc(doc(doc(db, "usuarios", usuarioActual.uid)), {
+                    nombre: nombreText,
+                    username: usernameText,
+                    bio: bioText,
+                    simbolo: simboloSelect,
+                    mostrarNombrePublico: publicarNombre
                 });
-                alert("¡Perfil actualizado con éxito!");
+                alert("¡Configuración guardada!");
             } catch(e) {
-                alert("Error al actualizar: " + e.message);
+                alert("Error al actualizar ajustes: " + e.message);
             }
         });
 
-        /* PUBLICAR EN LA COMUNIDAD */
+        /* PUBLICACIÓN COMPROMETIDA */
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const input = document.getElementById('input-post');
             const contentText = input.value.trim();
+            const isPrayer = document.getElementById('chk-oracion').checked;
             if (!contentText) return;
 
             document.getElementById('btn-publicar').disabled = true;
             try {
-                // Almacenamiento idéntico al esquema de tus capturas
                 await addDoc(collection(db, "publicaciones"), {
                     content: contentText,
                     userId: usuarioActual.uid,
-                    userName: datosUsuarioDocumento?.nombre || usuarioActual.displayName || "Anónimo",
-                    userFoto: datosUsuarioDocumento?.fotoUrl || usuarioActual.photoURL || `https://api.dicebear.com/8.x/identicon/svg?seed=${usuarioActual.uid}`,
-                    isRepost: false,
+                    userName: datosUsuarioDocumento?.nombre || "Anónimo",
+                    userUsername: datosUsuarioDocumento?.username || "anonimo",
+                    userFoto: datosUsuarioDocumento?.simbolo || "⛵",
+                    mostrarNombrePost: datosUsuarioDocumento?.mostrarNombrePublico !== false,
+                    isPrayer: isPrayer,
                     likes: [],
-                    reportCount: 0,
-                    status: "approved",
                     timestamp: serverTimestamp()
                 });
                 input.value = "";
+                document.getElementById('chk-oracion').checked = false;
             } catch (error) {
-                alert("Error de publicación: " + error.message);
+                alert("Error al publicar: " + error.message);
             } finally {
                 document.getElementById('btn-publicar').disabled = false;
             }
         });
 
-        /* MOTOR DE RENDERIZADO DE FEEDS EN TIEMPO REAL */
+        /* ESCUCHADOR DE FILTRADO Y RENDERIZACIÓN */
         function cargarFeedRealtime() {
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
             
@@ -332,19 +357,20 @@
                     const post = docSnap.data();
                     post.id = docSnap.id;
                     
-                    // Lógica de Filtrado dinámica en Cliente
                     let mostrar = true;
                     if (filtroActual === "perfil" && post.userId !== usuarioActual.uid) mostrar = false;
+                    if (filtroActual === "oraciones" && !post.isPrayer) mostrar = false;
                     if (filtroActual === "guardados" && !datosUsuarioDocumento?.guardados?.includes(post.id)) mostrar = false;
 
                     if (mostrar) {
                         const amilike = post.likes?.includes(usuarioActual.uid);
                         const numLikes = post.likes?.length || 0;
-                        
                         const yaGuardado = datosUsuarioDocumento?.guardados?.includes(post.id);
                         const loSigo = datosUsuarioDocumento?.seguidos?.includes(post.userId);
                         
-                        // Ocultar botón de seguir si es mi propio post
+                        // Determinación de visibilidad de nombres dinámicos en los posts de otros
+                        const nombreAMostrar = post.mostrarNombrePost ? post.userName : "Perfil Privado";
+
                         const esMiPost = post.userId === usuarioActual.uid;
                         const btnSeguirHtml = esMiPost ? '' : `
                             <button class="btn-seguir ${loSigo ? 'siguiendo' : ''}" onclick="window.interactuarSeguir('${post.userId}', ${loSigo})">
@@ -355,10 +381,10 @@
                         html += `
                             <div class="card fade-in">
                                 <div class="post-header">
-                                    <img class="avatar" src="${post.userFoto || 'https://api.dicebear.com/8.x/identicon/svg?seed=Faro'}">
+                                    <div class="avatar">${post.userFoto || '⛵'}</div>
                                     <div class="post-meta">
-                                        <strong>${post.userName}</strong>
-                                        <span>Reflexión</span>
+                                        <div class="name-display">${nombreAMostrar}</div>
+                                        <div class="username-display">@${post.userUsername || 'usuario'} ${post.isPrayer ? '• 🙏 Petición' : ''}</div>
                                     </div>
                                     ${btnSeguirHtml}
                                 </div>
@@ -376,25 +402,20 @@
                     }
                 });
 
-                if(filtroActual === "perfil") {
-                    document.getElementById('feed-perfil').innerHTML = html || '<p class="loader">Aún no has compartido nada.</p>';
-                } else {
-                    document.getElementById('feed-posts').innerHTML = html || '<p class="loader">No hay publicaciones para mostrar aquí.</p>';
-                }
+                const contenedor = filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts';
+                document.getElementById(contenedor).innerHTML = html || '<p class="loader">No hay publicaciones aquí todavía.</p>';
             });
         }
 
-        /* ACCIONES GLOBALES DE INTERACCIÓN (Bindeados a Window) */
+        /* OPERACIONES BINDEADAS */
         window.darLike = async (postId, yaDioLike) => {
-            const postRef = doc(db, "publicaciones", postId);
-            await updateDoc(postRef, {
+            await updateDoc(doc(db, "publicaciones", postId), {
                 likes: yaDioLike ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid)
             });
         };
 
         window.guardarPost = async (postId, yaGuardado) => {
-            const userRef = doc(db, "usuarios", usuarioActual.uid);
-            await updateDoc(userRef, {
+            await updateDoc(doc(db, "usuarios", usuarioActual.uid), {
                 guardados: yaGuardado ? arrayRemove(postId) : arrayUnion(postId)
             });
         };
@@ -402,7 +423,6 @@
         window.interactuarSeguir = async (targetUserId, yaLoSigo) => {
             const miRef = doc(db, "usuarios", usuarioActual.uid);
             const targetRef = doc(db, "usuarios", targetUserId);
-            
             if(yaLoSigo) {
                 await updateDoc(miRef, { seguidos: arrayRemove(targetUserId) });
                 await updateDoc(targetRef, { seguidores: arrayRemove(usuarioActual.uid) });
@@ -412,7 +432,7 @@
             }
         };
 
-        /* NAVEGACIÓN Y TABS */
+        /* NAVEGACIÓN DE PESTAÑAS (SUPERIOR) */
         const navBtns = document.querySelectorAll('.nav-btn');
         navBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -426,8 +446,11 @@
                 document.getElementById('vista-perfil').classList.add('oculto');
                 document.getElementById(targetId).classList.remove('oculto');
 
-                if (filtroActual === "guardados") {
-                    document.getElementById('titulo-subfeed').innerText = "Mis Guardados";
+                // Mostrar u ocultar la caja de redactar posts si no estamos en inicio o peticiones
+                if (filtroActual === "global" || filtroActual === "oraciones") {
+                    document.getElementById('caja-publicacion').classList.remove('oculto');
+                } else {
+                    document.getElementById('caja-publicacion').classList.add('oculto');
                 }
 
                 cargarFeedRealtime();
@@ -450,7 +473,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Falló', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error', err));
             });
         }
     </script>
