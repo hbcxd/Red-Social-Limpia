@@ -69,7 +69,7 @@ export const versiculosDiarios = [
         NTV: "¡El fiel amor del Señor nunca se acaba! Sus misericordias jamás terminan. Grande es su fidelidad; sus misericordias son nuevas cada mañana.", 
         NVI: "El gran amor del Señor nunca se acaba, y su compasión jamás se agota. Cada mañana se renuevan sus bondades; ¡muy grande es su fidelidad!", 
         PDT: "El fiel amor del SEÑOR nunca termina; su compasión no tiene fin, cada mañana se renuevan. ¡Qué grande es tu fidelidad!" 
-    }
+    },
     {
         ref: "Salmos 34:18",
         RV: "Cercano está Jehová a los quebrantados de corazón; y salva a los contritos de espíritu.",
