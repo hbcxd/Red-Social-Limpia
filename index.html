@@ -346,7 +346,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, query, onSnapshot, addDoc, updateDoc, doc, setDoc, getDoc, getDocs, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
         
@@ -423,8 +423,10 @@
         // --- LOGIN Y SESIÓN ---
         document.getElementById('btn-google').addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
             try {
-                await signInWithPopup(auth, provider);
+                // Utiliza redirección directa para máxima compatibilidad
+                await signInWithRedirect(auth, provider);
             } catch (err) {
                 throw new Error(`Login Fallido (${err.code}): ${err.message}. Recuerda usar un Servidor Local.`);
             }
@@ -482,7 +484,7 @@
         }
 
         // --- PUBLICAR Y FEED ---
-        document.getElementById('btn-primary' || 'btn-publicar').addEventListener('click', async () => {
+        document.getElementById('btn-publicar').addEventListener('click', async () => {
             const contenido = document.getElementById('input-publicacion').value;
             const esPeticion = document.getElementById('chk-peticion').checked;
             const btn = document.getElementById('btn-publicar');
