@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4A90E2">
+    
     <title>Faro - Comunidad de Fe</title>
     <style>
         /* TEMA Y VARIABLES */
@@ -21,24 +24,38 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; padding-bottom: 70px; }
-
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-        /* UTILIDADES Y ANIMACIONES */
+        /* UTILIDADES */
         .oculto { display: none !important; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* PANTALLA DE CARGA GLOBAL PWA */
+        #pantalla-carga { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
         /* PANTALLA LOGIN */
-        #pantalla-login { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--card); }
-        .logo-faro { font-size: 3rem; margin-bottom: 10px; }
-        .btn-google { background: #fff; color: #333; border: 1px solid #ddd; padding: 12px 24px; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: transform 0.2s; }
-        .btn-google:hover { background: #f9f9f9; transform: scale(0.98); }
-        .btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
+        #pantalla-login { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--card); padding: 20px; }
+        
+        /* DISEÑO DEL FARO EN CSS PÚRO (Sin imágenes) */
+        .faro-css { position: relative; width: 80px; height: 120px; margin-bottom: 20px; }
+        .faro-base { position: absolute; bottom: 0; left: 15px; right: 15px; height: 90px; background: var(--primary); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); border-radius: 2px; }
+        .faro-franja { position: absolute; top: 30px; left: 11px; right: 11px; height: 20px; background: var(--card); clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
+        .faro-luz { position: absolute; top: 15px; left: 25px; right: 25px; height: 20px; background: #fff59d; border-radius: 5px; box-shadow: 0 0 30px 15px rgba(255, 235, 59, 0.6); animation: rotarLuz 3s infinite alternate ease-in-out; }
+        .faro-techo { position: absolute; top: 5px; left: 20px; right: 20px; height: 10px; background: var(--text); clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%); }
+        
+        @keyframes rotarLuz { 
+            0% { transform: scaleX(0.8); box-shadow: -20px 0 30px 10px rgba(255, 235, 59, 0.4); opacity: 0.7; } 
+            100% { transform: scaleX(1.2); box-shadow: 20px 0 40px 15px rgba(255, 235, 59, 0.8); opacity: 1; } 
+        }
+
+        .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: all 0.3s; }
+        .btn-google:hover { background: var(--primary); color: #fff; }
+        .btn-google:disabled { opacity: 0.5; pointer-events: none; }
 
         /* TOPBAR Y NAVEGACIÓN */
         header { position: sticky; top: 0; background: var(--card); padding: 15px; border-bottom: 1px solid var(--border); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-        header h1 { font-size: 20px; color: var(--primary); }
+        header h1 { font-size: 20px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
         nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-btn { background: transparent; border: none; color: var(--text-light); font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 20px; transition: all 0.2s; }
@@ -46,16 +63,12 @@
 
         /* COMPONENTES APP */
         .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .versiculo-box { border-left: 4px solid var(--primary); background: var(--primary-light); text-align: center; }
         
-        /* Versículo */
-        .versiculo-box { border-left: 4px solid var(--primary); background: var(--primary-light); }
-        
-        /* Publicador */
         .input-post { width: 100%; min-height: 80px; background: transparent; border: none; color: var(--text); font-size: 16px; resize: none; outline: none; margin-bottom: 10px; }
         .btn-primary { background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
         .btn-primary:disabled { opacity: 0.6; }
 
-        /* Feed */
         .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
         .post-meta { display: flex; flex-direction: column; }
@@ -66,34 +79,47 @@
         .btn-action { background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
         .btn-action.like-activo { color: var(--danger); }
 
-        /* Perfil */
         .perfil-header { text-align: center; padding: 20px 0; }
         .avatar-lg { width: 80px; height: 80px; font-size: 30px; margin: 0 auto 10px; }
         .btn-outline { border: 1px solid var(--border); background: transparent; color: var(--text); padding: 8px 15px; border-radius: 15px; cursor: pointer; margin-top: 10px; }
-        
-        /* Loader */
         .loader { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; }
     </style>
 </head>
 <body>
 
-    <div id="pantalla-login">
-        <div class="logo-faro">⛵</div>
-        <h1 style="font-size: 28px; margin-bottom: 10px;">Faro</h1>
-        <p style="color: var(--text-light); max-width: 300px; margin-bottom: 20px;">Edifica tu vida y conecta con la comunidad.</p>
+    <div id="pantalla-carga">
+        <div class="faro-css" style="transform: scale(0.6);">
+            <div class="faro-techo"></div>
+            <div class="faro-luz"></div>
+            <div class="faro-base">
+                <div class="faro-franja"></div>
+            </div>
+        </div>
+        <p style="color: var(--primary); font-weight: bold; margin-top: 10px;">Iluminando...</p>
+    </div>
+
+    <div id="pantalla-login" class="oculto">
+        <div class="faro-css">
+            <div class="faro-techo"></div>
+            <div class="faro-luz"></div>
+            <div class="faro-base">
+                <div class="faro-franja"></div>
+            </div>
+        </div>
+        
+        <h1 style="font-size: 32px; margin-bottom: 10px; color: var(--text);">Faro</h1>
+        <p style="color: var(--text-light); max-width: 280px; margin-bottom: 30px; font-size: 15px;">Encuentra luz y conecta con tu comunidad espiritual.</p>
         
         <button id="btn-google" class="btn-google">
-            <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" width="20" alt="G">
-            Entrar con Google
+            <span style="font-size: 20px;">G</span> Continuar con Google
         </button>
-        
-        <p id="login-status" style="margin-top: 15px; font-size: 14px; color: var(--text-light); font-weight: bold;">Verificando sesión...</p>
+        <p id="login-status" style="margin-top: 20px; font-size: 14px; color: var(--text-light);"></p>
     </div>
 
     <div id="pantalla-app" class="oculto fade-in">
         <header>
-            <h1>Faro</h1>
-            <button id="btn-tema" class="btn-outline" style="margin: 0; border: none;">🌓</button>
+            <h1><span style="font-size: 16px;">⛵</span> Faro</h1>
+            <button id="btn-tema" class="btn-outline" style="margin: 0; border: none; font-size: 18px;">🌓</button>
         </header>
 
         <div class="container" id="vista-feed">
@@ -108,11 +134,11 @@
                     <label style="font-size: 13px; color: var(--text-light); cursor: pointer;">
                         <input type="checkbox" id="chk-oracion"> 🙏 Es petición
                     </label>
-                    <button id="btn-publicar" class="btn-primary">Publicar</button>
+                    <button id="btn-publicar" class="btn-primary">Compartir</button>
                 </div>
             </div>
 
-            <div id="feed-posts" class="loader">Cargando publicaciones...</div>
+            <div id="feed-posts" class="loader">Cargando la comunidad...</div>
         </div>
 
         <div class="container oculto" id="vista-perfil">
@@ -122,26 +148,26 @@
                 <p id="perfil-email" style="color: var(--text-light); font-size: 14px; margin-bottom: 15px;"></p>
                 <button id="btn-logout" class="btn-outline" style="color: var(--danger); border-color: var(--danger);">Cerrar Sesión</button>
             </div>
-            <h3 style="margin-bottom: 10px; font-size: 16px;">Mis Publicaciones</h3>
+            <h3 style="margin-bottom: 10px; font-size: 16px;">Mi Diario Espiritual</h3>
             <div id="feed-perfil" class="loader">Cargando...</div>
         </div>
 
         <nav>
-            <button class="nav-btn activo" data-target="vista-feed" data-filtro="global">🌍 Comunidad</button>
+            <button class="nav-btn activo" data-target="vista-feed" data-filtro="global">🌍 Inicio</button>
             <button class="nav-btn" data-target="vista-feed" data-filtro="oraciones">🙏 Oraciones</button>
-            <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil">👤 Mi Perfil</button>
+            <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil">👤 Perfil</button>
         </nav>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        // Importamos getRedirectResult para asegurar la sesión al recargar la página
-        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        // Importamos setPersistence para forzar la memoria en la PWA
+        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
+        // Importación de tu archivo local
         import { versiculosDiarios } from "./versiculos.js";
 
-        // 1. Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
             authDomain: "red-social-de-dios.firebaseapp.com",
@@ -155,99 +181,93 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Variables Globales
         let usuarioActual = null;
         let filtroActual = "global";
 
-        // Elementos del DOM
+        const pantallaCarga = document.getElementById('pantalla-carga');
         const pantallaLogin = document.getElementById('pantalla-login');
         const pantallaApp = document.getElementById('pantalla-app');
         const loginStatus = document.getElementById('login-status');
         const btnGoogle = document.getElementById('btn-google');
 
-        /* ==============================================
-           1. SISTEMA DE AUTENTICACIÓN (ROBUSTO)
-           ============================================== */
+        /* ========================================================
+           SISTEMA DE SESIÓN A PRUEBA DE PWA
+           ======================================================== */
         
-        // A. Revisar si venimos de una redirección de Google
-        getRedirectResult(auth).then((result) => {
-            if (result) {
-                loginStatus.innerText = "¡Inicio exitoso! Preparando tu entorno...";
-                loginStatus.style.color = "var(--primary)";
+        // 1. Forzar persistencia local antes de hacer nada
+        setPersistence(auth, browserLocalPersistence).then(() => {
+            
+            // 2. Revisar si la PWA viene regresando de Google
+            return getRedirectResult(auth);
+
+        }).then((result) => {
+            if (result && result.user) {
+                // Si viene de Google, no hacemos nada extra, onAuthStateChanged se encargará
+                loginStatus.innerText = "¡Bienvenido de nuevo!";
             }
         }).catch((error) => {
-            loginStatus.innerText = "Fallo en el inicio: " + error.message;
+            console.error("Error en redirección PWA:", error);
+            loginStatus.innerText = "Error al conectar. Intenta de nuevo.";
             loginStatus.style.color = "var(--danger)";
-            btnGoogle.disabled = false;
         });
 
-        // B. Botón de Iniciar Sesión
-        btnGoogle.addEventListener('click', () => {
-            btnGoogle.disabled = true;
-            loginStatus.innerText = "Redirigiendo a Google...";
-            const provider = new GoogleAuthProvider();
-            // Esto asegura que siempre pregunte qué cuenta usar
-            provider.setCustomParameters({ prompt: 'select_account' }); 
-            signInWithRedirect(auth, provider);
-        });
-
-        // C. Botón de Cerrar Sesión
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            signOut(auth);
-        });
-
-        // D. Observador Principal de Estado (Se dispara automáticamente al abrir la app o regresar del login)
+        // 3. Observador de estado maestro
         onAuthStateChanged(auth, async (user) => {
+            // Quitamos la pantalla de carga principal
+            pantallaCarga.classList.add('oculto');
+
             if (user) {
-                // Hay usuario: Mostramos la red social
                 usuarioActual = user;
                 pantallaLogin.classList.add('oculto');
                 pantallaApp.classList.remove('oculto');
                 
-                // Configurar Perfil y Cargar contenido
                 await verificarYCrearPerfil(user);
                 mostrarVersiculoDiario();
                 cargarFeedRealtime();
             } else {
-                // No hay usuario: Mostramos la pantalla de login
                 usuarioActual = null;
                 pantallaApp.classList.add('oculto');
                 pantallaLogin.classList.remove('oculto');
-                loginStatus.innerText = "Listo para iniciar sesión.";
                 btnGoogle.disabled = false;
             }
         });
 
-        // E. Crear perfil en Firestore si es nuevo
+        // Inicio de sesión usando Redirect (Mejor para PWA instaladas en Vercel)
+        btnGoogle.addEventListener('click', () => {
+            btnGoogle.disabled = true;
+            loginStatus.innerText = "Abriendo conexión segura...";
+            const provider = new GoogleAuthProvider();
+            signInWithRedirect(auth, provider);
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth);
+        });
+
         async function verificarYCrearPerfil(user) {
             const userRef = doc(db, "usuarios", user.uid);
             try {
                 const userSnap = await getDoc(userRef);
                 if (!userSnap.exists()) {
                     await setDoc(userRef, {
-                        nombre: user.displayName,
+                        nombre: user.displayName || "Usuario Faro",
                         email: user.email,
                         creadoEn: serverTimestamp(),
                         bio: "Buscando la luz."
                     });
                 }
-                // Actualizar UI del Perfil
-                document.getElementById('perfil-nombre').innerText = user.displayName;
-                document.getElementById('perfil-email').innerText = user.email;
+                document.getElementById('perfil-nombre').innerText = user.displayName || "Usuario";
+                document.getElementById('perfil-email').innerText = user.email || "";
                 document.getElementById('perfil-avatar').innerText = user.displayName ? user.displayName.charAt(0).toUpperCase() : '?';
             } catch (err) {
-                console.error("Error al leer/crear perfil:", err);
-                // Si falla aquí, suele ser por las Reglas de Firestore
+                console.error("Error de perfil:", err);
             }
         }
 
-        /* ==============================================
-           2. NAVEGACIÓN Y TEMA
-           ============================================== */
-        
+        /* TEMA Y NAVEGACIÓN */
         const navBtns = document.querySelectorAll('.nav-btn');
         navBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 navBtns.forEach(b => b.classList.remove('activo'));
                 btn.classList.add('activo');
 
@@ -266,23 +286,16 @@
             document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
         });
 
-        /* ==============================================
-           3. VERSÍCULO DIARIO
-           ============================================== */
         function mostrarVersiculoDiario() {
             if(!versiculosDiarios || versiculosDiarios.length === 0) return;
-            const diaDelAño = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const diaDelAño = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
             const indice = diaDelAño % versiculosDiarios.length;
             const v = versiculosDiarios[indice];
-            
             document.getElementById('txt-versiculo').innerText = `"${v.RV}"`;
             document.getElementById('ref-versiculo').innerText = `- ${v.ref}`;
         }
 
-        /* ==============================================
-           4. PUBLICACIONES Y FEED REALTIME
-           ============================================== */
-        
+        /* PUBLICACIONES Y FEED */
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const input = document.getElementById('input-post');
             const isPrayer = document.getElementById('chk-oracion').checked;
@@ -290,9 +303,7 @@
             const btn = document.getElementById('btn-publicar');
 
             if (!text) return;
-            
             btn.disabled = true;
-            btn.innerText = "Enviando...";
 
             try {
                 await addDoc(collection(db, "publicaciones"), {
@@ -306,10 +317,9 @@
                 input.value = "";
                 document.getElementById('chk-oracion').checked = false;
             } catch (error) {
-                alert("Error al publicar: " + error.message);
+                alert("Error al compartir: " + error.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Publicar";
             }
         });
 
@@ -321,7 +331,6 @@
             
             unsubscribe = onSnapshot(q, (snapshot) => {
                 let html = "";
-                
                 snapshot.forEach((doc) => {
                     const post = doc.data();
                     post.id = doc.id;
@@ -341,7 +350,7 @@
                                     <div class="avatar">${inicial}</div>
                                     <div class="post-meta">
                                         <strong>${post.autor}</strong>
-                                        <span>${post.isPrayer ? '🙏 Petición de Oración' : '📝 Reflexión'}</span>
+                                        <span>${post.isPrayer ? '🙏 Oración' : '📝 Reflexión'}</span>
                                     </div>
                                 </div>
                                 <div class="post-content">${post.texto}</div>
@@ -356,28 +365,27 @@
                 });
 
                 const contenedor = filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts';
-                document.getElementById(contenedor).innerHTML = html || '<p class="loader">No hay publicaciones aquí todavía.</p>';
-            }, (error) => {
-                // Si las reglas de Firestore bloquean la lectura, lo mostrará aquí
-                console.error("Error cargando feed:", error);
-                document.getElementById(filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts').innerHTML = 
-                    `<p class="loader" style="color: red;">Error: Revisa las reglas de seguridad de Firestore.</p>`;
+                document.getElementById(contenedor).innerHTML = html || '<p class="loader">Aún no hay publicaciones.</p>';
             });
         }
 
         window.darLike = async (postId, yaDioLike) => {
             const postRef = doc(db, "publicaciones", postId);
-            try {
-                if (yaDioLike) {
-                    await updateDoc(postRef, { likes: arrayRemove(usuarioActual.uid) });
-                } else {
-                    await updateDoc(postRef, { likes: arrayUnion(usuarioActual.uid) });
-                }
-            } catch (e) {
-                console.error("Error al dar like:", e);
+            if (yaDioLike) {
+                await updateDoc(postRef, { likes: arrayRemove(usuarioActual.uid) });
+            } else {
+                await updateDoc(postRef, { likes: arrayUnion(usuarioActual.uid) });
             }
         };
 
+        // Registro del Service Worker (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('SW registrado', reg);
+                }).catch(err => console.log('SW falló', err));
+            });
+        }
     </script>
 </body>
 </html>
