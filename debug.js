@@ -15,13 +15,12 @@ export function activarCapturaDeErrores() {
         errorDisplay.innerHTML = `<strong>Error:</strong> ${msg} <br> <button onclick="this.parentElement.style.display='none'">Cerrar</button>`;
     };
 
-    // Captura errores de JavaScript
     window.onerror = (message, source, lineno, colno, error) => {
         mostrarError(`${message} (Línea: ${lineno})`);
     };
 
-    // Captura promesas fallidas (como Firebase)
     window.onunhandledrejection = (event) => {
-        mostrarError(event.reason.message || event.reason);
+        const errorMsg = event.reason ? (event.reason.message || event.reason) : 'Promesa fallida desconocida';
+        mostrarError(errorMsg);
     };
 }
