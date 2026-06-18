@@ -51,7 +51,7 @@
 
         .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: all 0.3s; }
         .btn-google:hover { background: var(--primary); color: #fff; }
-        .btn-google:disabled { opacity: 0.5; pointer-events: none; }
+        .btn-google:disabled { opacity: 0.5; pointer-events: none; border-color: var(--text-light); color: var(--text-light); }
 
         /* TOPBAR Y NAVEGACIÓN */
         header { position: sticky; top: 0; background: var(--card); padding: 15px; border-bottom: 1px solid var(--border); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
@@ -111,9 +111,8 @@
         <p style="color: var(--text-light); max-width: 280px; margin-bottom: 30px; font-size: 15px;">Encuentra luz y conecta con tu comunidad espiritual.</p>
         
         <button id="btn-google" class="btn-google">
-            <span style="font-size: 20px;">G</span> Continuar con Google
+            <span style="font-size: 20px; font-weight: 900;">G</span> Continuar con Google
         </button>
-        <p id="login-status" style="margin-top: 20px; font-size: 14px; color: var(--text-light);"></p>
     </div>
 
     <div id="pantalla-app" class="oculto fade-in">
@@ -161,11 +160,10 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        // Importamos setPersistence para forzar la memoria en la PWA
-        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        // VOLVEMOS AL POPUP: La PWA lo abrirá como un "Custom Tab" que no pierde la sesión
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
-        // Importación de tu archivo local
         import { versiculosDiarios } from "./versiculos.js";
 
         const firebaseConfig = {
@@ -187,57 +185,52 @@
         const pantallaCarga = document.getElementById('pantalla-carga');
         const pantallaLogin = document.getElementById('pantalla-login');
         const pantallaApp = document.getElementById('pantalla-app');
-        const loginStatus = document.getElementById('login-status');
         const btnGoogle = document.getElementById('btn-google');
 
         /* ========================================================
-           SISTEMA DE SESIÓN A PRUEBA DE PWA
+           SISTEMA DE SESIÓN SEGURO
            ======================================================== */
         
-        // 1. Forzar persistencia local antes de hacer nada
-        setPersistence(auth, browserLocalPersistence).then(() => {
-            
-            // 2. Revisar si la PWA viene regresando de Google
-            return getRedirectResult(auth);
-
-        }).then((result) => {
-            if (result && result.user) {
-                // Si viene de Google, no hacemos nada extra, onAuthStateChanged se encargará
-                loginStatus.innerText = "¡Bienvenido de nuevo!";
-            }
-        }).catch((error) => {
-            console.error("Error en redirección PWA:", error);
-            loginStatus.innerText = "Error al conectar. Intenta de nuevo.";
-            loginStatus.style.color = "var(--danger)";
-        });
-
-        // 3. Observador de estado maestro
+        // El observador maneja qué pantalla se muestra de forma inmediata
         onAuthStateChanged(auth, async (user) => {
-            // Quitamos la pantalla de carga principal
-            pantallaCarga.classList.add('oculto');
+            pantallaCarga.classList.add('oculto'); // Quitamos "Iluminando"
 
             if (user) {
                 usuarioActual = user;
                 pantallaLogin.classList.add('oculto');
                 pantallaApp.classList.remove('oculto');
                 
-                await verificarYCrearPerfil(user);
-                mostrarVersiculoDiario();
-                cargarFeedRealtime();
+                try {
+                    await verificarYCrearPerfil(user);
+                    mostrarVersiculoDiario();
+                    cargarFeedRealtime();
+                } catch (error) {
+                    alert("Aviso de Base de Datos: " + error.message);
+                }
             } else {
                 usuarioActual = null;
                 pantallaApp.classList.add('oculto');
                 pantallaLogin.classList.remove('oculto');
-                btnGoogle.disabled = false;
             }
         });
 
-        // Inicio de sesión usando Redirect (Mejor para PWA instaladas en Vercel)
-        btnGoogle.addEventListener('click', () => {
+        // Evento de Login mediante POPUP
+        btnGoogle.addEventListener('click', async () => {
             btnGoogle.disabled = true;
-            loginStatus.innerText = "Abriendo conexión segura...";
+            const textoOriginal = btnGoogle.innerHTML;
+            btnGoogle.innerHTML = `⏳ Conectando...`;
+            
             const provider = new GoogleAuthProvider();
-            signInWithRedirect(auth, provider);
+            provider.setCustomParameters({ prompt: 'select_account' });
+
+            try {
+                // Abre la ventana, inicia, se cierra y el observador de arriba hace el resto.
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                btnGoogle.disabled = false;
+                btnGoogle.innerHTML = textoOriginal;
+                alert("Hubo un fallo al intentar acceder: " + error.message);
+            }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => {
@@ -246,22 +239,18 @@
 
         async function verificarYCrearPerfil(user) {
             const userRef = doc(db, "usuarios", user.uid);
-            try {
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) {
-                    await setDoc(userRef, {
-                        nombre: user.displayName || "Usuario Faro",
-                        email: user.email,
-                        creadoEn: serverTimestamp(),
-                        bio: "Buscando la luz."
-                    });
-                }
-                document.getElementById('perfil-nombre').innerText = user.displayName || "Usuario";
-                document.getElementById('perfil-email').innerText = user.email || "";
-                document.getElementById('perfil-avatar').innerText = user.displayName ? user.displayName.charAt(0).toUpperCase() : '?';
-            } catch (err) {
-                console.error("Error de perfil:", err);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    nombre: user.displayName || "Usuario Faro",
+                    email: user.email,
+                    creadoEn: serverTimestamp(),
+                    bio: "Buscando la luz."
+                });
             }
+            document.getElementById('perfil-nombre').innerText = user.displayName || "Usuario";
+            document.getElementById('perfil-email').innerText = user.email || "";
+            document.getElementById('perfil-avatar').innerText = user.displayName ? user.displayName.charAt(0).toUpperCase() : '?';
         }
 
         /* TEMA Y NAVEGACIÓN */
@@ -381,9 +370,7 @@
         // Registro del Service Worker (PWA)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('SW registrado', reg);
-                }).catch(err => console.log('SW falló', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW falló', err));
             });
         }
     </script>
