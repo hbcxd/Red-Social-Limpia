@@ -2,338 +2,363 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faro - Red Social de Dios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Faro - Comunidad de Fe</title>
     <style>
-        /* =========================================
-           1. VARIABLES Y TEMA BASE
-           ========================================= */
+        /* TEMA Y VARIABLES */
         :root {
-            --bg: #f5f7fa;
-            --card-bg: #ffffff;
-            --text: #2c3e50;
-            --text-light: #7f8c8d;
-            --primary: #6B9AC4;
-            --primary-light: rgba(107, 154, 196, 0.12);
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            --bg: #f4f7f6; --card: #ffffff; --text: #2d3748; --text-light: #718096;
+            --primary: #4A90E2; --primary-hover: #357ABD; --primary-light: #ebf4ff;
+            --border: #e2e8f0; --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --danger: #e53e3e;
         }
 
         [data-theme="dark"] {
-            --bg: #121824;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
-            --text-light: #94a3b8;
-            --border: #334155;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+            --bg: #1a202c; --card: #2d3748; --text: #f7fafc; --text-light: #a0aec0;
+            --primary: #63b3ed; --primary-hover: #4299e1; --primary-light: rgba(99, 179, 237, 0.1);
+            --border: #4a5568; --shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; padding-bottom: 70px; }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-        /* =========================================
-           2. SISTEMA DE PANTALLAS (LOGIN VS APP)
-           ========================================= */
-        .pantalla {
-            display: none; /* Oculto por defecto */
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
+        /* UTILIDADES Y ANIMACIONES */
+        .oculto { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .pantalla.activa {
-            display: block;
-            opacity: 1;
-        }
+        /* PANTALLA LOGIN */
+        #pantalla-login { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--card); }
+        .logo-faro { font-size: 3rem; margin-bottom: 10px; }
+        .btn-google { background: #fff; color: #333; border: 1px solid #ddd; padding: 12px 24px; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px; margin-top: 20px; }
+        .btn-google:hover { background: #f9f9f9; }
 
-        /* Diseño específico del Login */
-        #pantalla-login {
-            display: flex; /* Flexbox para centrar todo */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 90vh;
-            text-align: center;
-        }
+        /* TOPBAR Y NAVEGACIÓN */
+        header { position: sticky; top: 0; background: var(--card); padding: 15px; border-bottom: 1px solid var(--border); z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 20px; color: var(--primary); }
+        
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { background: transparent; border: none; color: var(--text-light); font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 20px; transition: all 0.2s; }
+        .nav-btn.activo { color: var(--primary); background: var(--primary-light); }
 
-        .titulo-app { font-size: 2.5rem; margin-bottom: 10px; }
-        .subtitulo-app { color: var(--text-light); margin-bottom: 30px; }
+        /* COMPONENTES APP */
+        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        
+        /* Versículo */
+        .versiculo-box { border-left: 4px solid var(--primary); background: var(--primary-light); }
+        
+        /* Publicador */
+        .input-post { width: 100%; min-height: 80px; background: transparent; border: none; color: var(--text); font-size: 16px; resize: none; outline: none; margin-bottom: 10px; }
+        .btn-primary { background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .btn-primary:disabled { opacity: 0.6; }
 
-        .btn-google {
-            background: #fff;
-            color: #444;
-            border: 1px solid var(--border);
-            padding: 14px 28px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: transform 0.2s;
-        }
-        .btn-google:active { transform: scale(0.98); }
+        /* Feed */
+        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        .post-meta { display: flex; flex-direction: column; }
+        .post-meta strong { font-size: 15px; }
+        .post-meta span { font-size: 12px; color: var(--text-light); }
+        .post-content { font-size: 15px; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; }
+        .post-actions { display: flex; gap: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .btn-action { background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 5px; }
+        .btn-action.like-activo { color: var(--danger); }
 
-        /* =========================================
-           3. COMPONENTES DE LA APLICACIÓN
-           ========================================= */
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-        }
-
-        /* Botones e Inputs */
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .textarea-input {
-            width: 100%;
-            height: 80px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px;
-            background: var(--card-bg);
-            color: var(--text);
-            box-sizing: border-box;
-            resize: none;
-            margin-bottom: 10px;
-        }
-
-        /* Navegación Inferior */
-        nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            z-index: 1000;
-        }
-        .nav-item {
-            background: none; border: none; color: var(--text-light);
-            font-weight: 600; cursor: pointer; padding: 8px 16px; border-radius: 20px;
-        }
-        .nav-item.active { color: var(--primary); background: var(--primary-light); }
-        .spacer { height: 80px; } /* Evita que el menú tape el contenido */
-
+        /* Perfil */
+        .perfil-header { text-align: center; padding: 20px 0; }
+        .avatar-lg { width: 80px; height: 80px; font-size: 30px; margin: 0 auto 10px; }
+        .btn-outline { border: 1px solid var(--border); background: transparent; color: var(--text); padding: 8px 15px; border-radius: 15px; cursor: pointer; margin-top: 10px; }
+        
+        /* Loader */
+        .loader { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; }
     </style>
 </head>
 <body>
 
-    <!-- ==============================================================
-         CONTENEDOR 1: AUTENTICACIÓN (Prioridad Absoluta)
-         ============================================================== -->
-    <div id="pantalla-login" class="pantalla activa">
-        <h1 class="titulo-app">⛵ Faro</h1>
-        <p class="subtitulo-app">Conéctate con la comunidad de fe y comparte la palabra.</p>
-        
+    <div id="pantalla-login" class="oculto">
+        <div class="logo-faro">⛵</div>
+        <h1 style="font-size: 28px; margin-bottom: 10px;">Faro</h1>
+        <p style="color: var(--text-light); max-width: 300px; margin-bottom: 20px;">Edifica tu vida y conecta con la comunidad.</p>
         <button id="btn-google" class="btn-google">
-            <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" alt="Google" width="20">
-            Continuar con Google
+            <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png" width="20" alt="G">
+            Entrar con Google
         </button>
+        <p id="login-status" style="margin-top: 15px; font-size: 14px; color: var(--primary);"></p>
     </div>
 
-    <!-- ==============================================================
-         CONTENEDOR 2: APLICACIÓN PRINCIPAL (Carga tras el Login)
-         ============================================================== -->
-    <div id="pantalla-app" class="pantalla container">
-        
-        <!-- Bloque Versículo -->
-        <div class="card" style="border-left: 4px solid var(--primary); background: var(--primary-light); text-align: center;">
-            <div id="texto-versiculo" style="font-style: italic; font-size: 18px; margin-bottom: 8px;">Cargando palabra del día...</div>
-            <div id="ref-versiculo" style="color: var(--text-light); font-size: 14px;"></div>
-        </div>
+    <div id="pantalla-app" class="oculto fade-in">
+        <header>
+            <h1>Faro</h1>
+            <button id="btn-tema" class="btn-outline" style="margin: 0; border: none;">🌓</button>
+        </header>
 
-        <!-- Creador de Publicaciones -->
-        <div class="card" id="contenedor-publicar">
-            <textarea id="input-publicacion" class="textarea-input" placeholder="Comparte una reflexión o petición..."></textarea>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <label style="font-size: 14px; cursor: pointer;">
-                    <input type="checkbox" id="chk-peticion"> 🙏 Es petición
-                </label>
-                <button id="btn-publicar" class="btn-primary">Publicar</button>
+        <div class="container" id="vista-feed">
+            <div class="card versiculo-box">
+                <p id="txt-versiculo" style="font-size: 16px; font-weight: 500; font-style: italic; margin-bottom: 8px;">Cargando alimento diario...</p>
+                <p id="ref-versiculo" style="font-size: 13px; color: var(--text-light);"></p>
             </div>
+
+            <div class="card">
+                <textarea id="input-post" class="input-post" placeholder="¿Qué hay en tu corazón hoy?"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 13px; color: var(--text-light); cursor: pointer;">
+                        <input type="checkbox" id="chk-oracion"> 🙏 Es petición
+                    </label>
+                    <button id="btn-publicar" class="btn-primary">Publicar</button>
+                </div>
+            </div>
+
+            <div id="feed-posts" class="loader">Cargando publicaciones...</div>
         </div>
 
-        <!-- Feed de Contenido -->
-        <div id="feed-publicaciones"></div>
-        <div class="spacer"></div>
+        <div class="container oculto" id="vista-perfil">
+            <div class="card perfil-header">
+                <div class="avatar avatar-lg" id="perfil-avatar">?</div>
+                <h2 id="perfil-nombre">Cargando...</h2>
+                <p id="perfil-email" style="color: var(--text-light); font-size: 14px; margin-bottom: 15px;"></p>
+                <button id="btn-logout" class="btn-outline" style="color: var(--danger); border-color: var(--danger);">Cerrar Sesión</button>
+            </div>
+            <h3 style="margin-bottom: 10px; font-size: 16px;">Mis Publicaciones</h3>
+            <div id="feed-perfil" class="loader">Cargando...</div>
+        </div>
+
+        <nav>
+            <button class="nav-btn activo" data-target="vista-feed" data-filtro="global">🌍 Comunidad</button>
+            <button class="nav-btn" data-target="vista-feed" data-filtro="oraciones">🙏 Oraciones</button>
+            <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil">👤 Mi Perfil</button>
+        </nav>
     </div>
 
-    <!-- Navegación (Solo visible en la app) -->
-    <nav id="menu-navegacion" style="display: none;">
-        <button class="nav-item active" data-tab="global">🌍 Global</button>
-        <button class="nav-item" data-tab="oraciones">🙏 Oraciones</button>
-        <button class="nav-item" id="btn-salir">Cerrar Sesión</button>
-    </nav>
-
-
-    <!-- ==============================================================
-         LÓGICA JAVASCRIPT Y FIREBASE
-         ============================================================== -->
     <script type="module">
-        // 1. Importaciones de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        // Usamos signInWithRedirect + getRedirectResult para máxima compatibilidad móvil
+        import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         
-        // Importación de Cloud Messaging
-        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+        // Importa tus versículos (Asegúrate de que el archivo versiculos.js esté en la misma carpeta)
+        import { versiculosDiarios } from "./versiculos.js";
 
-        // 2. Configuración de Firebase
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAzb71Y1IHcGhWqRmX5E3-Va5258wrhdk0",
             authDomain: "red-social-de-dios.firebaseapp.com",
             projectId: "red-social-de-dios",
             storageBucket: "red-social-de-dios.firebasestorage.app",
             messagingSenderId: "256126083920",
-            appId: "1:256126083920:web:f9265cbac956d1efe38255",
-            measurementId: "G-5X7TMJVN71"
+            appId: "1:256126083920:web:f9265cbac956d1efe38255"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const messaging = getMessaging(app);
 
-        // Clave VAPID proporcionada para notificaciones
-        const VAPID_KEY = "BMXEapO152zU5C2NCR9joZWClL0SK2mDUro7Hev8qtkJdvRB0Z8HwcrK_HvkIYED_Q1NKMjVuBd0r3zKLYwEMLY";
+        // Variables Globales
+        let usuarioActual = null;
+        let filtroActual = "global";
 
-        // 3. Gestión de Interfaz (Cambio de pantallas)
+        // DOM Elements
         const pantallaLogin = document.getElementById('pantalla-login');
         const pantallaApp = document.getElementById('pantalla-app');
-        const menuNavegacion = document.getElementById('menu-navegacion');
+        const loginStatus = document.getElementById('login-status');
 
-        function mostrarApp() {
-            pantallaLogin.classList.remove('activa');
-            pantallaLogin.style.display = 'none'; // Quitamos el login del flujo
-            
-            pantallaApp.classList.add('activa');
-            menuNavegacion.style.display = 'flex';
-        }
+        /* ==============================================
+           1. SISTEMA DE AUTENTICACIÓN
+           ============================================== */
+        
+        // Interceptar el retorno de Google (soluciona problemas de carga en móviles)
+        getRedirectResult(auth).then((result) => {
+            if (result) loginStatus.innerText = "¡Inicio exitoso! Cargando Faro...";
+        }).catch((error) => {
+            loginStatus.innerText = "Error: " + error.message;
+            loginStatus.style.color = "red";
+        });
 
-        function mostrarLogin() {
-            pantallaApp.classList.remove('activa');
-            menuNavegacion.style.display = 'none';
-            
-            pantallaLogin.style.display = 'flex';
-            setTimeout(() => pantallaLogin.classList.add('activa'), 50);
-        }
-
-        // 4. Lógica de Autenticación
-        document.getElementById('btn-google').addEventListener('click', async () => {
+        // Botón Login
+        document.getElementById('btn-google').addEventListener('click', () => {
+            loginStatus.innerText = "Redirigiendo a Google...";
             const provider = new GoogleAuthProvider();
-            try {
-                // Redirección segura priorizada
-                await signInWithRedirect(auth, provider);
-            } catch (error) {
-                console.error("Error al iniciar sesión:", error);
-            }
+            signInWithRedirect(auth, provider);
         });
 
-        document.getElementById('btn-salir').addEventListener('click', () => signOut(auth));
+        // Botón Logout
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth);
+        });
 
-        // El Observador de Sesión: Decide qué pantalla mostrar
-        onAuthStateChanged(auth, (user) => {
+        // Observador de Estado de Sesión (El cerebro del acceso)
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // El usuario está validado, mostramos la App
-                mostrarApp();
-                configurarNotificaciones();
-                cargarFeed();
+                usuarioActual = user;
+                pantallaLogin.classList.add('oculto');
+                pantallaApp.classList.remove('oculto');
+                
+                // Configurar Perfil
+                await verificarYCrearPerfil(user);
+                mostrarVersiculoDiario();
+                cargarFeedRealtime();
             } else {
-                // No hay usuario, mostramos el Login obligatoriamente
-                mostrarLogin();
+                usuarioActual = null;
+                pantallaApp.classList.add('oculto');
+                pantallaLogin.classList.remove('oculto');
             }
         });
 
-        // 5. Configuración de Cloud Messaging
-        async function configurarNotificaciones() {
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-                    if (token) {
-                        console.log("Token de FCM listo para recibir mensajes:", token);
-                        // Aquí en el futuro puedes guardar el token en la base de datos del usuario
-                    }
-                }
-            } catch (error) {
-                console.log("Permiso de notificaciones denegado o error:", error);
+        async function verificarYCrearPerfil(user) {
+            const userRef = doc(db, "usuarios", user.uid);
+            const userSnap = await getDoc(userRef);
+            
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    nombre: user.displayName,
+                    email: user.email,
+                    creadoEn: serverTimestamp(),
+                    bio: "Buscando la luz."
+                });
             }
+            
+            // Actualizar UI del Perfil
+            document.getElementById('perfil-nombre').innerText = user.displayName;
+            document.getElementById('perfil-email').innerText = user.email;
+            document.getElementById('perfil-avatar').innerText = user.displayName.charAt(0).toUpperCase();
         }
 
-        // 6. Lógica Básica de Publicación
-        document.getElementById('btn-publicar').addEventListener('click', async () => {
-            const contenido = document.getElementById('input-publicacion').value;
-            const esPeticion = document.getElementById('chk-peticion').checked;
+        /* ==============================================
+           2. SISTEMA DE NAVEGACIÓN Y TEMA
+           ============================================== */
+        
+        const navBtns = document.querySelectorAll('.nav-btn');
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Cambiar estilos de botones
+                navBtns.forEach(b => b.classList.remove('activo'));
+                btn.classList.add('activo');
+
+                // Cambiar Vistas
+                const targetId = btn.getAttribute('data-target');
+                document.getElementById('vista-feed').classList.add('oculto');
+                document.getElementById('vista-perfil').classList.add('oculto');
+                document.getElementById(targetId).classList.remove('oculto');
+
+                // Aplicar Filtro
+                filtroActual = btn.getAttribute('data-filtro');
+                cargarFeedRealtime(); // Recargar datos según el filtro
+            });
+        });
+
+        // Modo Oscuro Toggle
+        document.getElementById('btn-tema').addEventListener('click', () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        });
+
+        /* ==============================================
+           3. VERSÍCULO DIARIO (Manejo local pseudo-aleatorio)
+           ============================================== */
+        function mostrarVersiculoDiario() {
+            if(!versiculosDiarios || versiculosDiarios.length === 0) return;
+            const diaDelAño = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const indice = diaDelAño % versiculosDiarios.length;
+            const v = versiculosDiarios[indice];
             
-            if (!contenido.trim()) return;
+            document.getElementById('txt-versiculo').innerText = `"${v.RV}"`;
+            document.getElementById('ref-versiculo').innerText = `- ${v.ref}`;
+        }
+
+        /* ==============================================
+           4. PUBLICACIONES Y FEED REALTIME
+           ============================================== */
+        
+        // Crear Post
+        document.getElementById('btn-publicar').addEventListener('click', async () => {
+            const input = document.getElementById('input-post');
+            const isPrayer = document.getElementById('chk-oracion').checked;
+            const text = input.value.trim();
+            const btn = document.getElementById('btn-publicar');
+
+            if (!text) return;
+            
+            btn.disabled = true;
+            btn.innerText = "Enviando...";
 
             try {
                 await addDoc(collection(db, "publicaciones"), {
-                    userId: auth.currentUser.uid,
-                    nombre: auth.currentUser.displayName || "Usuario",
-                    content: contenido,
-                    isPrayer: esPeticion,
+                    userId: usuarioActual.uid,
+                    autor: usuarioActual.displayName,
+                    texto: text,
+                    isPrayer: isPrayer,
+                    likes: [],
                     timestamp: serverTimestamp()
                 });
-                document.getElementById('input-publicacion').value = "";
-                document.getElementById('chk-peticion').checked = false;
+                input.value = "";
+                document.getElementById('chk-oracion').checked = false;
             } catch (error) {
-                console.error("Error publicando:", error);
+                alert("Error al publicar: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Publicar";
             }
         });
 
-        // 7. Lógica Básica del Feed
-        function cargarFeed() {
-            onSnapshot(query(collection(db, "publicaciones")), (snap) => {
-                const contenedor = document.getElementById('feed-publicaciones');
-                contenedor.innerHTML = '';
-                
-                let posts = snap.docs.map(doc => doc.data());
-                // Ordenar por más reciente (verificando que exista el timestamp)
-                posts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+        // Escuchar Posts (Tiempo real)
+        let unsubscribe = null;
+        function cargarFeedRealtime() {
+            if (unsubscribe) unsubscribe(); // Limpiar escucha anterior
 
-                posts.forEach(post => {
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.innerHTML = `
-                        <strong style="color: var(--primary);">${post.nombre}</strong>
-                        <p style="margin: 8px 0; line-height: 1.5;">${post.content}</p>
-                        <span style="font-size: 12px; color: var(--text-light);">
-                            ${post.isPrayer ? '🙏 Petición de oración' : '💬 Publicación'}
-                        </span>
-                    `;
-                    contenedor.appendChild(div);
+            const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
+            
+            unsubscribe = onSnapshot(q, (snapshot) => {
+                let html = "";
+                
+                snapshot.forEach((doc) => {
+                    const post = doc.data();
+                    post.id = doc.id;
+                    
+                    // Aplicar filtros lógicos
+                    let mostrar = true;
+                    if (filtroActual === "oraciones" && !post.isPrayer) mostrar = false;
+                    if (filtroActual === "perfil" && post.userId !== usuarioActual.uid) mostrar = false;
+
+                    if (mostrar) {
+                        const amilike = post.likes?.includes(usuarioActual.uid);
+                        const numLikes = post.likes?.length || 0;
+                        const inicial = post.autor ? post.autor.charAt(0).toUpperCase() : '?';
+
+                        html += `
+                            <div class="card fade-in">
+                                <div class="post-header">
+                                    <div class="avatar">${inicial}</div>
+                                    <div class="post-meta">
+                                        <strong>${post.autor}</strong>
+                                        <span>${post.isPrayer ? '🙏 Petición de Oración' : '📝 Reflexión'}</span>
+                                    </div>
+                                </div>
+                                <div class="post-content">${post.texto}</div>
+                                <div class="post-actions">
+                                    <button class="btn-action ${amilike ? 'like-activo' : ''}" onclick="window.darLike('${post.id}', ${amilike})">
+                                        ${amilike ? '❤️' : '🤍'} ${numLikes} Amén
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
                 });
+
+                const contenedor = filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts';
+                document.getElementById(contenedor).innerHTML = html || '<p class="loader">No hay publicaciones aquí todavía.</p>';
             });
         }
+
+        // Función Global para Likes
+        window.darLike = async (postId, yaDioLike) => {
+            const postRef = doc(db, "publicaciones", postId);
+            if (yaDioLike) {
+                await updateDoc(postRef, { likes: arrayRemove(usuarioActual.uid) });
+            } else {
+                await updateDoc(postRef, { likes: arrayUnion(usuarioActual.uid) });
+            }
+        };
+
     </script>
 </body>
 </html>
