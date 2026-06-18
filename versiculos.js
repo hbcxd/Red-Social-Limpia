@@ -489,7 +489,7 @@ export const versiculosDiarios = [
         NTV: "¡Que tu corazón vuelva a estar tranquilo, alma mía, porque el Señor ha sido bueno contigo!",
         NVI: "¡Ya puedes descansar, alma mía, porque el Señor ha sido bueno contigo!",
         PDT: "¡Vuelve a descansar, alma mía, porque el SEÑOR te ha tratado bien!"
-    }
+    },
     {
         ref: "Salmos 18:30",
         RV: "En cuanto a Dios, perfecto es su camino, y acrisolada la palabra de Jehová; escudo es a todos los que en él esperan.",
