@@ -64,9 +64,10 @@
 
         /* PUBLICACIÓN INDIVIDUAL */
         .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; font-size: 20px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
-        .post-meta { display: flex; flex-direction: column; flex-grow: 1; }
-        .post-meta .name-display { font-size: 14px; font-weight: bold; }
+        /* Avatares mixtos: Soporta tanto emoji como imágenes antiguas */
+        .avatar { width: 40px; height: 40px; border-radius: 50%; font-size: 20px; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); object-fit: cover; }
+        .post-meta { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; }
+        .post-meta .name-display { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .post-meta .username-display { font-size: 12px; color: var(--text-light); font-weight: 500; }
         .post-content { font-size: 15px; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; }
         .post-actions { display: flex; gap: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
@@ -79,7 +80,7 @@
 
         /* PERFIL E INTERFAZ AJUSTES */
         .perfil-header { text-align: center; padding: 15px 0; }
-        .avatar-lg { width: 75px; height: 75px; font-size: 36px; margin: 0 auto 10px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); }
+        .avatar-lg { width: 75px; height: 75px; font-size: 36px; margin: 0 auto 10px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); object-fit: cover; overflow: hidden;}
         .stats-box { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .stat-item { display: flex; flex-direction: column; font-size: 13px; color: var(--text-light); }
         .stat-item strong { font-size: 16px; color: var(--text); }
@@ -117,9 +118,9 @@
             </header>
             <nav>
                 <button class="nav-btn activo" data-target="vista-feed" data-filtro="global"><span>🌍</span>Inicio</button>
-                <button class="nav-btn" data-target="vista-feed" data-filtro="oraciones"><span>🙏</span>Oraciones</button>
+                <button class="nav-btn" data-target="vista-feed" data-filtro="oraciones"><span>🙏</span>Peticiones</button>
                 <button class="nav-btn" data-target="vista-feed" data-filtro="guardados"><span>🔖</span>Guardados</button>
-                <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil"><span>👤</span>Perfil</button>
+                <button class="nav-btn" data-target="vista-perfil" data-filtro="perfil"><span>👤</span>Mi Perfil</button>
             </nav>
         </div>
 
@@ -133,7 +134,7 @@
                 <textarea id="input-post" class="input-post" placeholder="¿Qué hay en tu corazón hoy?"></textarea>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <label class="checkbox-group" style="margin: 0;">
-                        <input type="checkbox" id="chk-oracion"> 🙏 Es petición de oración
+                        <input type="checkbox" id="chk-oracion"> 🙏 Es petición
                     </label>
                     <button id="btn-publicar" class="btn-primary">Compartir</button>
                 </div>
@@ -161,7 +162,7 @@
                     <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre Completo:</label>
                     <input type="text" id="edit-nombre" class="form-control" placeholder="Tu Nombre y Apellido">
                     
-                    <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre de Usuario (@username):</label>
+                    <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre de Usuario (@usuario):</label>
                     <input type="text" id="edit-username" class="form-control" placeholder="ejemplo: juan_fe">
 
                     <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Biografía espiritual:</label>
@@ -173,11 +174,13 @@
                         <option value="📖">📖 Santa Biblia</option>
                         <option value="⚔️">⚔️ Espada del Espíritu</option>
                         <option value="✝️">✝️ Cruz de Redención</option>
+                        <option value="🕊️">🕊️ Paloma (Espíritu Santo)</option>
+                        <option value="🔥">🔥 Fuego Avivador</option>
                     </select>
 
                     <h5 style="font-size: 12px; margin: 10px 0 5px; color: var(--text-light);">Visibilidad y Privacidad:</h5>
                     <label class="checkbox-group">
-                        <input type="checkbox" id="edit-ver-nombre" checked> Mostrar mi Nombre y Apellido al público
+                        <input type="checkbox" id="edit-ver-nombre" checked> Mostrar mi Nombre y Apellido públicamente
                     </label>
                     
                     <button id="btn-guardar-perfil" class="btn-primary" style="width: 100%; font-size: 14px; margin-top: 5px;">Guardar y Aplicar Cambios</button>
@@ -186,7 +189,7 @@
                 <button id="btn-logout" class="btn-outline" style="color: var(--danger); border-color: var(--danger); width: 100%; margin-top: 15px;">Cerrar Sesión</button>
             </div>
             
-            <h3 style="margin-bottom: 10px; font-size: 15px;">Mis Publicaciones</h3>
+            <h3 style="margin-bottom: 10px; font-size: 15px;" id="titulo-subfeed">Mis Publicaciones</h3>
             <div id="feed-perfil" class="loader">Cargando tu bitácora...</div>
         </div>
     </div>
@@ -262,7 +265,7 @@
 
         async function crearPerfilPorDefecto(user) {
             const parseName = user.displayName || "Fiel Faro";
-            const genUsername = parseName.toLowerCase().replace(/\s+/g, '_') + Math.floor(Math.random() * 100);
+            const genUsername = parseName.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 100);
             await setDoc(doc(db, "usuarios", user.uid), {
                 nombre: parseName,
                 username: genUsername,
@@ -277,24 +280,34 @@
         }
 
         function renderizarAjustesPerfil(datos) {
-            document.getElementById('perfil-nombre-display').innerText = datos.mostrarNombrePublico ? (datos.nombre || "Sin Nombre") : "Nombre Privado";
+            // Adaptabilidad robusta para usuarios antiguos y nuevos
+            const mostrarN = datos.mostrarNombrePublico !== false; // true por defecto
+            document.getElementById('perfil-nombre-display').innerText = mostrarN ? (datos.nombre || "Usuario") : "Nombre Privado";
             document.getElementById('perfil-username-display').innerText = `@${datos.username || 'usuario'}`;
             document.getElementById('perfil-bio').innerText = datos.bio || "";
-            document.getElementById('perfil-avatar').innerText = datos.simbolo || "⛵";
+            
+            // Adaptabilidad de avatar: Si es imagen antigua o símbolo nuevo
+            const avatarVisual = datos.simbolo || datos.fotoUrl || "⛵";
+            const avatarEl = document.getElementById('perfil-avatar');
+            if (avatarVisual.startsWith('http')) {
+                avatarEl.innerHTML = `<img src="${avatarVisual}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            } else {
+                avatarEl.innerHTML = avatarVisual;
+            }
             
             // Asignación a Inputs del Panel
             document.getElementById('edit-nombre').value = datos.nombre || "";
             document.getElementById('edit-username').value = datos.username || "";
             document.getElementById('edit-bio').value = datos.bio || "";
-            document.getElementById('edit-simbolo').value = datos.simbolo || "⛵";
-            document.getElementById('edit-ver-nombre').checked = datos.mostrarNombrePublico !== false;
+            document.getElementById('edit-simbolo').value = (datos.simbolo && !datos.simbolo.startsWith('http')) ? datos.simbolo : "⛵";
+            document.getElementById('edit-ver-nombre').checked = mostrarN;
 
             document.getElementById('count-seguidores').innerText = datos.seguidores?.length || 0;
             document.getElementById('count-seguidos').innerText = datos.seguidos?.length || 0;
             document.getElementById('count-guardados').innerText = datos.guardados?.length || 0;
         }
 
-        /* GUARDAR CONFIGURACIÓN DESDE EL PANEL */
+        /* GUARDAR CONFIGURACIÓN DESDE EL PANEL REPARADO */
         document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
             const nombreText = document.getElementById('edit-nombre').value.trim();
             const usernameText = document.getElementById('edit-username').value.trim().toLowerCase().replace(/\s+/g, '');
@@ -304,21 +317,29 @@
 
             if(!nombreText || !usernameText) return alert("Faltan campos obligatorios.");
 
+            const btnSave = document.getElementById('btn-guardar-perfil');
+            btnSave.disabled = true;
+            btnSave.innerText = "Guardando...";
+
             try {
-                await updateDoc(doc(doc(db, "usuarios", usuarioActual.uid)), {
+                // Aquí estaba el error anterior (doc(doc(...))). Ahora está correcto.
+                await updateDoc(doc(db, "usuarios", usuarioActual.uid), {
                     nombre: nombreText,
                     username: usernameText,
                     bio: bioText,
                     simbolo: simboloSelect,
                     mostrarNombrePublico: publicarNombre
                 });
-                alert("¡Configuración guardada!");
+                alert("¡Configuración guardada y actualizada!");
             } catch(e) {
                 alert("Error al actualizar ajustes: " + e.message);
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerText = "Guardar y Aplicar Cambios";
             }
         });
 
-        /* PUBLICACIÓN COMPROMETIDA */
+        /* PUBLICAR EN LA COMUNIDAD */
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const input = document.getElementById('input-post');
             const contentText = input.value.trim();
@@ -327,12 +348,13 @@
 
             document.getElementById('btn-publicar').disabled = true;
             try {
+                // Compatible con BD antigua y nueva
                 await addDoc(collection(db, "publicaciones"), {
                     content: contentText,
                     userId: usuarioActual.uid,
-                    userName: datosUsuarioDocumento?.nombre || "Anónimo",
-                    userUsername: datosUsuarioDocumento?.username || "anonimo",
-                    userFoto: datosUsuarioDocumento?.simbolo || "⛵",
+                    userName: datosUsuarioDocumento?.nombre || usuarioActual.displayName || "Usuario",
+                    userUsername: datosUsuarioDocumento?.username || "usuario",
+                    userFoto: datosUsuarioDocumento?.simbolo || datosUsuarioDocumento?.fotoUrl || "⛵",
                     mostrarNombrePost: datosUsuarioDocumento?.mostrarNombrePublico !== false,
                     isPrayer: isPrayer,
                     likes: [],
@@ -347,7 +369,7 @@
             }
         });
 
-        /* ESCUCHADOR DE FILTRADO Y RENDERIZACIÓN */
+        /* ESCUCHADOR DE FILTRADO Y RENDERIZACIÓN ROBUSTO */
         function cargarFeedRealtime() {
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
             
@@ -368,8 +390,17 @@
                         const yaGuardado = datosUsuarioDocumento?.guardados?.includes(post.id);
                         const loSigo = datosUsuarioDocumento?.seguidos?.includes(post.userId);
                         
-                        // Determinación de visibilidad de nombres dinámicos en los posts de otros
-                        const nombreAMostrar = post.mostrarNombrePost ? post.userName : "Perfil Privado";
+                        // PARACAÍDAS (FALLBACKS) PARA USUARIOS Y POSTS VIEJOS
+                        const nombreAutorReal = post.userName || post.autor || "Usuario";
+                        const mostrarNombre = post.mostrarNombrePost !== false; // Si es viejo y no tiene esto, asume true
+                        const nombreAMostrar = mostrarNombre ? nombreAutorReal : "Perfil Privado";
+                        const alias = post.userUsername || "usuario";
+                        
+                        // Manejo robusto de avatares mixtos
+                        const avatarInfo = post.userFoto || post.simbolo || '⛵';
+                        const avatarRender = avatarInfo.startsWith('http') 
+                            ? `<img class="avatar" src="${avatarInfo}">` 
+                            : `<div class="avatar">${avatarInfo}</div>`;
 
                         const esMiPost = post.userId === usuarioActual.uid;
                         const btnSeguirHtml = esMiPost ? '' : `
@@ -381,14 +412,14 @@
                         html += `
                             <div class="card fade-in">
                                 <div class="post-header">
-                                    <div class="avatar">${post.userFoto || '⛵'}</div>
+                                    ${avatarRender}
                                     <div class="post-meta">
                                         <div class="name-display">${nombreAMostrar}</div>
-                                        <div class="username-display">@${post.userUsername || 'usuario'} ${post.isPrayer ? '• 🙏 Petición' : ''}</div>
+                                        <div class="username-display">@${alias} ${post.isPrayer ? '• 🙏 Petición' : ''}</div>
                                     </div>
                                     ${btnSeguirHtml}
                                 </div>
-                                <div class="post-content">${post.content}</div>
+                                <div class="post-content">${post.content || post.texto || ''}</div>
                                 <div class="post-actions">
                                     <button class="btn-action ${amilike ? 'like-activo' : ''}" onclick="window.darLike('${post.id}', ${amilike})">
                                         ${amilike ? '❤️' : '🤍'} ${numLikes} Amén
