@@ -36,7 +36,7 @@
         
         .logo-faro-svg { width: 80px; height: 80px; color: var(--primary); margin-bottom: 20px; }
         
-        .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 10px; transition: all 0.3s; }
+        .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: all 0.3s; }
         .btn-google:hover { background: var(--primary); color: #fff; }
 
         /* HEADER FIJO Y NAVEGACIÓN */
@@ -82,7 +82,7 @@
         .stat-item strong { font-size: 16px; color: var(--text); }
         
         #panel-ajustes { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.4s ease-out; opacity: 0; }
-        #panel-ajustes.desplegado { max-height: 800px; opacity: 1; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--border); }
+        #panel-ajustes.desplegado { max-height: 900px; opacity: 1; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--border); }
 
         .form-control { width: 100%; padding: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); border-radius: 8px; margin-bottom: 10px; font-size: 14px; outline: none; }
         .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; color: var(--text); cursor: pointer; }
@@ -208,6 +208,9 @@
                 <button id="btn-invitar" class="btn-outline" style="width: 100%; margin-top: 10px; background: var(--primary-light); color: var(--primary); font-weight: bold; border-color: var(--primary);">✨ Invitar a un hermano</button>
 
                 <div id="panel-ajustes" style="text-align: left;">
+                    
+                    <button id="btn-notificaciones" class="btn-primary" style="width: 100%; margin-bottom: 15px; background: var(--success);">🔔 Activar Notificaciones</button>
+
                     <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre Completo:</label>
                     <input type="text" id="edit-nombre" class="form-control" placeholder="Tu Nombre y Apellido">
                     
@@ -262,6 +265,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, getDocs, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
         
         import { versiculosDiarios } from "./versiculos.js";
 
@@ -277,6 +281,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
 
         let usuarioActual = null;
         let datosUsuarioDocumento = null;
@@ -290,6 +295,41 @@
             return `<svg viewBox="0 0 24 24"><use href="#icon-${safeId}"></use></svg>`;
         }
 
+        /* =========================================
+           LÓGICA DE NOTIFICACIONES PUSH
+           ========================================= */
+        async function solicitarPermisoNotificaciones() {
+            try {
+                const currentToken = await getToken(messaging, { 
+                    vapidKey: 'BMXEapO152zU5C2NCR9joZWClL0SK2mDUro7Hev8qtkJdvRB0Z8HwcrK_HvkIYED_Q1NKMjVuBd0r3zKLYwEMLY' 
+                });
+                
+                if (currentToken) {
+                    await setDoc(doc(db, "tokens_notificacion", usuarioActual.uid), {
+                        token: currentToken,
+                        timestamp: serverTimestamp()
+                    }, { merge: true });
+                    alert("🔔 ¡Notificaciones activadas con éxito! Te avisaremos cuando haya novedades.");
+                    document.getElementById('btn-notificaciones').style.display = 'none';
+                } else {
+                    alert("No se pudo obtener el token de notificación. Revisa los permisos de tu navegador.");
+                }
+            } catch (error) {
+                console.error("Error al pedir permiso de notificaciones", error);
+                alert("Debes permitir las notificaciones en tu navegador para usar esta función.");
+            }
+        }
+
+        document.getElementById('btn-notificaciones').addEventListener('click', solicitarPermisoNotificaciones);
+
+        onMessage(messaging, (payload) => {
+            console.log("Mensaje recibido: ", payload);
+            alert(`🔔 ${payload.notification.title}\n${payload.notification.body}`);
+        });
+
+        /* =========================================
+           RESTO DE LA LÓGICA DE LA APP
+           ========================================= */
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('pantalla-carga').classList.add('oculto');
             if (user) {
