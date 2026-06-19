@@ -36,7 +36,7 @@
         
         .logo-faro-svg { width: 80px; height: 80px; color: var(--primary); margin-bottom: 20px; }
         
-        .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: all 0.3s; }
+        .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 10px; transition: all 0.3s; }
         .btn-google:hover { background: var(--primary); color: #fff; }
 
         /* HEADER FIJO Y NAVEGACIÓN */
@@ -81,7 +81,6 @@
         .stat-item:hover { color: var(--primary); }
         .stat-item strong { font-size: 16px; color: var(--text); }
         
-        /* Panel Desplegable */
         #panel-ajustes { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.4s ease-out; opacity: 0; }
         #panel-ajustes.desplegado { max-height: 800px; opacity: 1; padding-top: 15px; margin-top: 15px; border-top: 1px solid var(--border); }
 
@@ -103,6 +102,17 @@
         .usuario-lista-item .avatar-peq svg { width: 100%; height: 100%; }
 
         .loader { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; font-size: 14px; }
+
+        /* ALERTAS PWA (INSTALAR / ACTUALIZAR) */
+        .pwa-alertas {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--card); border: 1px solid var(--primary);
+            box-shadow: var(--shadow); padding: 12px 20px; border-radius: 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 15px;
+            z-index: 9999; width: 90%; max-width: 400px;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-cerrar-alerta { background: transparent; border: none; font-size: 16px; color: var(--text-light); cursor: pointer; padding: 0 5px; }
     </style>
 </head>
 <body>
@@ -126,7 +136,19 @@
     <div id="pantalla-login" class="oculto">
         <svg class="logo-faro-svg" viewBox="0 0 24 24" style="width: 100px; height: 100px;"><use href="#icon-faro"></use></svg>
         <h1 style="font-size: 32px; margin-bottom: 10px; color: var(--text);">Faro</h1>
-        <p style="color: var(--text-light); max-width: 280px; margin-bottom: 30px; font-size: 15px;">Encuentra luz y conecta con tu comunidad espiritual.</p>
+        
+        <div style="max-width: 340px; margin-bottom: 20px; text-align: center;">
+            <p style="color: var(--text-light); font-size: 15px; margin-bottom: 15px; line-height: 1.6;">
+                Nuestro propósito es edificarnos unos a otros a través de la Palabra de Dios, manteniéndonos unidos como comunidad y cuerpo de Cristo.
+            </p>
+            <div style="background: var(--primary-light); padding: 12px; border-radius: 8px; border-left: 4px solid var(--primary); text-align: left;">
+                <p style="color: var(--primary); font-size: 14px; font-style: italic; font-weight: 500; margin-bottom: 5px;">
+                    "Por lo cual, animaos unos a otros, y edificaos unos a otros, así como lo hacéis."
+                </p>
+                <strong style="color: var(--primary); font-size: 12px;">- 1 Tesalonicenses 5:11</strong>
+            </div>
+        </div>
+
         <button id="btn-google" class="btn-google"><span>G</span> Continuar con Google</button>
     </div>
 
@@ -183,7 +205,6 @@
                 </div>
 
                 <button id="btn-toggle-ajustes" class="btn-outline" style="width: 100%;">⚙️ Ajustes del Perfil</button>
-                <!-- NUEVO BOTÓN: Link de Invitación -->
                 <button id="btn-invitar" class="btn-outline" style="width: 100%; margin-top: 10px; background: var(--primary-light); color: var(--primary); font-weight: bold; border-color: var(--primary);">✨ Invitar a un hermano</button>
 
                 <div id="panel-ajustes" style="text-align: left;">
@@ -231,6 +252,12 @@
         </div>
     </div>
 
+    <div id="pwa-alertas" class="pwa-alertas oculto">
+        <span id="pwa-mensaje" style="font-size: 14px; font-weight: 500;"></span>
+        <button id="btn-pwa-accion" class="btn-primary" style="padding: 6px 15px; font-size: 13px;"></button>
+        <button id="btn-pwa-cerrar" class="btn-cerrar-alerta">✖</button>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -255,17 +282,14 @@
         let datosUsuarioDocumento = null;
         let filtroActual = "global";
 
-        // MEMORIA TEMPORAL PARA COMPARTIR DE FORMA SEGURA
         window.postsActuales = {};
 
-        /* HELPER: RENDERIZAR SVGS */
         function obtenerSvgIcono(id) {
             const idsValidos = ['faro', 'biblia', 'cruz', 'espada', 'paloma', 'fuego'];
             const safeId = idsValidos.includes(id) ? id : 'faro';
             return `<svg viewBox="0 0 24 24"><use href="#icon-${safeId}"></use></svg>`;
         }
 
-        /* ESCUCHA DE SESIÓN */
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('pantalla-carga').classList.add('oculto');
             if (user) {
@@ -301,7 +325,6 @@
 
         document.getElementById('btn-logout').addEventListener('click', () => signOut(auth));
 
-        /* GESTIÓN DE PERFIL */
         async function crearPerfilPorDefecto(user) {
             const parseName = user.displayName || "Fiel Creyente";
             const genUsername = parseName.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 100);
@@ -322,7 +345,6 @@
             document.getElementById('perfil-username-display').innerText = `@${datos.username || 'usuario'}`;
             document.getElementById('perfil-bio').innerText = datos.bio || "";
             
-            // Icono vectorial
             document.getElementById('perfil-avatar').innerHTML = obtenerSvgIcono(datos.simboloId || 'faro');
             
             document.getElementById('edit-nombre').value = datos.nombre || "";
@@ -335,12 +357,10 @@
             document.getElementById('count-seguidos').innerText = datos.seguidos?.length || 0;
         }
 
-        /* TOGGLE PANEL AJUSTES */
         document.getElementById('btn-toggle-ajustes').addEventListener('click', () => {
             document.getElementById('panel-ajustes').classList.toggle('desplegado');
         });
 
-        /* GUARDAR PERFIL Y ACTUALIZAR POSTS VIEJOS EN CASCADA */
         document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
             const nombreText = document.getElementById('edit-nombre').value.trim();
             const usernameText = document.getElementById('edit-username').value.trim().toLowerCase().replace(/\s+/g, '');
@@ -354,13 +374,11 @@
             btnSave.disabled = true; btnSave.innerText = "Guardando y actualizando historial...";
 
             try {
-                // 1. Guardar en Perfil
                 await updateDoc(doc(db, "usuarios", usuarioActual.uid), {
                     nombre: nombreText, username: usernameText, bio: bioText,
                     simboloId: simboloSelect, mostrarNombrePublico: publicarNombre
                 });
 
-                // 2. ACTUALIZACIÓN RETROACTIVA (ACTUALIZAR POSTS VIEJOS)
                 const qPosts = query(collection(db, "publicaciones"), where("userId", "==", usuarioActual.uid));
                 const snapshots = await getDocs(qPosts);
                 const promesas = [];
@@ -380,7 +398,6 @@
             finally { btnSave.disabled = false; btnSave.innerText = "Guardar Cambios"; }
         });
 
-        /* COMPARTIR POST */
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const input = document.getElementById('input-post');
             const contentText = input.value.trim();
@@ -403,16 +420,15 @@
             finally { document.getElementById('btn-publicar').disabled = false; }
         });
 
-        /* CARGAR FEED */
         function cargarFeedRealtime() {
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
             onSnapshot(q, (snapshot) => {
                 let html = "";
-                window.postsActuales = {}; // Reiniciar la caché local de publicaciones
+                window.postsActuales = {}; 
 
                 snapshot.forEach((docSnap) => {
                     const post = docSnap.data(); post.id = docSnap.id;
-                    window.postsActuales[post.id] = post; // Guardar en caché local
+                    window.postsActuales[post.id] = post; 
                     
                     let mostrar = true;
                     if (filtroActual === "perfil" && post.userId !== usuarioActual.uid) mostrar = false;
@@ -450,7 +466,6 @@
                                     <button class="btn-action ${yaGuardado ? 'save-activo' : ''}" onclick="window.guardarPost('${post.id}', ${yaGuardado})">
                                         🔖 ${yaGuardado ? 'Guardado' : 'Guardar'}
                                     </button>
-                                    <!-- NUEVOS BOTONES DE ACCIÓN -->
                                     <button class="btn-action" onclick="window.recompartirInterno('${post.id}')">
                                         🔄 Recompartir
                                     </button>
@@ -468,7 +483,6 @@
             });
         }
 
-        /* LISTA MODAL SEGUIDORES/SEGUIDOS */
         window.abrirModalUsuarios = async (tipo) => {
             const modal = document.getElementById('modal-usuarios');
             const titulo = document.getElementById('modal-titulo');
@@ -486,7 +500,6 @@
 
             try {
                 let html = '';
-                // Promesas para cargar la info de cada usuario de la lista
                 const promesas = listaIds.map(id => getDoc(doc(db, "usuarios", id)));
                 const snaps = await Promise.all(promesas);
                 
@@ -512,7 +525,6 @@
 
         window.cerrarModalUsuarios = () => { document.getElementById('modal-usuarios').classList.remove('activo'); };
 
-        /* OPERACIONES BÁSICAS */
         window.darLike = async (postId, yaDioLike) => { await updateDoc(doc(db, "publicaciones", postId), { likes: yaDioLike ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) }); };
         window.guardarPost = async (postId, yaGuardado) => { await updateDoc(doc(db, "usuarios", usuarioActual.uid), { guardados: yaGuardado ? arrayRemove(postId) : arrayUnion(postId) }); };
         window.interactuarSeguir = async (targetUserId, yaLoSigo) => {
@@ -520,7 +532,6 @@
             await updateDoc(doc(db, "usuarios", targetUserId), { seguidores: yaLoSigo ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) });
         };
 
-        /* FUNCIONES DE COMPARTIR (NUEVAS) */
         window.recompartirInterno = async (postId) => {
             const postOriginal = window.postsActuales[postId];
             if (!postOriginal) return;
@@ -541,9 +552,7 @@
                     timestamp: serverTimestamp()
                 });
                 alert("¡Has recompartido la publicación con éxito!");
-            } catch (e) {
-                alert("Error al recompartir internamente.");
-            }
+            } catch (e) { alert("Error al recompartir internamente."); }
         };
 
         window.compartirExterno = async (postId) => {
@@ -555,50 +564,32 @@
 
             if (navigator.share) {
                 try {
-                    await navigator.share({
-                        title: 'Faro - Comunidad de Fe',
-                        text: textoCompartir,
-                        url: urlApp
-                    });
-                } catch (err) {
-                    if (err.name !== 'AbortError') alert("Error al compartir externamente.");
-                }
+                    await navigator.share({ title: 'Faro - Comunidad de Fe', text: textoCompartir, url: urlApp });
+                } catch (err) { if (err.name !== 'AbortError') alert("Error al compartir externamente."); }
             } else {
                 try {
                     await navigator.clipboard.writeText(urlApp);
                     alert("¡Enlace de la publicación copiado al portapapeles! Ya puedes enviarlo a tus amigos.");
-                } catch (err) {
-                    alert("No se pudo copiar el enlace.");
-                }
+                } catch (err) { alert("No se pudo copiar el enlace."); }
             }
         };
 
-        /* MANEJADOR DE INVITACIÓN (NUEVO) */
         document.getElementById('btn-invitar').addEventListener('click', async () => {
             const urlApp = `${window.location.origin}${window.location.pathname}`;
             const textoInvitacion = "¡Hola! Te invito a unirte a Faro, un espacio para compartir peticiones de oración, reflexiones bíblicas y crecer juntos en comunidad. Regístrate aquí:";
 
             if (navigator.share) {
                 try {
-                    await navigator.share({
-                        title: 'Faro - Comunidad de Fe',
-                        text: textoInvitacion,
-                        url: urlApp
-                    });
-                } catch (err) {
-                    if (err.name !== 'AbortError') alert("Error al enviar la invitación.");
-                }
+                    await navigator.share({ title: 'Faro - Comunidad de Fe', text: textoInvitacion, url: urlApp });
+                } catch (err) { if (err.name !== 'AbortError') alert("Error al enviar la invitación."); }
             } else {
                 try {
                     await navigator.clipboard.writeText(`${textoInvitacion} ${urlApp}`);
                     alert("¡Mensaje de invitación copiado al portapapeles! Compártelo con tus conocidos.");
-                } catch (err) {
-                    alert("No se pudo copiar el enlace de invitación.");
-                }
+                } catch (err) { alert("No se pudo copiar el enlace de invitación."); }
             }
         });
 
-        /* NAVEGACIÓN Y TEMA */
         const navBtns = document.querySelectorAll('.nav-btn');
         navBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -627,7 +618,60 @@
             document.getElementById('ref-versiculo').innerText = `- ${versiculosDiarios[diaDelAño % versiculosDiarios.length].ref}`;
         }
         
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error', err)); }
+        /* =========================================
+           LÓGICA DE INSTALACIÓN Y ACTUALIZACIÓN PWA
+           ========================================= */
+        const pwaAlertas = document.getElementById('pwa-alertas');
+        const pwaMensaje = document.getElementById('pwa-mensaje');
+        const btnPwaAccion = document.getElementById('btn-pwa-accion');
+        const btnPwaCerrar = document.getElementById('btn-pwa-cerrar');
+
+        function mostrarAlertaPWA(mensaje, textoBoton, callback) {
+            pwaMensaje.innerText = mensaje;
+            btnPwaAccion.innerText = textoBoton;
+            btnPwaAccion.onclick = callback;
+            pwaAlertas.classList.remove('oculto');
+        }
+
+        function ocultarAlertaPWA() { pwaAlertas.classList.add('oculto'); }
+        btnPwaCerrar.addEventListener('click', ocultarAlertaPWA);
+
+        let eventoInstalacion = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); 
+            eventoInstalacion = e;
+            mostrarAlertaPWA("Lleva a Faro contigo. ¿Deseas instalar la app?", "Instalar", async () => {
+                if (!eventoInstalacion) return;
+                eventoInstalacion.prompt();
+                const result = await eventoInstalacion.userChoice;
+                if (result.outcome === 'accepted') console.log('App instalada');
+                eventoInstalacion = null;
+                ocultarAlertaPWA();
+            });
+        });
+
+        if ('serviceWorker' in navigator) {
+            let actualizando = false;
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                reg.addEventListener('updatefound', () => {
+                    const nuevoWorker = reg.installing;
+                    nuevoWorker.addEventListener('statechange', () => {
+                        if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            mostrarAlertaPWA("¡Hay una nueva actualización disponible!", "Actualizar", () => {
+                                nuevoWorker.postMessage({ type: 'SKIP_WAITING' });
+                            });
+                        }
+                    });
+                });
+            }).catch(err => console.log('Error en Service Worker', err));
+
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!actualizando) {
+                    actualizando = true;
+                    window.location.reload();
+                }
+            });
+        }
     </script>
 </body>
 </html>
