@@ -2,7 +2,8 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'faro-v2.7'; 
+// Cambiamos la versión para forzar la actualización en los dispositivos
+const CACHE_NAME = 'faro-v2.8'; 
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -35,7 +36,7 @@ messaging.onBackgroundMessage((payload) => {
 
 self.addEventListener('install', (e) => {
     e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE)));
-    self.skipWaiting();
+    // Se elimina self.skipWaiting() de aquí para que la app espere la confirmación del usuario
 });
 
 self.addEventListener('activate', (e) => {
@@ -56,4 +57,11 @@ self.addEventListener('fetch', (e) => {
     const url = new URL(e.request.url);
     if (url.hostname.includes('googleapis.com') || url.hostname.includes('firebase')) return;
     e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+});
+
+// NUEVO: Escucha el mensaje desde index.html para forzar la actualización
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
