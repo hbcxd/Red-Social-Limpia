@@ -63,7 +63,7 @@
         .post-meta .name-display { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .post-meta .username-display { font-size: 12px; color: var(--text-light); font-weight: 500; }
         .post-content { font-size: 15px; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; }
-        .post-actions { display: flex; gap: 15px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .post-actions { display: flex; gap: 15px; border-top: 1px solid var(--border); padding-top: 10px; flex-wrap: wrap; }
         .btn-action { background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
         .btn-action.like-activo { color: var(--danger); }
         .btn-action.save-activo { color: #ecc94b; }
@@ -183,6 +183,8 @@
                 </div>
 
                 <button id="btn-toggle-ajustes" class="btn-outline" style="width: 100%;">⚙️ Ajustes del Perfil</button>
+                <!-- NUEVO BOTÓN: Link de Invitación -->
+                <button id="btn-invitar" class="btn-outline" style="width: 100%; margin-top: 10px; background: var(--primary-light); color: var(--primary); font-weight: bold; border-color: var(--primary);">✨ Invitar a un hermano</button>
 
                 <div id="panel-ajustes" style="text-align: left;">
                     <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre Completo:</label>
@@ -252,6 +254,9 @@
         let usuarioActual = null;
         let datosUsuarioDocumento = null;
         let filtroActual = "global";
+
+        // MEMORIA TEMPORAL PARA COMPARTIR DE FORMA SEGURA
+        window.postsActuales = {};
 
         /* HELPER: RENDERIZAR SVGS */
         function obtenerSvgIcono(id) {
@@ -403,8 +408,11 @@
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
             onSnapshot(q, (snapshot) => {
                 let html = "";
+                window.postsActuales = {}; // Reiniciar la caché local de publicaciones
+
                 snapshot.forEach((docSnap) => {
                     const post = docSnap.data(); post.id = docSnap.id;
+                    window.postsActuales[post.id] = post; // Guardar en caché local
                     
                     let mostrar = true;
                     if (filtroActual === "perfil" && post.userId !== usuarioActual.uid) mostrar = false;
@@ -441,6 +449,13 @@
                                     </button>
                                     <button class="btn-action ${yaGuardado ? 'save-activo' : ''}" onclick="window.guardarPost('${post.id}', ${yaGuardado})">
                                         🔖 ${yaGuardado ? 'Guardado' : 'Guardar'}
+                                    </button>
+                                    <!-- NUEVOS BOTONES DE ACCIÓN -->
+                                    <button class="btn-action" onclick="window.recompartirInterno('${post.id}')">
+                                        🔄 Recompartir
+                                    </button>
+                                    <button class="btn-action" onclick="window.compartirExterno('${post.id}')">
+                                        🔗 Compartir
                                     </button>
                                 </div>
                             </div>
@@ -504,6 +519,84 @@
             await updateDoc(doc(db, "usuarios", usuarioActual.uid), { seguidos: yaLoSigo ? arrayRemove(targetUserId) : arrayUnion(targetUserId) });
             await updateDoc(doc(db, "usuarios", targetUserId), { seguidores: yaLoSigo ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) });
         };
+
+        /* FUNCIONES DE COMPARTIR (NUEVAS) */
+        window.recompartirInterno = async (postId) => {
+            const postOriginal = window.postsActuales[postId];
+            if (!postOriginal) return;
+
+            const confirmar = confirm(`¿Deseas recompartir esta publicación de @${postOriginal.userUsername} en tu inicio?`);
+            if (!confirmar) return;
+
+            try {
+                await addDoc(collection(db, "publicaciones"), {
+                    content: `🔄 Recompartido de @${postOriginal.userUsername}:\n\n"${postOriginal.content}"`,
+                    userId: usuarioActual.uid,
+                    userName: datosUsuarioDocumento?.nombre || "Usuario",
+                    userUsername: datosUsuarioDocumento?.username || "usuario",
+                    simboloId: datosUsuarioDocumento?.simboloId || "faro",
+                    mostrarNombrePost: datosUsuarioDocumento?.mostrarNombrePublico !== false,
+                    isPrayer: false, 
+                    likes: [], 
+                    timestamp: serverTimestamp()
+                });
+                alert("¡Has recompartido la publicación con éxito!");
+            } catch (e) {
+                alert("Error al recompartir internamente.");
+            }
+        };
+
+        window.compartirExterno = async (postId) => {
+            const postOriginal = window.postsActuales[postId];
+            if (!postOriginal) return;
+
+            const urlApp = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+            const textoCompartir = `Mira esta edificación en Faro de @${postOriginal.userUsername}: "${postOriginal.content.substring(0, 60)}..."`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Faro - Comunidad de Fe',
+                        text: textoCompartir,
+                        url: urlApp
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') alert("Error al compartir externamente.");
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(urlApp);
+                    alert("¡Enlace de la publicación copiado al portapapeles! Ya puedes enviarlo a tus amigos.");
+                } catch (err) {
+                    alert("No se pudo copiar el enlace.");
+                }
+            }
+        };
+
+        /* MANEJADOR DE INVITACIÓN (NUEVO) */
+        document.getElementById('btn-invitar').addEventListener('click', async () => {
+            const urlApp = `${window.location.origin}${window.location.pathname}`;
+            const textoInvitacion = "¡Hola! Te invito a unirte a Faro, un espacio para compartir peticiones de oración, reflexiones bíblicas y crecer juntos en comunidad. Regístrate aquí:";
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Faro - Comunidad de Fe',
+                        text: textoInvitacion,
+                        url: urlApp
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') alert("Error al enviar la invitación.");
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(`${textoInvitacion} ${urlApp}`);
+                    alert("¡Mensaje de invitación copiado al portapapeles! Compártelo con tus conocidos.");
+                } catch (err) {
+                    alert("No se pudo copiar el enlace de invitación.");
+                }
+            }
+        });
 
         /* NAVEGACIÓN Y TEMA */
         const navBtns = document.querySelectorAll('.nav-btn');
