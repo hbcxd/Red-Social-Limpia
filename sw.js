@@ -2,8 +2,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-// Cambiamos la versión para forzar la actualización en los dispositivos
-const CACHE_NAME = 'faro-v2.8'; 
+const CACHE_NAME = 'faro-v2.9'; 
 const URLS_TO_CACHE = [
   './',
   './index.html',
@@ -25,18 +24,20 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
+// Escuchar notificaciones cuando la app está en segundo plano o cerrada
 messaging.onBackgroundMessage((payload) => {
+    console.log('[sw.js] Notificación recibida en background.', payload);
     const tituloNotificacion = payload.notification.title || "Faro";
     const opcionesNotificacion = {
-        body: payload.notification.body || "Nueva notificación",
-        icon: './icon-192.png'
+        body: payload.notification.body || "Tienes una nueva notificación en la comunidad.",
+        icon: './icon-192.png', // Asegúrate de tener este icono en tu carpeta
+        badge: './icon-192.png'
     };
     self.registration.showNotification(tituloNotificacion, opcionesNotificacion);
 });
 
 self.addEventListener('install', (e) => {
     e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(URLS_TO_CACHE)));
-    // Se elimina self.skipWaiting() de aquí para que la app espere la confirmación del usuario
 });
 
 self.addEventListener('activate', (e) => {
@@ -59,7 +60,6 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });
 
-// NUEVO: Escucha el mensaje desde index.html para forzar la actualización
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
