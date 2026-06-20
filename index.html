@@ -321,6 +321,22 @@
         </div>
     </div>
 
+    <div id="modal-terminos-obligatorio" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Términos y Privacidad</h3>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p>Bienvenido a Faro. Para continuar y ser parte de nuestra comunidad, por favor confirma que has leído y aceptas nuestros términos de uso y políticas de privacidad.</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; font-size: 13px; justify-content: center;">
+                    <span style="color: var(--primary); cursor: pointer; text-decoration: underline;" onclick="window.abrirModalTexto('terminos')">Leer Términos</span>
+                    <span style="color: var(--primary); cursor: pointer; text-decoration: underline;" onclick="window.abrirModalTexto('politicas')">Leer Políticas</span>
+                </div>
+                <button id="btn-aceptar-terminos" class="btn-primary" style="width: 100%;">He leído y acepto todos los términos</button>
+            </div>
+        </div>
+    </div>
+
     <div id="pwa-alertas" class="pwa-alertas oculto">
         <span id="pwa-mensaje" style="font-size: 14px; font-weight: 500;"></span>
         <button id="btn-pwa-accion" class="btn-primary" style="padding: 6px 15px; font-size: 13px;"></button>
@@ -362,17 +378,27 @@
 
         window.postsActuales = {};
 
+        /* =========================================
+           ACEPTACIÓN DE TÉRMINOS (LOCALSTORAGE)
+           ========================================= */
+        const modalTerminos = document.getElementById('modal-terminos-obligatorio');
+        if (!localStorage.getItem("terminos_aceptados")) {
+            modalTerminos.classList.add('activo');
+        }
+        document.getElementById('btn-aceptar-terminos').addEventListener('click', () => {
+            localStorage.setItem("terminos_aceptados", "true");
+            modalTerminos.classList.remove('activo');
+        });
+
         function obtenerSvgIcono(id) {
             const idsValidos = ['faro', 'biblia', 'cruz', 'espada', 'paloma', 'fuego'];
             const safeId = idsValidos.includes(id) ? id : 'faro';
             return `<svg viewBox="0 0 24 24"><use href="#icon-${safeId}"></use></svg>`;
         }
 
-        // UTILIDAD: Formateo de fechas usando API nativa (detecta zona horaria)
         function formatearFechaSutil(fbTimestamp) {
             if (!fbTimestamp) return 'hace un momento';
             const date = fbTimestamp.toDate();
-            // Esto mostrará por ejemplo: "14 oct, 15:30" adaptado a la hora local del usuario
             return date.toLocaleString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
@@ -406,7 +432,6 @@
                     if (docSnap.exists()) {
                         datosUsuarioDocumento = docSnap.data();
                         renderizarAjustesPerfil(datosUsuarioDocumento);
-                        // Forzar re-render de feeds si cambian los datos (ej: a quien sigo)
                         cargarFeedRealtime();
                     } else {
                         crearPerfilPorDefecto(user);
@@ -470,7 +495,6 @@
                 if(!dataToSave.nombre || !dataToSave.username) throw new Error("Faltan campos.");
                 await updateDoc(doc(db, "usuarios", usuarioActual.uid), dataToSave);
 
-                // Actualizar posts históricos
                 const qPosts = query(collection(db, "publicaciones"), where("userId", "==", usuarioActual.uid));
                 const snapshots = await getDocs(qPosts);
                 const promesas = [];
@@ -487,10 +511,10 @@
         });
 
         /* =========================================
-           NOTIFICACIONES INTERNAS EN BD
+           NOTIFICACIONES (VERSIÓN CORREGIDA)
            ========================================= */
         async function registrarNotificacion(targetUserId, tipo, postId = null) {
-            if (targetUserId === usuarioActual.uid) return; // No auto-notificar
+            if (targetUserId === usuarioActual.uid) return;
             try {
                 await addDoc(collection(db, "notificaciones"), {
                     paraUserId: targetUserId, deUserId: usuarioActual.uid,
@@ -500,37 +524,54 @@
             } catch (e) { console.error("Error al registrar notificación", e); }
         }
 
-        window.abrirModalNotificaciones = () => {
+        window.abrirModalNotificaciones = async () => {
+            if (!usuarioActual) return; // Validación de seguridad vital
+            
             const modal = document.getElementById('modal-notificaciones');
             const lista = document.getElementById('lista-notificaciones');
             modal.classList.add('activo');
             lista.innerHTML = '<p class="loader">Buscando actividad...</p>';
 
-            const q = query(collection(db, "notificaciones"), where("paraUserId", "==", usuarioActual.uid), orderBy("timestamp", "desc"), limit(20));
-            getDocs(q).then(snapshot => {
+            try {
+                // NOTA: Esta consulta requiere un índice compuesto en Firebase (paraUserId ASC, timestamp DESC).
+                // Si ves un error en la consola, Firebase te dará un link directo para crearlo con un clic.
+                const q = query(collection(db, "notificaciones"), where("paraUserId", "==", usuarioActual.uid), orderBy("timestamp", "desc"), limit(20));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    lista.innerHTML = '<p style="text-align:center; padding: 20px; font-size:14px; color:var(--text-light);">Aún no tienes notificaciones recientes.</p>';
+                    return;
+                }
+
                 let html = '';
                 snapshot.forEach(doc => {
                     const n = doc.data();
-                    let icono = '🔔'; let texto = '';
-                    if (n.tipo === 'like') { icono = '❤️'; texto = `<strong>${n.deUsuarioNombre}</strong> dijo Amén a tu publicación.`; }
-                    if (n.tipo === 'follow') { icono = '👥'; texto = `<strong>${n.deUsuarioNombre}</strong> ha comenzado a seguirte.`; }
-                    if (n.tipo === 'save') { icono = '🔖'; texto = `<strong>${n.deUsuarioNombre}</strong> guardó tu publicación.`; }
-                    if (n.tipo === 'repost') { icono = '🔄'; texto = `<strong>${n.deUsuarioNombre}</strong> recompartió tu publicación.`; }
+                    const nombre = n.deUsuarioNombre || "Alguien";
+                    const tiempo = n.timestamp ? formatearFechaSutil(n.timestamp) : "hace poco";
+                    
+                    let icono = '🔔'; 
+                    let texto = `<strong>${nombre}</strong> interactuó contigo.`;
+                    
+                    if (n.tipo === 'like') { icono = '❤️'; texto = `<strong>${nombre}</strong> dijo Amén a tu publicación.`; }
+                    else if (n.tipo === 'follow') { icono = '👥'; texto = `<strong>${nombre}</strong> ha comenzado a seguirte.`; }
+                    else if (n.tipo === 'save') { icono = '🔖'; texto = `<strong>${nombre}</strong> guardó tu publicación.`; }
+                    else if (n.tipo === 'repost') { icono = '🔄'; texto = `<strong>${nombre}</strong> recompartió tu publicación.`; }
                     
                     html += `
                         <div class="notif-item">
                             <div class="notif-icon">${icono}</div>
                             <div>
                                 <div class="notif-text" onclick="window.verPerfilUsuario('${n.deUserId}')" style="cursor:pointer;">${texto}</div>
-                                <span class="notif-time">${formatearFechaSutil(n.timestamp)}</span>
+                                <span class="notif-time">${tiempo}</span>
                             </div>
                         </div>
                     `;
                 });
-                lista.innerHTML = html || '<p style="text-align:center; padding: 20px; font-size:14px; color:var(--text-light);">Aún no tienes notificaciones recientes.</p>';
-            }).catch(e => {
-                lista.innerHTML = '<p style="text-align:center; color:red;">Fallo al cargar notificaciones.</p>';
-            });
+                lista.innerHTML = html;
+            } catch (e) {
+                console.error("Error cargando notificaciones:", e);
+                lista.innerHTML = '<p style="text-align:center; color:red; padding: 20px;">No se pudo cargar la actividad.</p>';
+            }
         };
         window.cerrarModalNotificaciones = () => document.getElementById('modal-notificaciones').classList.remove('activo');
 
@@ -564,9 +605,7 @@
             if(unsubscribeFeed) unsubscribeFeed();
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
             unsubscribeFeed = onSnapshot(q, (snapshot) => {
-                let htmlGeneral = "";
-                let htmlPerfil = "";
-                let htmlAjeno = "";
+                let htmlGeneral = ""; let htmlPerfil = ""; let htmlAjeno = "";
                 window.postsActuales = {}; 
 
                 snapshot.forEach((docSnap) => {
@@ -611,17 +650,12 @@
                         </div>
                     `;
 
-                    // Lógica de ruteo a las distintas vistas
-                    // 1. Feed General / Peticiones / Guardados
                     let mostrarGeneral = true;
                     if (filtroActual === "oraciones" && !post.isPrayer) mostrarGeneral = false;
                     if (filtroActual === "guardados" && !yaGuardado) mostrarGeneral = false;
                     if (filtroActual !== "perfil" && mostrarGeneral) htmlGeneral += templateTarjeta;
 
-                    // 2. Mi Perfil
                     if (esMiPost) htmlPerfil += templateTarjeta;
-
-                    // 3. Perfil Ajeno
                     if (perfilAjenoViendo === post.userId) htmlAjeno += templateTarjeta;
                 });
 
@@ -677,18 +711,12 @@
            ========================================= */
         window.verPerfilUsuario = async (uId) => {
             if (uId === usuarioActual.uid) {
-                // Es mi propio perfil, simular click en pestaña "Mi Perfil"
                 document.querySelector('button[data-target="vista-perfil"]').click();
-                window.cerrarModalBuscar();
-                window.cerrarModalNotificaciones();
-                return;
+                window.cerrarModalBuscar(); window.cerrarModalNotificaciones(); return;
             }
 
-            window.cerrarModalBuscar();
-            window.cerrarModalNotificaciones();
-            window.cerrarModalUsuarios();
+            window.cerrarModalBuscar(); window.cerrarModalNotificaciones(); window.cerrarModalUsuarios();
 
-            // Ocultar navegacion activa
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('activo'));
             document.getElementById('vista-feed').classList.add('oculto');
             document.getElementById('vista-perfil').classList.add('oculto');
@@ -696,7 +724,7 @@
             const vistaAjena = document.getElementById('vista-perfil-ajeno');
             vistaAjena.classList.remove('oculto');
             perfilAjenoViendo = uId;
-            cargarFeedRealtime(); // Re-trigger para mostrar posts ajenos
+            cargarFeedRealtime(); 
 
             try {
                 const snap = await getDoc(doc(db, "usuarios", uId));
@@ -722,7 +750,7 @@
         window.cerrarPerfilAjeno = () => {
             perfilAjenoViendo = null;
             document.getElementById('vista-perfil-ajeno').classList.add('oculto');
-            document.querySelector('button[data-target="vista-feed"]').click(); // Volver al inicio
+            document.querySelector('button[data-target="vista-feed"]').click(); 
         };
 
         /* =========================================
@@ -823,7 +851,7 @@
                 document.getElementById('vista-feed').classList.add('oculto');
                 document.getElementById('vista-perfil').classList.add('oculto');
                 document.getElementById('vista-perfil-ajeno').classList.add('oculto');
-                perfilAjenoViendo = null; // Reiniciar vista ajena
+                perfilAjenoViendo = null; 
 
                 document.getElementById(targetId).classList.remove('oculto');
                 document.getElementById('caja-publicacion').classList.toggle('oculto', (filtroActual !== "global" && filtroActual !== "oraciones"));
