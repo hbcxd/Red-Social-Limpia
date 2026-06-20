@@ -39,6 +39,9 @@
         .btn-google { background: transparent; color: var(--text); border: 2px solid var(--primary); padding: 12px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-top: 20px; transition: all 0.3s; }
         .btn-google:hover { background: var(--primary); color: #fff; }
 
+        .links-legales { margin-top: 30px; font-size: 12px; color: var(--text-light); }
+        .links-legales span { color: var(--primary); cursor: pointer; text-decoration: underline; margin: 0 5px; }
+
         /* HEADER FIJO Y NAVEGACIÓN */
         .header-fijo-container { position: fixed; top: 0; left: 0; right: 0; background: var(--card); z-index: 1000; border-bottom: 1px solid var(--border); box-shadow: var(--shadow); }
         header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; }
@@ -57,11 +60,13 @@
 
         /* PUBLICACIONES Y AVATARES SVG */
         .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); padding: 8px; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); padding: 8px; cursor: pointer; }
         .avatar svg { width: 100%; height: 100%; }
-        .post-meta { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; }
+        .post-meta { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; cursor: pointer; }
         .post-meta .name-display { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .post-meta .username-display { font-size: 12px; color: var(--text-light); font-weight: 500; }
+        .post-meta .time-display { font-size: 10px; color: var(--text-light); opacity: 0.7; margin-top: 1px; }
+        
         .post-content { font-size: 15px; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; }
         .post-actions { display: flex; gap: 15px; border-top: 1px solid var(--border); padding-top: 10px; flex-wrap: wrap; }
         .btn-action { background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
@@ -71,7 +76,7 @@
         .btn-seguir { background: var(--primary-light); color: var(--primary); border: none; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .btn-seguir.siguiendo { background: var(--border); color: var(--text-light); }
 
-        /* PERFIL Y PANEL AJUSTES DESPLEGABLE */
+        /* PERFILES Y PANEL AJUSTES DESPLEGABLE */
         .perfil-header { text-align: center; padding: 15px 0; }
         .avatar-lg { width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); padding: 15px; }
         .avatar-lg svg { width: 100%; height: 100%; }
@@ -88,22 +93,31 @@
         .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; color: var(--text); cursor: pointer; }
         .btn-outline { border: 1px solid var(--border); background: transparent; color: var(--text); padding: 8px 15px; border-radius: 15px; cursor: pointer; margin-top: 10px; }
         
-        /* MODAL USUARIOS (SEGUIDORES/SEGUIDOS) */
+        /* MODALES COMUNES */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.activo { opacity: 1; pointer-events: auto; }
-        .modal-content { background: var(--card); width: 100%; max-width: 400px; border-radius: 16px; display: flex; flex-direction: column; max-height: 80vh; }
+        .modal-content { background: var(--card); width: 100%; max-width: 450px; border-radius: 16px; display: flex; flex-direction: column; max-height: 80vh; }
         .modal-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 16px; }
         .btn-cerrar { background: transparent; border: none; font-size: 20px; color: var(--text-light); cursor: pointer; }
         .modal-body { padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .modal-body p { font-size: 14px; color: var(--text-light); line-height: 1.5; margin-bottom: 10px; }
         
-        .usuario-lista-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 12px; }
+        .usuario-lista-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+        .usuario-lista-item:hover { background: var(--border); }
         .usuario-lista-item .avatar-peq { width: 35px; height: 35px; background: var(--primary-light); color: var(--primary); border-radius: 50%; padding: 6px; display: flex; align-items: center; justify-content: center; }
         .usuario-lista-item .avatar-peq svg { width: 100%; height: 100%; }
 
+        /* NOTIFICACIONES */
+        .notif-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--border); }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-icon { font-size: 18px; }
+        .notif-text { font-size: 13px; color: var(--text); }
+        .notif-time { font-size: 10px; color: var(--text-light); display: block; margin-top: 2px; }
+
         .loader { text-align: center; padding: 20px; color: var(--text-light); font-style: italic; font-size: 14px; }
 
-        /* ALERTAS PWA (INSTALAR / ACTUALIZAR) */
+        /* ALERTAS PWA */
         .pwa-alertas {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: var(--card); border: 1px solid var(--primary);
@@ -137,19 +151,19 @@
         <svg class="logo-faro-svg" viewBox="0 0 24 24" style="width: 100px; height: 100px;"><use href="#icon-faro"></use></svg>
         <h1 style="font-size: 32px; margin-bottom: 10px; color: var(--text);">Faro</h1>
         
-        <div style="max-width: 340px; margin-bottom: 20px; text-align: center;">
+        <div style="max-width: 340px; margin-bottom: 10px; text-align: center;">
             <p style="color: var(--text-light); font-size: 15px; margin-bottom: 15px; line-height: 1.6;">
-                Nuestro propósito es edificarnos unos a otros a través de la Palabra de Dios, manteniéndonos unidos como comunidad y cuerpo de Cristo.
+                Nuestro propósito es edificarnos unos a otros a través de la Palabra de Dios, manteniéndonos unidos como comunidad.
             </p>
-            <div style="background: var(--primary-light); padding: 12px; border-radius: 8px; border-left: 4px solid var(--primary); text-align: left;">
-                <p style="color: var(--primary); font-size: 14px; font-style: italic; font-weight: 500; margin-bottom: 5px;">
-                    "Por lo cual, animaos unos a otros, y edificaos unos a otros, así como lo hacéis."
-                </p>
-                <strong style="color: var(--primary); font-size: 12px;">- 1 Tesalonicenses 5:11</strong>
-            </div>
         </div>
 
         <button id="btn-google" class="btn-google"><span>G</span> Continuar con Google</button>
+        
+        <div class="links-legales">
+            Al continuar, aceptas nuestros 
+            <span onclick="window.abrirModalTexto('terminos')">Términos y Condiciones</span> 
+            y la <span onclick="window.abrirModalTexto('politicas')">Política de Privacidad</span>.
+        </div>
     </div>
 
     <div id="pantalla-app" class="oculto">
@@ -157,9 +171,13 @@
         <div class="header-fijo-container">
             <header>
                 <h1><svg viewBox="0 0 24 24" style="width:20px;height:20px;"><use href="#icon-faro"></use></svg> Faro</h1>
-                <button id="btn-tema" class="btn-outline" style="margin: 0; border: none; font-size: 18px;">🌓</button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-abrir-notificaciones" class="btn-outline" style="margin: 0; border: none; font-size: 18px;" onclick="window.abrirModalNotificaciones()">🔔</button>
+                    <button id="btn-abrir-busqueda" class="btn-outline" style="margin: 0; border: none; font-size: 18px;" onclick="window.abrirModalBuscar()">🔍</button>
+                    <button id="btn-tema" class="btn-outline" style="margin: 0; border: none; font-size: 18px;">🌓</button>
+                </div>
             </header>
-            <nav>
+            <nav id="barra-navegacion">
                 <button class="nav-btn activo" data-target="vista-feed" data-filtro="global"><span>🌍</span>Inicio</button>
                 <button class="nav-btn" data-target="vista-feed" data-filtro="oraciones"><span>🙏</span>Peticiones</button>
                 <button class="nav-btn" data-target="vista-feed" data-filtro="guardados"><span>🔖</span>Guardados</button>
@@ -188,28 +206,21 @@
 
         <div class="container oculto" id="vista-perfil">
             <div class="card perfil-header">
-                <div class="avatar-lg" id="perfil-avatar">
-                    <svg viewBox="0 0 24 24"><use href="#icon-faro"></use></svg>
-                </div>
+                <div class="avatar-lg" id="perfil-avatar"><svg viewBox="0 0 24 24"><use href="#icon-faro"></use></svg></div>
                 <h2 id="perfil-nombre-display">Cargando...</h2>
                 <p id="perfil-username-display" style="color: var(--primary); font-size: 14px; font-weight: 600;"></p>
                 <p id="perfil-bio" style="color: var(--text-light); font-size: 13px; font-style: italic; margin-top: 6px;"></p>
                 
                 <div class="stats-box">
-                    <div class="stat-item" onclick="abrirModalUsuarios('seguidores')">
-                        <strong id="count-seguidores">0</strong>Seguidores
-                    </div>
-                    <div class="stat-item" onclick="abrirModalUsuarios('seguidos')">
-                        <strong id="count-seguidos">0</strong>Seguidos
-                    </div>
+                    <div class="stat-item" onclick="abrirModalUsuarios('seguidores')"><strong id="count-seguidores">0</strong>Seguidores</div>
+                    <div class="stat-item" onclick="abrirModalUsuarios('seguidos')"><strong id="count-seguidos">0</strong>Seguidos</div>
                 </div>
 
                 <button id="btn-toggle-ajustes" class="btn-outline" style="width: 100%;">⚙️ Ajustes del Perfil</button>
                 <button id="btn-invitar" class="btn-outline" style="width: 100%; margin-top: 10px; background: var(--primary-light); color: var(--primary); font-weight: bold; border-color: var(--primary);">✨ Invitar a un hermano</button>
 
                 <div id="panel-ajustes" style="text-align: left;">
-                    
-                    <button id="btn-notificaciones" class="btn-primary" style="width: 100%; margin-bottom: 15px; background: var(--success);">🔔 Activar Notificaciones</button>
+                    <button id="btn-notificaciones" class="btn-primary" style="width: 100%; margin-bottom: 15px; background: var(--success);">🔔 Activar Notificaciones Push</button>
 
                     <label style="font-size: 12px; color: var(--text-light); font-weight: bold;">Nombre Completo:</label>
                     <input type="text" id="edit-nombre" class="form-control" placeholder="Tu Nombre y Apellido">
@@ -231,17 +242,32 @@
                     </select>
 
                     <h5 style="font-size: 12px; margin: 10px 0 5px; color: var(--text-light);">Visibilidad y Privacidad:</h5>
-                    <label class="checkbox-group">
-                        <input type="checkbox" id="edit-ver-nombre" checked> Mostrar Nombre Público
-                    </label>
+                    <label class="checkbox-group"><input type="checkbox" id="edit-ver-nombre" checked> Mostrar Nombre Público</label>
                     
                     <button id="btn-guardar-perfil" class="btn-primary" style="width: 100%; font-size: 14px; margin-top: 5px;">Guardar Cambios</button>
                     <button id="btn-logout" class="btn-outline" style="color: var(--danger); border-color: var(--danger); width: 100%; margin-top: 15px;">Cerrar Sesión</button>
                 </div>
             </div>
-            
-            <h3 style="margin-bottom: 10px; font-size: 15px;" id="titulo-subfeed">Mis Publicaciones</h3>
+            <h3 style="margin-bottom: 10px; font-size: 15px;">Mis Publicaciones</h3>
             <div id="feed-perfil" class="loader">Cargando tu bitácora...</div>
+        </div>
+
+        <div class="container oculto" id="vista-perfil-ajeno">
+            <button class="btn-outline" style="margin-bottom: 15px; font-size: 12px;" onclick="window.cerrarPerfilAjeno()">⬅ Volver</button>
+            <div class="card perfil-header">
+                <div class="avatar-lg" id="ajeno-avatar"><svg viewBox="0 0 24 24"><use href="#icon-faro"></use></svg></div>
+                <h2 id="ajeno-nombre-display">...</h2>
+                <p id="ajeno-username-display" style="color: var(--primary); font-size: 14px; font-weight: 600;"></p>
+                <p id="ajeno-bio" style="color: var(--text-light); font-size: 13px; font-style: italic; margin-top: 6px;"></p>
+                
+                <div class="stats-box">
+                    <div class="stat-item"><strong id="ajeno-count-seguidores">0</strong>Seguidores</div>
+                    <div class="stat-item"><strong id="ajeno-count-seguidos">0</strong>Seguidos</div>
+                </div>
+                <div id="ajeno-btn-container"></div>
+            </div>
+            <h3 style="margin-bottom: 10px; font-size: 15px;">Publicaciones</h3>
+            <div id="feed-perfil-ajeno" class="loader">Cargando publicaciones...</div>
         </div>
     </div>
 
@@ -249,9 +275,49 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-titulo">Lista</h3>
-                <button class="btn-cerrar" onclick="cerrarModalUsuarios()">✖</button>
+                <button class="btn-cerrar" onclick="window.cerrarModalUsuarios()">✖</button>
             </div>
             <div id="modal-body" class="modal-body loader">Cargando...</div>
+        </div>
+    </div>
+
+    <div id="modal-buscar" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Buscar Personas</h3>
+                <button class="btn-cerrar" onclick="window.cerrarModalBuscar()">✖</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                    <input type="text" id="input-busqueda" class="form-control" placeholder="Escribe el @usuario..." style="margin-bottom:0;">
+                    <button id="btn-ejecutar-busqueda" class="btn-primary">Buscar</button>
+                </div>
+                <div id="resultados-busqueda" style="display: flex; flex-direction: column; gap: 10px;">
+                    <p style="text-align:center; font-size:14px; color:var(--text-light);">Encuentra a otras personas de la comunidad.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-notificaciones" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Actividad Reciente</h3>
+                <button class="btn-cerrar" onclick="window.cerrarModalNotificaciones()">✖</button>
+            </div>
+            <div class="modal-body" id="lista-notificaciones" style="padding: 0; max-height: 60vh;">
+                <p class="loader">Cargando actividad...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-textos-legales" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="titulo-legal">Documento</h3>
+                <button class="btn-cerrar" onclick="window.cerrarModalTexto()">✖</button>
+            </div>
+            <div class="modal-body" id="contenido-legal" style="max-height: 60vh;"></div>
         </div>
     </div>
 
@@ -260,11 +326,17 @@
         <button id="btn-pwa-accion" class="btn-primary" style="padding: 6px 15px; font-size: 13px;"></button>
         <button id="btn-pwa-cerrar" class="btn-cerrar-alerta">✖</button>
     </div>
+    <div id="ios-pwa-alerta" class="pwa-alertas oculto" style="bottom: 80px; flex-direction: column; text-align: center;">
+        <p style="font-size: 14px; margin-bottom: 10px; color: var(--text);">
+            Para instalar la app en tu iPhone/iPad: toca el ícono de <strong>Compartir</strong> en Safari y selecciona <strong>"Agregar a la pantalla de inicio"</strong>.
+        </p>
+        <button id="btn-cerrar-ios" class="btn-primary" style="padding: 6px 15px; font-size: 13px;">Entendido</button>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, getDocs, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, getDocs, doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
         
         import { versiculosDiarios } from "./versiculos.js";
@@ -286,6 +358,7 @@
         let usuarioActual = null;
         let datosUsuarioDocumento = null;
         let filtroActual = "global";
+        let perfilAjenoViendo = null;
 
         window.postsActuales = {};
 
@@ -295,40 +368,32 @@
             return `<svg viewBox="0 0 24 24"><use href="#icon-${safeId}"></use></svg>`;
         }
 
+        // UTILIDAD: Formateo de fechas usando API nativa (detecta zona horaria)
+        function formatearFechaSutil(fbTimestamp) {
+            if (!fbTimestamp) return 'hace un momento';
+            const date = fbTimestamp.toDate();
+            // Esto mostrará por ejemplo: "14 oct, 15:30" adaptado a la hora local del usuario
+            return date.toLocaleString('es-ES', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
         /* =========================================
-           LÓGICA DE NOTIFICACIONES PUSH
+           LÓGICA PUSH
            ========================================= */
         async function solicitarPermisoNotificaciones() {
             try {
-                const currentToken = await getToken(messaging, { 
-                    vapidKey: 'BMXEapO152zU5C2NCR9joZWClL0SK2mDUro7Hev8qtkJdvRB0Z8HwcrK_HvkIYED_Q1NKMjVuBd0r3zKLYwEMLY' 
-                });
-                
+                const currentToken = await getToken(messaging, { vapidKey: 'BMXEapO152zU5C2NCR9joZWClL0SK2mDUro7Hev8qtkJdvRB0Z8HwcrK_HvkIYED_Q1NKMjVuBd0r3zKLYwEMLY' });
                 if (currentToken) {
-                    await setDoc(doc(db, "tokens_notificacion", usuarioActual.uid), {
-                        token: currentToken,
-                        timestamp: serverTimestamp()
-                    }, { merge: true });
-                    alert("🔔 ¡Notificaciones activadas con éxito! Te avisaremos cuando haya novedades.");
+                    await setDoc(doc(db, "tokens_notificacion", usuarioActual.uid), { token: currentToken, timestamp: serverTimestamp() }, { merge: true });
+                    alert("🔔 ¡Notificaciones activadas!");
                     document.getElementById('btn-notificaciones').style.display = 'none';
-                } else {
-                    alert("No se pudo obtener el token de notificación. Revisa los permisos de tu navegador.");
                 }
-            } catch (error) {
-                console.error("Error al pedir permiso de notificaciones", error);
-                alert("Debes permitir las notificaciones en tu navegador para usar esta función.");
-            }
+            } catch (error) { alert("Permiso denegado por el navegador."); }
         }
-
         document.getElementById('btn-notificaciones').addEventListener('click', solicitarPermisoNotificaciones);
-
-        onMessage(messaging, (payload) => {
-            console.log("Mensaje recibido: ", payload);
-            alert(`🔔 ${payload.notification.title}\n${payload.notification.body}`);
-        });
+        onMessage(messaging, (payload) => alert(`🔔 ${payload.notification.title}\n${payload.notification.body}`));
 
         /* =========================================
-           RESTO DE LA LÓGICA DE LA APP
+           AUTENTICACIÓN Y PERFIL
            ========================================= */
         onAuthStateChanged(auth, async (user) => {
             document.getElementById('pantalla-carga').classList.add('oculto');
@@ -341,16 +406,16 @@
                     if (docSnap.exists()) {
                         datosUsuarioDocumento = docSnap.data();
                         renderizarAjustesPerfil(datosUsuarioDocumento);
+                        // Forzar re-render de feeds si cambian los datos (ej: a quien sigo)
+                        cargarFeedRealtime();
                     } else {
                         crearPerfilPorDefecto(user);
                     }
                 });
-
                 mostrarVersiculoDiario();
                 cargarFeedRealtime();
             } else {
-                usuarioActual = null;
-                datosUsuarioDocumento = null;
+                usuarioActual = null; datosUsuarioDocumento = null;
                 document.getElementById('pantalla-app').classList.add('oculto');
                 document.getElementById('pantalla-login').classList.remove('oculto');
             }
@@ -358,8 +423,7 @@
 
         document.getElementById('btn-google').addEventListener('click', async () => {
             document.getElementById('btn-google').disabled = true;
-            const provider = new GoogleAuthProvider();
-            try { await signInWithPopup(auth, provider); } 
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
             catch (error) { document.getElementById('btn-google').disabled = false; alert("Error: " + error.message); }
         });
 
@@ -369,12 +433,8 @@
             const parseName = user.displayName || "Fiel Creyente";
             const genUsername = parseName.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 100);
             await setDoc(doc(db, "usuarios", user.uid), {
-                nombre: parseName,
-                username: genUsername,
-                bio: "Buscando la palabra viva.",
-                simboloId: "faro",
-                mostrarNombrePublico: true,
-                seguidos: [], seguidores: [], guardados: [],
+                nombre: parseName, username: genUsername, bio: "Buscando la palabra viva.",
+                simboloId: "faro", mostrarNombrePublico: true, seguidos: [], seguidores: [], guardados: [],
                 creadoEn: serverTimestamp()
             });
         }
@@ -384,60 +444,100 @@
             document.getElementById('perfil-nombre-display').innerText = mostrarN ? (datos.nombre || "Usuario") : "Nombre Privado";
             document.getElementById('perfil-username-display').innerText = `@${datos.username || 'usuario'}`;
             document.getElementById('perfil-bio').innerText = datos.bio || "";
-            
             document.getElementById('perfil-avatar').innerHTML = obtenerSvgIcono(datos.simboloId || 'faro');
-            
             document.getElementById('edit-nombre').value = datos.nombre || "";
             document.getElementById('edit-username').value = datos.username || "";
             document.getElementById('edit-bio').value = datos.bio || "";
             document.getElementById('edit-simbolo').value = datos.simboloId || "faro";
             document.getElementById('edit-ver-nombre').checked = mostrarN;
-
             document.getElementById('count-seguidores').innerText = datos.seguidores?.length || 0;
             document.getElementById('count-seguidos').innerText = datos.seguidos?.length || 0;
         }
 
-        document.getElementById('btn-toggle-ajustes').addEventListener('click', () => {
-            document.getElementById('panel-ajustes').classList.toggle('desplegado');
-        });
+        document.getElementById('btn-toggle-ajustes').addEventListener('click', () => document.getElementById('panel-ajustes').classList.toggle('desplegado'));
 
         document.getElementById('btn-guardar-perfil').addEventListener('click', async () => {
-            const nombreText = document.getElementById('edit-nombre').value.trim();
-            const usernameText = document.getElementById('edit-username').value.trim().toLowerCase().replace(/\s+/g, '');
-            const bioText = document.getElementById('edit-bio').value.trim();
-            const simboloSelect = document.getElementById('edit-simbolo').value;
-            const publicarNombre = document.getElementById('edit-ver-nombre').checked;
-
-            if(!nombreText || !usernameText) return alert("Faltan campos obligatorios.");
-
             const btnSave = document.getElementById('btn-guardar-perfil');
-            btnSave.disabled = true; btnSave.innerText = "Guardando y actualizando historial...";
-
+            btnSave.disabled = true; btnSave.innerText = "Guardando...";
             try {
-                await updateDoc(doc(db, "usuarios", usuarioActual.uid), {
-                    nombre: nombreText, username: usernameText, bio: bioText,
-                    simboloId: simboloSelect, mostrarNombrePublico: publicarNombre
-                });
+                const dataToSave = {
+                    nombre: document.getElementById('edit-nombre').value.trim(),
+                    username: document.getElementById('edit-username').value.trim().toLowerCase().replace(/\s+/g, ''),
+                    bio: document.getElementById('edit-bio').value.trim(),
+                    simboloId: document.getElementById('edit-simbolo').value,
+                    mostrarNombrePublico: document.getElementById('edit-ver-nombre').checked
+                };
+                if(!dataToSave.nombre || !dataToSave.username) throw new Error("Faltan campos.");
+                await updateDoc(doc(db, "usuarios", usuarioActual.uid), dataToSave);
 
+                // Actualizar posts históricos
                 const qPosts = query(collection(db, "publicaciones"), where("userId", "==", usuarioActual.uid));
                 const snapshots = await getDocs(qPosts);
                 const promesas = [];
                 snapshots.forEach((docPost) => {
                     promesas.push(updateDoc(doc(db, "publicaciones", docPost.id), {
-                        userName: nombreText,
-                        userUsername: usernameText,
-                        simboloId: simboloSelect,
-                        mostrarNombrePost: publicarNombre
+                        userName: dataToSave.nombre, userUsername: dataToSave.username,
+                        simboloId: dataToSave.simboloId, mostrarNombrePost: dataToSave.mostrarNombrePublico
                     }));
                 });
                 await Promise.all(promesas);
-
                 document.getElementById('panel-ajustes').classList.remove('desplegado');
-                alert("¡Perfil y publicaciones antiguas actualizados con éxito!");
             } catch(e) { alert("Error: " + e.message); } 
             finally { btnSave.disabled = false; btnSave.innerText = "Guardar Cambios"; }
         });
 
+        /* =========================================
+           NOTIFICACIONES INTERNAS EN BD
+           ========================================= */
+        async function registrarNotificacion(targetUserId, tipo, postId = null) {
+            if (targetUserId === usuarioActual.uid) return; // No auto-notificar
+            try {
+                await addDoc(collection(db, "notificaciones"), {
+                    paraUserId: targetUserId, deUserId: usuarioActual.uid,
+                    deUsuarioNombre: datosUsuarioDocumento.mostrarNombrePublico ? datosUsuarioDocumento.nombre : "Alguien",
+                    tipo: tipo, postId: postId, timestamp: serverTimestamp()
+                });
+            } catch (e) { console.error("Error al registrar notificación", e); }
+        }
+
+        window.abrirModalNotificaciones = () => {
+            const modal = document.getElementById('modal-notificaciones');
+            const lista = document.getElementById('lista-notificaciones');
+            modal.classList.add('activo');
+            lista.innerHTML = '<p class="loader">Buscando actividad...</p>';
+
+            const q = query(collection(db, "notificaciones"), where("paraUserId", "==", usuarioActual.uid), orderBy("timestamp", "desc"), limit(20));
+            getDocs(q).then(snapshot => {
+                let html = '';
+                snapshot.forEach(doc => {
+                    const n = doc.data();
+                    let icono = '🔔'; let texto = '';
+                    if (n.tipo === 'like') { icono = '❤️'; texto = `<strong>${n.deUsuarioNombre}</strong> dijo Amén a tu publicación.`; }
+                    if (n.tipo === 'follow') { icono = '👥'; texto = `<strong>${n.deUsuarioNombre}</strong> ha comenzado a seguirte.`; }
+                    if (n.tipo === 'save') { icono = '🔖'; texto = `<strong>${n.deUsuarioNombre}</strong> guardó tu publicación.`; }
+                    if (n.tipo === 'repost') { icono = '🔄'; texto = `<strong>${n.deUsuarioNombre}</strong> recompartió tu publicación.`; }
+                    
+                    html += `
+                        <div class="notif-item">
+                            <div class="notif-icon">${icono}</div>
+                            <div>
+                                <div class="notif-text" onclick="window.verPerfilUsuario('${n.deUserId}')" style="cursor:pointer;">${texto}</div>
+                                <span class="notif-time">${formatearFechaSutil(n.timestamp)}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                lista.innerHTML = html || '<p style="text-align:center; padding: 20px; font-size:14px; color:var(--text-light);">Aún no tienes notificaciones recientes.</p>';
+            }).catch(e => {
+                lista.innerHTML = '<p style="text-align:center; color:red;">Fallo al cargar notificaciones.</p>';
+            });
+        };
+        window.cerrarModalNotificaciones = () => document.getElementById('modal-notificaciones').classList.remove('activo');
+
+
+        /* =========================================
+           PUBLICAR Y FEED
+           ========================================= */
         document.getElementById('btn-publicar').addEventListener('click', async () => {
             const input = document.getElementById('input-post');
             const contentText = input.value.trim();
@@ -447,8 +547,7 @@
             document.getElementById('btn-publicar').disabled = true;
             try {
                 await addDoc(collection(db, "publicaciones"), {
-                    content: contentText,
-                    userId: usuarioActual.uid,
+                    content: contentText, userId: usuarioActual.uid,
                     userName: datosUsuarioDocumento?.nombre || "Usuario",
                     userUsername: datosUsuarioDocumento?.username || "usuario",
                     simboloId: datosUsuarioDocumento?.simboloId || "faro",
@@ -460,176 +559,260 @@
             finally { document.getElementById('btn-publicar').disabled = false; }
         });
 
+        let unsubscribeFeed = null;
         function cargarFeedRealtime() {
+            if(unsubscribeFeed) unsubscribeFeed();
             const q = query(collection(db, "publicaciones"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                let html = "";
+            unsubscribeFeed = onSnapshot(q, (snapshot) => {
+                let htmlGeneral = "";
+                let htmlPerfil = "";
+                let htmlAjeno = "";
                 window.postsActuales = {}; 
 
                 snapshot.forEach((docSnap) => {
                     const post = docSnap.data(); post.id = docSnap.id;
                     window.postsActuales[post.id] = post; 
                     
-                    let mostrar = true;
-                    if (filtroActual === "perfil" && post.userId !== usuarioActual.uid) mostrar = false;
-                    if (filtroActual === "oraciones" && !post.isPrayer) mostrar = false;
-                    if (filtroActual === "guardados" && !datosUsuarioDocumento?.guardados?.includes(post.id)) mostrar = false;
+                    const amilike = post.likes?.includes(usuarioActual?.uid);
+                    const numLikes = post.likes?.length || 0;
+                    const yaGuardado = datosUsuarioDocumento?.guardados?.includes(post.id);
+                    const loSigo = datosUsuarioDocumento?.seguidos?.includes(post.userId);
+                    
+                    const mostrarNombre = post.mostrarNombrePost !== false; 
+                    const nombreAMostrar = mostrarNombre ? (post.userName || "Usuario") : "Perfil Privado";
+                    const avatarRender = obtenerSvgIcono(post.simboloId || 'faro');
+                    const timeString = formatearFechaSutil(post.timestamp);
 
-                    if (mostrar) {
-                        const amilike = post.likes?.includes(usuarioActual.uid);
-                        const numLikes = post.likes?.length || 0;
-                        const yaGuardado = datosUsuarioDocumento?.guardados?.includes(post.id);
-                        const loSigo = datosUsuarioDocumento?.seguidos?.includes(post.userId);
-                        
-                        const mostrarNombre = post.mostrarNombrePost !== false; 
-                        const nombreAMostrar = mostrarNombre ? (post.userName || "Usuario") : "Perfil Privado";
-                        const avatarRender = obtenerSvgIcono(post.simboloId || 'faro');
+                    const esMiPost = post.userId === usuarioActual?.uid;
+                    const btnSeguirHtml = esMiPost ? '' : `<button class="btn-seguir ${loSigo ? 'siguiendo' : ''}" onclick="window.interactuarSeguir('${post.userId}', ${loSigo})">${loSigo ? 'Siguiendo' : 'Seguir'}</button>`;
 
-                        const esMiPost = post.userId === usuarioActual.uid;
-                        const btnSeguirHtml = esMiPost ? '' : `<button class="btn-seguir ${loSigo ? 'siguiendo' : ''}" onclick="window.interactuarSeguir('${post.userId}', ${loSigo})">${loSigo ? 'Siguiendo' : 'Seguir'}</button>`;
-
-                        html += `
-                            <div class="card fade-in">
-                                <div class="post-header">
-                                    <div class="avatar">${avatarRender}</div>
-                                    <div class="post-meta">
-                                        <div class="name-display">${nombreAMostrar}</div>
-                                        <div class="username-display">@${post.userUsername || 'usuario'} ${post.isPrayer ? '• 🙏' : ''}</div>
-                                    </div>
-                                    ${btnSeguirHtml}
+                    const templateTarjeta = `
+                        <div class="card fade-in">
+                            <div class="post-header">
+                                <div class="avatar" onclick="window.verPerfilUsuario('${post.userId}')">${avatarRender}</div>
+                                <div class="post-meta" onclick="window.verPerfilUsuario('${post.userId}')">
+                                    <div class="name-display">${nombreAMostrar}</div>
+                                    <div class="username-display">@${post.userUsername || 'usuario'} ${post.isPrayer ? '• 🙏' : ''}</div>
+                                    <div class="time-display">${timeString}</div>
                                 </div>
-                                <div class="post-content">${post.content || ''}</div>
-                                <div class="post-actions">
-                                    <button class="btn-action ${amilike ? 'like-activo' : ''}" onclick="window.darLike('${post.id}', ${amilike})">
-                                        ${amilike ? '❤️' : '🤍'} ${numLikes} Amén
-                                    </button>
-                                    <button class="btn-action ${yaGuardado ? 'save-activo' : ''}" onclick="window.guardarPost('${post.id}', ${yaGuardado})">
-                                        🔖 ${yaGuardado ? 'Guardado' : 'Guardar'}
-                                    </button>
-                                    <button class="btn-action" onclick="window.recompartirInterno('${post.id}')">
-                                        🔄 Recompartir
-                                    </button>
-                                    <button class="btn-action" onclick="window.compartirExterno('${post.id}')">
-                                        🔗 Compartir
-                                    </button>
-                                </div>
+                                ${btnSeguirHtml}
                             </div>
-                        `;
-                    }
+                            <div class="post-content">${post.content || ''}</div>
+                            <div class="post-actions">
+                                <button class="btn-action ${amilike ? 'like-activo' : ''}" onclick="window.darLike('${post.id}', '${post.userId}', ${amilike})">
+                                    ${amilike ? '❤️' : '🤍'} ${numLikes} Amén
+                                </button>
+                                <button class="btn-action ${yaGuardado ? 'save-activo' : ''}" onclick="window.guardarPost('${post.id}', '${post.userId}', ${yaGuardado})">
+                                    🔖 ${yaGuardado ? 'Guardado' : 'Guardar'}
+                                </button>
+                                <button class="btn-action" onclick="window.recompartirInterno('${post.id}', '${post.userId}')">🔄 Recompartir</button>
+                                <button class="btn-action" onclick="window.compartirExterno('${post.id}')">🔗 Compartir</button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Lógica de ruteo a las distintas vistas
+                    // 1. Feed General / Peticiones / Guardados
+                    let mostrarGeneral = true;
+                    if (filtroActual === "oraciones" && !post.isPrayer) mostrarGeneral = false;
+                    if (filtroActual === "guardados" && !yaGuardado) mostrarGeneral = false;
+                    if (filtroActual !== "perfil" && mostrarGeneral) htmlGeneral += templateTarjeta;
+
+                    // 2. Mi Perfil
+                    if (esMiPost) htmlPerfil += templateTarjeta;
+
+                    // 3. Perfil Ajeno
+                    if (perfilAjenoViendo === post.userId) htmlAjeno += templateTarjeta;
                 });
 
-                const contenedor = filtroActual === "perfil" ? 'feed-perfil' : 'feed-posts';
-                document.getElementById(contenedor).innerHTML = html || '<p class="loader">No hay publicaciones.</p>';
+                document.getElementById('feed-posts').innerHTML = htmlGeneral || '<p class="loader">No hay publicaciones.</p>';
+                document.getElementById('feed-perfil').innerHTML = htmlPerfil || '<p class="loader">Aún no hay bitácora.</p>';
+                document.getElementById('feed-perfil-ajeno').innerHTML = htmlAjeno || '<p class="loader">Este usuario no tiene publicaciones.</p>';
             });
         }
 
-        window.abrirModalUsuarios = async (tipo) => {
-            const modal = document.getElementById('modal-usuarios');
-            const titulo = document.getElementById('modal-titulo');
-            const body = document.getElementById('modal-body');
-            
-            modal.classList.add('activo');
-            titulo.innerText = tipo === 'seguidores' ? 'Tus Seguidores' : 'Personas que sigues';
-            body.innerHTML = '<p class="loader">Cargando...</p>';
+        /* =========================================
+           INTERACCIONES
+           ========================================= */
+        window.darLike = async (postId, targetUserId, yaDioLike) => { 
+            await updateDoc(doc(db, "publicaciones", postId), { likes: yaDioLike ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) }); 
+            if(!yaDioLike) registrarNotificacion(targetUserId, 'like', postId);
+        };
+        window.guardarPost = async (postId, targetUserId, yaGuardado) => { 
+            await updateDoc(doc(db, "usuarios", usuarioActual.uid), { guardados: yaGuardado ? arrayRemove(postId) : arrayUnion(postId) }); 
+            if(!yaGuardado) registrarNotificacion(targetUserId, 'save', postId);
+        };
+        window.interactuarSeguir = async (targetUserId, yaLoSigo) => {
+            if(targetUserId === usuarioActual.uid) return;
+            await updateDoc(doc(db, "usuarios", usuarioActual.uid), { seguidos: yaLoSigo ? arrayRemove(targetUserId) : arrayUnion(targetUserId) });
+            await updateDoc(doc(db, "usuarios", targetUserId), { seguidores: yaLoSigo ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) });
+            if(!yaLoSigo) registrarNotificacion(targetUserId, 'follow');
+        };
 
-            const listaIds = datosUsuarioDocumento[tipo] || [];
-            if(listaIds.length === 0) {
-                body.innerHTML = `<p class="loader" style="margin:0;">No hay usuarios para mostrar.</p>`;
+        window.recompartirInterno = async (postId, targetUserId) => {
+            const p = window.postsActuales[postId];
+            if (!p || !confirm(`¿Recompartir publicación de @${p.userUsername}?`)) return;
+            try {
+                await addDoc(collection(db, "publicaciones"), {
+                    content: `🔄 Recompartido de @${p.userUsername}:\n\n"${p.content}"`,
+                    userId: usuarioActual.uid, userName: datosUsuarioDocumento.nombre, userUsername: datosUsuarioDocumento.username,
+                    simboloId: datosUsuarioDocumento.simboloId, mostrarNombrePost: datosUsuarioDocumento.mostrarNombrePublico,
+                    isPrayer: false, likes: [], timestamp: serverTimestamp()
+                });
+                registrarNotificacion(targetUserId, 'repost', postId);
+                alert("¡Recompartido con éxito!");
+            } catch (e) { alert("Error al recompartir."); }
+        };
+
+        window.compartirExterno = async (postId) => {
+            const p = window.postsActuales[postId];
+            const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+            const text = `Mira esta publicación en Faro de @${p.userUsername}: "${p.content.substring(0, 60)}..."`;
+            if (navigator.share) { try { await navigator.share({ title: 'Faro', text, url }); } catch(e){} } 
+            else { navigator.clipboard.writeText(url); alert("Enlace copiado."); }
+        };
+
+        /* =========================================
+           VER PERFIL AJENO
+           ========================================= */
+        window.verPerfilUsuario = async (uId) => {
+            if (uId === usuarioActual.uid) {
+                // Es mi propio perfil, simular click en pestaña "Mi Perfil"
+                document.querySelector('button[data-target="vista-perfil"]').click();
+                window.cerrarModalBuscar();
+                window.cerrarModalNotificaciones();
                 return;
             }
 
+            window.cerrarModalBuscar();
+            window.cerrarModalNotificaciones();
+            window.cerrarModalUsuarios();
+
+            // Ocultar navegacion activa
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('activo'));
+            document.getElementById('vista-feed').classList.add('oculto');
+            document.getElementById('vista-perfil').classList.add('oculto');
+            
+            const vistaAjena = document.getElementById('vista-perfil-ajeno');
+            vistaAjena.classList.remove('oculto');
+            perfilAjenoViendo = uId;
+            cargarFeedRealtime(); // Re-trigger para mostrar posts ajenos
+
+            try {
+                const snap = await getDoc(doc(db, "usuarios", uId));
+                if(snap.exists()) {
+                    const u = snap.data();
+                    const mostrarN = u.mostrarNombrePublico !== false;
+                    document.getElementById('ajeno-nombre-display').innerText = mostrarN ? u.nombre : "Perfil Privado";
+                    document.getElementById('ajeno-username-display').innerText = `@${u.username}`;
+                    document.getElementById('ajeno-bio').innerText = u.bio || "";
+                    document.getElementById('ajeno-avatar').innerHTML = obtenerSvgIcono(u.simboloId || 'faro');
+                    document.getElementById('ajeno-count-seguidores').innerText = u.seguidores?.length || 0;
+                    document.getElementById('ajeno-count-seguidos').innerText = u.seguidos?.length || 0;
+
+                    const loSigo = datosUsuarioDocumento?.seguidos?.includes(uId);
+                    document.getElementById('ajeno-btn-container').innerHTML = `
+                        <button class="btn-seguir ${loSigo ? 'siguiendo' : ''}" style="width:100%; font-size:14px; padding:8px;" onclick="window.interactuarSeguir('${uId}', ${loSigo}); this.innerText = ${loSigo} ? 'Seguir' : 'Siguiendo'; this.classList.toggle('siguiendo');">
+                            ${loSigo ? 'Siguiendo' : 'Seguir Usuario'}
+                        </button>`;
+                }
+            } catch(e) { console.error("Error cargando perfil", e); }
+        };
+
+        window.cerrarPerfilAjeno = () => {
+            perfilAjenoViendo = null;
+            document.getElementById('vista-perfil-ajeno').classList.add('oculto');
+            document.querySelector('button[data-target="vista-feed"]').click(); // Volver al inicio
+        };
+
+        /* =========================================
+           BÚSQUEDA DE USUARIOS Y LISTAS
+           ========================================= */
+        window.abrirModalBuscar = () => {
+            document.getElementById('modal-buscar').classList.add('activo');
+            document.getElementById('resultados-busqueda').innerHTML = '<p style="text-align:center; font-size:14px; color:var(--text-light);">Encuentra personas.</p>';
+            document.getElementById('input-busqueda').value = '';
+        };
+        window.cerrarModalBuscar = () => document.getElementById('modal-buscar').classList.remove('activo');
+
+        document.getElementById('btn-ejecutar-busqueda').addEventListener('click', async () => {
+            const term = document.getElementById('input-busqueda').value.trim().toLowerCase();
+            const res = document.getElementById('resultados-busqueda');
+            if(!term) return; res.innerHTML = '<p class="loader">Buscando...</p>';
+            try {
+                const q = query(collection(db, "usuarios"), where("username", ">=", term), where("username", "<=", term + '\uf8ff'));
+                const snaps = await getDocs(q);
+                let html = '';
+                snaps.forEach((d) => {
+                    const u = d.data(); const uId = d.id;
+                    const nombreView = u.mostrarNombrePublico !== false ? u.nombre : "Privado";
+                    html += `
+                        <div class="usuario-lista-item" onclick="window.verPerfilUsuario('${uId}')">
+                            <div class="avatar-peq">${obtenerSvgIcono(u.simboloId)}</div>
+                            <div><strong style="font-size:14px;">${nombreView}</strong><br><span style="font-size:12px; color:var(--text-light)">@${u.username}</span></div>
+                        </div>`;
+                });
+                res.innerHTML = html || '<p style="text-align:center; font-size:14px;">No se encontraron personas.</p>';
+            } catch(e) { res.innerHTML = '<p style="color:red; text-align:center;">Error al buscar.</p>'; }
+        });
+
+        window.abrirModalUsuarios = async (tipo) => {
+            const modal = document.getElementById('modal-usuarios');
+            document.getElementById('modal-titulo').innerText = tipo === 'seguidores' ? 'Tus Seguidores' : 'Personas que sigues';
+            const body = document.getElementById('modal-body');
+            modal.classList.add('activo'); body.innerHTML = '<p class="loader">Cargando...</p>';
+
+            const ids = datosUsuarioDocumento[tipo] || [];
+            if(ids.length === 0) { body.innerHTML = `<p class="loader" style="margin:0;">No hay usuarios.</p>`; return; }
             try {
                 let html = '';
-                const promesas = listaIds.map(id => getDoc(doc(db, "usuarios", id)));
-                const snaps = await Promise.all(promesas);
-                
+                const snaps = await Promise.all(ids.map(id => getDoc(doc(db, "usuarios", id))));
                 snaps.forEach(snap => {
                     if(snap.exists()) {
-                        const u = snap.data();
-                        const mostrarN = u.mostrarNombrePublico !== false;
-                        const nombreView = mostrarN ? u.nombre : "Perfil Privado";
+                        const u = snap.data(); const uId = snap.id;
+                        const nView = u.mostrarNombrePublico !== false ? u.nombre : "Privado";
                         html += `
-                            <div class="usuario-lista-item">
-                                <div class="avatar-peq">${obtenerSvgIcono(u.simboloId || 'faro')}</div>
-                                <div>
-                                    <strong style="font-size:14px;">${nombreView}</strong><br>
-                                    <span style="font-size:12px; color:var(--text-light)">@${u.username}</span>
-                                </div>
-                            </div>
-                        `;
+                            <div class="usuario-lista-item" onclick="window.verPerfilUsuario('${uId}')">
+                                <div class="avatar-peq">${obtenerSvgIcono(u.simboloId)}</div>
+                                <div><strong style="font-size:14px;">${nView}</strong><br><span style="font-size:12px; color:var(--text-light)">@${u.username}</span></div>
+                            </div>`;
                     }
                 });
                 body.innerHTML = html;
             } catch (e) { body.innerHTML = `<p style="color:red; text-align:center;">Error al cargar.</p>`; }
         };
+        window.cerrarModalUsuarios = () => document.getElementById('modal-usuarios').classList.remove('activo');
 
-        window.cerrarModalUsuarios = () => { document.getElementById('modal-usuarios').classList.remove('activo'); };
+        /* =========================================
+           TÉRMINOS Y POLÍTICAS (MODALES LEGALES)
+           ========================================= */
+        window.abrirModalTexto = (tipo) => {
+            const modal = document.getElementById('modal-textos-legales');
+            const titulo = document.getElementById('titulo-legal');
+            const contenido = document.getElementById('contenido-legal');
+            modal.classList.add('activo');
 
-        window.darLike = async (postId, yaDioLike) => { await updateDoc(doc(db, "publicaciones", postId), { likes: yaDioLike ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) }); };
-        window.guardarPost = async (postId, yaGuardado) => { await updateDoc(doc(db, "usuarios", usuarioActual.uid), { guardados: yaGuardado ? arrayRemove(postId) : arrayUnion(postId) }); };
-        window.interactuarSeguir = async (targetUserId, yaLoSigo) => {
-            await updateDoc(doc(db, "usuarios", usuarioActual.uid), { seguidos: yaLoSigo ? arrayRemove(targetUserId) : arrayUnion(targetUserId) });
-            await updateDoc(doc(db, "usuarios", targetUserId), { seguidores: yaLoSigo ? arrayRemove(usuarioActual.uid) : arrayUnion(usuarioActual.uid) });
-        };
-
-        window.recompartirInterno = async (postId) => {
-            const postOriginal = window.postsActuales[postId];
-            if (!postOriginal) return;
-
-            const confirmar = confirm(`¿Deseas recompartir esta publicación de @${postOriginal.userUsername} en tu inicio?`);
-            if (!confirmar) return;
-
-            try {
-                await addDoc(collection(db, "publicaciones"), {
-                    content: `🔄 Recompartido de @${postOriginal.userUsername}:\n\n"${postOriginal.content}"`,
-                    userId: usuarioActual.uid,
-                    userName: datosUsuarioDocumento?.nombre || "Usuario",
-                    userUsername: datosUsuarioDocumento?.username || "usuario",
-                    simboloId: datosUsuarioDocumento?.simboloId || "faro",
-                    mostrarNombrePost: datosUsuarioDocumento?.mostrarNombrePublico !== false,
-                    isPrayer: false, 
-                    likes: [], 
-                    timestamp: serverTimestamp()
-                });
-                alert("¡Has recompartido la publicación con éxito!");
-            } catch (e) { alert("Error al recompartir internamente."); }
-        };
-
-        window.compartirExterno = async (postId) => {
-            const postOriginal = window.postsActuales[postId];
-            if (!postOriginal) return;
-
-            const urlApp = `${window.location.origin}${window.location.pathname}?post=${postId}`;
-            const textoCompartir = `Mira esta edificación en Faro de @${postOriginal.userUsername}: "${postOriginal.content.substring(0, 60)}..."`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'Faro - Comunidad de Fe', text: textoCompartir, url: urlApp });
-                } catch (err) { if (err.name !== 'AbortError') alert("Error al compartir externamente."); }
+            if (tipo === 'terminos') {
+                titulo.innerText = "Términos y Condiciones";
+                contenido.innerHTML = `
+                    <p><strong>1. Propósito:</strong> Faro es una comunidad construida para la edificación espiritual y el respeto mutuo. Al usar esta app, te comprometes a actuar con amor y decoro.</p>
+                    <p><strong>2. Contenido:</strong> Todo lo que publiques es tu responsabilidad. Nos reservamos el derecho de eliminar cuentas que compartan contenido ofensivo, fraudulento o contrario a los valores de la comunidad.</p>
+                    <p><strong>3. Uso del servicio:</strong> Esta plataforma es gratuita y se provee "tal cual". No garantizamos disponibilidad ininterrumpida.</p>
+                `;
             } else {
-                try {
-                    await navigator.clipboard.writeText(urlApp);
-                    alert("¡Enlace de la publicación copiado al portapapeles! Ya puedes enviarlo a tus amigos.");
-                } catch (err) { alert("No se pudo copiar el enlace."); }
+                titulo.innerText = "Política de Privacidad";
+                contenido.innerHTML = `
+                    <p><strong>1. Datos recogidos:</strong> Recopilamos la información básica proporcionada por Google (Nombre, Email) y los datos que ingreses en tu perfil voluntariamente.</p>
+                    <p><strong>2. Uso de datos:</strong> Tu información se usa exclusivamente para el funcionamiento interno de Faro (mostrar tu perfil, vincular tus publicaciones). No vendemos ni compartimos tu información con terceros.</p>
+                    <p><strong>3. Privacidad:</strong> Tienes la opción en tus ajustes de ocultar tu nombre público. Puedes eliminar tu cuenta y datos contactando a la administración.</p>
+                `;
             }
         };
+        window.cerrarModalTexto = () => document.getElementById('modal-textos-legales').classList.remove('activo');
 
-        document.getElementById('btn-invitar').addEventListener('click', async () => {
-            const urlApp = `${window.location.origin}${window.location.pathname}`;
-            const textoInvitacion = "¡Hola! Te invito a unirte a Faro, un espacio para compartir peticiones de oración, reflexiones bíblicas y crecer juntos en comunidad. Regístrate aquí:";
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'Faro - Comunidad de Fe', text: textoInvitacion, url: urlApp });
-                } catch (err) { if (err.name !== 'AbortError') alert("Error al enviar la invitación."); }
-            } else {
-                try {
-                    await navigator.clipboard.writeText(`${textoInvitacion} ${urlApp}`);
-                    alert("¡Mensaje de invitación copiado al portapapeles! Compártelo con tus conocidos.");
-                } catch (err) { alert("No se pudo copiar el enlace de invitación."); }
-            }
-        });
-
+        /* =========================================
+           NAVEGACIÓN PRINCIPAL
+           ========================================= */
         const navBtns = document.querySelectorAll('.nav-btn');
         navBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -639,8 +822,10 @@
 
                 document.getElementById('vista-feed').classList.add('oculto');
                 document.getElementById('vista-perfil').classList.add('oculto');
+                document.getElementById('vista-perfil-ajeno').classList.add('oculto');
+                perfilAjenoViendo = null; // Reiniciar vista ajena
+
                 document.getElementById(targetId).classList.remove('oculto');
-                
                 document.getElementById('caja-publicacion').classList.toggle('oculto', (filtroActual !== "global" && filtroActual !== "oraciones"));
                 cargarFeedRealtime();
             });
@@ -659,34 +844,22 @@
         }
         
         /* =========================================
-           LÓGICA DE INSTALACIÓN Y ACTUALIZACIÓN PWA
+           PWA Y ALERTAS IOS
            ========================================= */
         const pwaAlertas = document.getElementById('pwa-alertas');
-        const pwaMensaje = document.getElementById('pwa-mensaje');
-        const btnPwaAccion = document.getElementById('btn-pwa-accion');
-        const btnPwaCerrar = document.getElementById('btn-pwa-cerrar');
-
-        function mostrarAlertaPWA(mensaje, textoBoton, callback) {
-            pwaMensaje.innerText = mensaje;
-            btnPwaAccion.innerText = textoBoton;
-            btnPwaAccion.onclick = callback;
-            pwaAlertas.classList.remove('oculto');
+        function mostrarAlertaPWA(mensaje, texto, cb) {
+            document.getElementById('pwa-mensaje').innerText = mensaje;
+            const btn = document.getElementById('btn-pwa-accion');
+            btn.innerText = texto; btn.onclick = cb; pwaAlertas.classList.remove('oculto');
         }
+        document.getElementById('btn-pwa-cerrar').addEventListener('click', () => pwaAlertas.classList.add('oculto'));
 
-        function ocultarAlertaPWA() { pwaAlertas.classList.add('oculto'); }
-        btnPwaCerrar.addEventListener('click', ocultarAlertaPWA);
-
-        let eventoInstalacion = null;
+        let eInst = null;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); 
-            eventoInstalacion = e;
+            e.preventDefault(); eInst = e;
             mostrarAlertaPWA("Lleva a Faro contigo. ¿Deseas instalar la app?", "Instalar", async () => {
-                if (!eventoInstalacion) return;
-                eventoInstalacion.prompt();
-                const result = await eventoInstalacion.userChoice;
-                if (result.outcome === 'accepted') console.log('App instalada');
-                eventoInstalacion = null;
-                ocultarAlertaPWA();
+                if (!eInst) return; eInst.prompt(); await eInst.userChoice;
+                eInst = null; pwaAlertas.classList.add('oculto');
             });
         });
 
@@ -694,23 +867,20 @@
             let actualizando = false;
             navigator.serviceWorker.register('./sw.js').then(reg => {
                 reg.addEventListener('updatefound', () => {
-                    const nuevoWorker = reg.installing;
-                    nuevoWorker.addEventListener('statechange', () => {
-                        if (nuevoWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            mostrarAlertaPWA("¡Hay una nueva actualización disponible!", "Actualizar", () => {
-                                nuevoWorker.postMessage({ type: 'SKIP_WAITING' });
-                            });
+                    const nw = reg.installing;
+                    nw.addEventListener('statechange', () => {
+                        if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                            mostrarAlertaPWA("¡Hay una actualización!", "Actualizar", () => nw.postMessage({ type: 'SKIP_WAITING' }));
                         }
                     });
                 });
-            }).catch(err => console.log('Error en Service Worker', err));
-
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!actualizando) {
-                    actualizando = true;
-                    window.location.reload();
-                }
             });
+            navigator.serviceWorker.addEventListener('controllerchange', () => { if (!actualizando) { actualizando = true; window.location.reload(); } });
+        }
+
+        if (/iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase()) && !('standalone' in window.navigator && window.navigator.standalone)) {
+            document.getElementById('ios-pwa-alerta').classList.remove('oculto');
+            document.getElementById('btn-cerrar-ios').addEventListener('click', () => document.getElementById('ios-pwa-alerta').classList.add('oculto'));
         }
     </script>
 </body>
